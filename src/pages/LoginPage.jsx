@@ -11,7 +11,7 @@ export default function LoginPage() {
         <Card>
           <Button type="primary" href={wx_qrcode_url} block>
             微信登陆
-                    </Button>
+          </Button>
         </Card>
       </Col>
     </Row>

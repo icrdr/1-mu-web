@@ -3,14 +3,14 @@ import { DOMAIN_URL } from '../config'
 import { Redirect } from 'react-router-dom'
 import axios from 'axios'
 import { List, Card } from 'antd';
-import {hasToken} from '../utility'
+import { hasToken } from '../utility'
 
-export default function UserList() {
+export default function UsersList({ update }) {
   const [userLiset, setUserLiset] = useState([]);
 
-  useEffect(() => {  
+  useEffect(() => {
     if (hasToken()) {
-      axios.get(DOMAIN_URL + '/api/users', {
+      axios.get(DOMAIN_URL + '/api/user', {
         withCredentials: true
       }).then(res => {
         console.log(res.data)
@@ -19,7 +19,7 @@ export default function UserList() {
         if (err.response) console.log(err.response.data)
       })
     }
-  }, []);
+  }, [update]);
 
   if (!hasToken()) {
     return <Redirect to='/login' />
