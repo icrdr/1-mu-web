@@ -4,6 +4,7 @@ import axios from 'axios'
 import cookie from 'react-cookies'
 
 const DOMAIN_URL = window.DOMAIN_URL
+const COOKIE_DOMAIN = window.COOKIE_DOMAIN
 export default function useWxLogin(props) {
   const [state, setState] = useState('pending');
 
@@ -16,7 +17,9 @@ export default function useWxLogin(props) {
         }
       }).then(res => {
         console.log(res.data)
-        cookie.save('token', res.data.token)
+        cookie.save('token', res.data.token,{
+          domain: COOKIE_DOMAIN
+        })
         setState('ok')
       }).catch(err => {
         if (err.response) console.log(err.response.data)
