@@ -5,6 +5,7 @@ import cookie from 'react-cookies'
 
 const DOMAIN_URL = window.DOMAIN_URL
 const COOKIE_DOMAIN = window.COOKIE_DOMAIN
+
 export default function useWxLogin(props) {
   const [state, setState] = useState('pending');
 
