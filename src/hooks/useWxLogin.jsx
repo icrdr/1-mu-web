@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { DOMAIN_URL } from '../config'
 import queryString from 'query-string'
 import axios from 'axios'
 import cookie from 'react-cookies'
 
+const DOMAIN_URL = window.DOMAIN_URL
 export default function useWxLogin(props) {
   const [state, setState] = useState('pending');
 

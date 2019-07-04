@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { DOMAIN_URL } from '../config'
 import { Redirect } from 'react-router-dom'
 import axios from 'axios'
 import { List } from 'antd';
 import { hasToken } from '../utility'
 
+const DOMAIN_URL = window.DOMAIN_URL
 export default function UsersList({ update }) {
   const [userLiset, setUserLiset] = useState([]);
 

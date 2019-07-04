@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import useWxLogin from '../hooks/useWxLogin'
 import FilesList from '../components/FilesList'
-import { DOMAIN_URL } from '../config'
 import { Upload, message, Button, Icon, Card, Row, Col } from 'antd';
+
+const DOMAIN_URL = window.DOMAIN_URL
 
 export default function MainPage(props) {
 
