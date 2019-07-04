@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { DOMAIN_URL, IMG_FORMAT } from '../config'
+import { DOMAIN_URL } from '../config'
 import { Redirect } from 'react-router-dom'
 import axios from 'axios'
 import { List } from 'antd';
@@ -23,11 +23,12 @@ export default function UsersList({ update }) {
       })
     }
   }, [update]);
+
   const imgRender = (item) => {
-    if (IMG_FORMAT.includes(item.format)) {
-      return <img width={272} alt="img" src={item.url} />
+    if (item.previews.length>0) {
+      return <img height={100} alt="img" src={item.previews[0].url} />
     } else {
-      return <div>iiii</div>
+      return <div>no preview</div>
     }
   }
   if (!hasToken()) {
