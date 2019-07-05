@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import queryString from 'query-string'
 import axios from 'axios'
 import cookie from 'react-cookies'
+import { isWx } from "../utility";
 
 const DOMAIN_URL = window.DOMAIN_URL
 const COOKIE_DOMAIN = window.COOKIE_DOMAIN
@@ -14,7 +15,8 @@ export default function useWxLogin(props) {
     if (values.code) {
       axios.get(`${DOMAIN_URL}/api/token`, {
         params: {
-          wxcode: values.code
+          wxcode: values.code,
+          wxtype: isWx()?'gz':'kf'
         }
       }).then(res => {
         console.log(res.data)
