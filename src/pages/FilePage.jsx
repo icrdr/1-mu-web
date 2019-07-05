@@ -36,9 +36,8 @@ export default function MainPage(props) {
   };
   return (
     <Row type="flex" justify="space-around" align="middle">
-      <Col>
-        <Card style={{ width: 900 }}>
-
+      <Col xs={24} md={20}>
+        <Card>
           <Upload {...args}>
             <Button>
               <Icon type="upload" /> Click to Upload
