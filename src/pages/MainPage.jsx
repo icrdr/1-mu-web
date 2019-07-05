@@ -18,6 +18,7 @@ export default function MainPage(props) {
 
   return (
     <div>
+      {window.navigator.userAgent}
       {isWx()}
     </div>
   )

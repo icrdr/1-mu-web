@@ -14,7 +14,7 @@ export function hasToken(){
 
 export function isWx(){
   let ua = window.navigator.userAgent.toLowerCase();
-  if(ua.match(/MicroMessenger/i) === 'micromessenger'){
+  if(ua.indexOf('micromessenger') !== -1){
       return 'true';
   }else{
       return 'false';
