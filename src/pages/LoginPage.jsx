@@ -1,12 +1,16 @@
-import React, { useEffect,useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { isWx } from '../utility'
 import { Button, Row, Col, Card } from 'antd';
 import axios from 'axios'
+import useInterval from '../hooks/useInterval'
 
 const REDIRECT_URI = window.REDIRECT_URI
 const WX_KF_APPID = window.WX_KF_APPID
 const WX_GZ_APPID = window.WX_GZ_APPID
 const DOMAIN_URL = window.DOMAIN_URL
+
+const WX_QRCODE_TRY = window.WX_QRCODE_TRY
+const WX_QRCODE_DELAY = window.WX_QRCODE_DELAY
 
 export default function LoginPage() {
   let wx_qrcode_url = ''
@@ -18,6 +22,16 @@ export default function LoginPage() {
 
   const [qrcode, setQrcode] = useState('');
   const [scene_str, setScene_str] = useState('');
+  const [count, setCount] = useState(1);
+  const [isChecking, setIsChecking] = useState(false);
+
+  useInterval(() => {
+    fetchCheck()
+    if (WX_QRCODE_TRY < count) {
+      setIsChecking(false)
+    }
+    setCount(count + 1);
+  }, isChecking ? WX_QRCODE_DELAY : null);
 
   useEffect(() => {
     let url = DOMAIN_URL + '/api/wechat/qrcode'
@@ -30,12 +44,12 @@ export default function LoginPage() {
     })
   }, []);
 
-  const fetchCheck =()=>{
+  const fetchCheck = () => {
     let url = DOMAIN_URL + '/api/wechat/check'
-    let params ={
-      'scene_str':scene_str
+    let params = {
+      'scene_str': scene_str
     }
-    axios.get(url,{params:params}).then(res => {
+    axios.get(url, { params: params }).then(res => {
       console.log(res.data)
     }).catch(err => {
       if (err.response) console.log(err.response.data)
@@ -51,7 +65,7 @@ export default function LoginPage() {
           <Button type="primary" href={wx_qrcode_url} block>
             微信登陆
           </Button>
-          <Button onClick={fetchCheck} block>
+          <Button onClick={() => setIsChecking(true)} block>
             测试是否扫描
           </Button>
         </Card>
