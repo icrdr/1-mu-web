@@ -13,14 +13,16 @@ export default function useWxLogin(props) {
   useEffect(() => {
     const values = queryString.parse(props.location.search)
     if (values.code) {
-      axios.get(`${DOMAIN_URL}/api/token`, {
-        params: {
-          wxcode: values.code,
-          wxtype: isWx()?'gz':'kf'
-        }
+      let url = `${DOMAIN_URL}/api/wechat/auth`
+      let params = {
+        wxcode: values.code,
+        wxtype: isWx() ? 'gz' : 'kf'
+      }
+      axios.get(url, {
+        params: params
       }).then(res => {
         console.log(res.data)
-        cookie.save('token', res.data.token,{
+        cookie.save('token', res.data.token, {
           domain: COOKIE_DOMAIN
         })
         setState('ok')
@@ -28,7 +30,7 @@ export default function useWxLogin(props) {
         if (err.response) console.log(err.response.data)
         setState('error')
       })
-    }else{
+    } else {
       setState('ok')
     }
   }, [props]);

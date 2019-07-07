@@ -10,10 +10,12 @@ export default function UsersList({ update }) {
 
   useEffect(() => {
     if (hasToken()) {
-      axios.get(DOMAIN_URL + '/api/file', {
-        params: {
-          order: 'desc'
-        },
+      let url = DOMAIN_URL + '/api/file'
+      let params = {
+        order: 'desc'
+      }
+      axios.get(url, {
+        params: params,
         withCredentials: true
       }).then(res => {
         console.log(res.data)
