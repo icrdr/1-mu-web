@@ -26,6 +26,18 @@ export default function LoginPage() {
     })
   }, []);
 
+  const fetchCheck =()=>{
+    let url = DOMAIN_URL + '/api/wechat/check'
+    let params ={
+      'scene_id':'123'
+    }
+    axios.get(url,{params:params}).then(res => {
+      console.log(res.data)
+    }).catch(err => {
+      if (err.response) console.log(err.response.data)
+    })
+  }
+
   return (
     <Row type="flex" justify="center" style={{ height: '1000px', background: '#eee' }}>
       {isWx()}
@@ -34,6 +46,9 @@ export default function LoginPage() {
           <img src={qrcode} alt='qrcode' />
           <Button type="primary" href={wx_qrcode_url} block>
             微信登陆
+          </Button>
+          <Button onClick={fetchCheck} block>
+            测试是否扫描
           </Button>
         </Card>
       </Col>
