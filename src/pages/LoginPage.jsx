@@ -59,7 +59,7 @@ export default function LoginPage() {
   return (
     <Row type="flex" justify="center" style={{ height: '1000px', background: '#eee' }}>
       {isWx()}
-      <Col span={10} style={{ height: 'auto' }}>
+      <Col xs={22} md={10} style={{ height: 'auto' }}>
         <Card>
           <img width='100%' src={qrcode} alt='qrcode' />
           <Button type="primary" href={wx_qrcode_url} block>
