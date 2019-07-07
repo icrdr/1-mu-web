@@ -1,0 +1,5 @@
+var DOMAIN_URL = 'http://domain.com'
+var REDIRECT_URI = 'http://domain.com'
+var COOKIE_DOMAIN = '.domain.com'
+var WX_GZ_APPID = ''
+var WX_KF_APPID = ''
