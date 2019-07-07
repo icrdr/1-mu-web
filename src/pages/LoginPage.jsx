@@ -29,7 +29,7 @@ export default function LoginPage() {
   const fetchCheck =()=>{
     let url = DOMAIN_URL + '/api/wechat/check'
     let params ={
-      'scene_id':'123'
+      'scene_str':'123'
     }
     axios.get(url,{params:params}).then(res => {
       console.log(res.data)
