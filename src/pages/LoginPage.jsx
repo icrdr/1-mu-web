@@ -15,12 +15,16 @@ export default function LoginPage() {
   } else {
     wx_qrcode_url = `https://open.weixin.qq.com/connect/qrconnect?appid=${WX_KF_APPID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=snsapi_login&state=STATE#wechat_redirect`
   }
+
   const [qrcode, setQrcode] = useState('');
+  const [scene_str, setScene_str] = useState('');
+
   useEffect(() => {
     let url = DOMAIN_URL + '/api/wechat/qrcode'
     axios.get(url).then(res => {
       console.log(res.data)
       setQrcode(`https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=${res.data.ticket}`)
+      setScene_str(res.data.scene_str)
     }).catch(err => {
       if (err.response) console.log(err.response.data)
     })
@@ -29,7 +33,7 @@ export default function LoginPage() {
   const fetchCheck =()=>{
     let url = DOMAIN_URL + '/api/wechat/check'
     let params ={
-      'scene_str':'123'
+      'scene_str':scene_str
     }
     axios.get(url,{params:params}).then(res => {
       console.log(res.data)
