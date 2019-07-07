@@ -3,3 +3,5 @@ var REDIRECT_URI = 'http://domain.com'
 var COOKIE_DOMAIN = '.domain.com'
 var WX_GZ_APPID = ''
 var WX_KF_APPID = ''
+var WX_QRCODE_TRY = 5
+var WX_QRCODE_DELAY = 2000

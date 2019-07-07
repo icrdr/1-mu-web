@@ -23,11 +23,11 @@ export default function LoginPage() {
   const [qrcode, setQrcode] = useState('');
   const [scene_str, setScene_str] = useState('');
   const [count, setCount] = useState(1);
-  const [isChecking, setIsChecking] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
 
   useInterval(() => {
     fetchCheck()
-    if (WX_QRCODE_TRY < count) {
+    if (WX_QRCODE_TRY <= count) {
       setIsChecking(false)
     }
     setCount(count + 1);
@@ -61,7 +61,7 @@ export default function LoginPage() {
       {isWx()}
       <Col span={10} style={{ height: 'auto' }}>
         <Card>
-          <img src={qrcode} alt='qrcode' />
+          <img width='100%' src={qrcode} alt='qrcode' />
           <Button type="primary" href={wx_qrcode_url} block>
             微信登陆
           </Button>
