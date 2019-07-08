@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import useWxLogin from '../hooks/useWxLogin'
 import FilesList from '../components/FilesList'
 import { Upload, message, Button, Icon, Card, Row, Col } from 'antd';
+import { hasToken } from '../utility'
+import LoginQrcode from '../components/LoginQrcode'
 
 const DOMAIN_URL = window.DOMAIN_URL
 
@@ -17,6 +19,7 @@ export default function MainPage(props) {
     default:
       break;
   }
+
   const args = {
     name: 'file',
     action: `${DOMAIN_URL}/api/file`,
@@ -34,6 +37,11 @@ export default function MainPage(props) {
       }
     },
   };
+
+  if (!hasToken()) {
+    return <LoginQrcode />
+  }
+
   return (
     <Row type="flex" justify="space-around" align="middle">
       <Col xs={24} md={20}>
@@ -47,6 +55,5 @@ export default function MainPage(props) {
         </Card>
       </Col>
     </Row>
-
   )
 }

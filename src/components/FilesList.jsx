@@ -1,29 +1,26 @@
 import React, { useEffect, useState } from 'react'
-import { Redirect } from 'react-router-dom'
 import axios from 'axios'
 import { List,Avatar } from 'antd';
-import { hasToken } from '../utility'
+
 
 const DOMAIN_URL = window.DOMAIN_URL
 export default function UsersList({ update }) {
   const [userLiset, setUserLiset] = useState([]);
 
   useEffect(() => {
-    if (hasToken()) {
-      let url = DOMAIN_URL + '/api/file'
-      let params = {
-        order: 'desc'
-      }
-      axios.get(url, {
-        params: params,
-        withCredentials: true
-      }).then(res => {
-        console.log(res.data)
-        setUserLiset(res.data.files)
-      }).catch(err => {
-        if (err.response) console.log(err.response.data)
-      })
+    let url = DOMAIN_URL + '/api/file'
+    let params = {
+      order: 'desc'
     }
+    axios.get(url, {
+      params: params,
+      withCredentials: true
+    }).then(res => {
+      console.log(res.data)
+      setUserLiset(res.data.files)
+    }).catch(err => {
+      if (err.response) console.log(err.response.data)
+    })
   }, [update]);
 
   const imgRender = (item) => {
@@ -41,9 +38,6 @@ export default function UsersList({ update }) {
     }
   }
 
-  if (!hasToken()) {
-    return <Redirect to='/login' />
-  }
   return (
     <div>
       <List
