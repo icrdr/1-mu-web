@@ -37,6 +37,7 @@ export default function LoginQrcode() {
   useEffect(() => {
     let url = DOMAIN_URL + '/api/wechat/qrcode'
     if (isChecking) {
+      setCount(1);
       axios.get(url).then(res => {
         console.log(res.data)
         setQrcode(`https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=${res.data.ticket}`)
