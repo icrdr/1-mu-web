@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import useWxLogin from '../hooks/useWxLogin'
 import FilesList from '../components/FilesList'
-import { Upload, message, Button, Icon, Card, Row, Col } from 'antd';
+import { Upload, message, Icon, Card, Row, Col } from 'antd';
 import { hasToken } from '../utility'
 import LoginQrcode from '../components/LoginQrcode'
 const { Dragger } = Upload;
@@ -15,8 +15,10 @@ export default function MainPage(props) {
     case 'pending':
       return <div>loading...</div>;
     case 'error':
+      window.history.replaceState(null, null, window.location.pathname);
       return <div>error!</div>;
     default:
+      window.history.replaceState(null, null, window.location.pathname);
       break;
   }
 
