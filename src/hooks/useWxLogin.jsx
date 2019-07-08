@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import queryString from 'query-string'
 import axios from 'axios'
 import cookie from 'react-cookies'
-import { isWx } from "../utility";
+// import { isWx } from "../utility";
 
 const DOMAIN_URL = window.DOMAIN_URL
 const COOKIE_DOMAIN = window.COOKIE_DOMAIN
@@ -16,7 +16,7 @@ export default function useWxLogin(props) {
       let url = `${DOMAIN_URL}/api/wechat/auth`
       let params = {
         wxcode: values.code,
-        wxtype: isWx() ? 'gz' : 'kf'
+        // wxtype: isWx() ? 'gz' : 'kf'
       }
       axios.get(url, {
         params: params
