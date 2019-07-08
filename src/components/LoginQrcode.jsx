@@ -4,6 +4,7 @@ import { isWx } from '../utility'
 import { Button, Row, Col, Card } from 'antd';
 import axios from 'axios'
 import useInterval from '../hooks/useInterval'
+import cookie from 'react-cookies'
 
 const REDIRECT_URI = window.REDIRECT_URI
 // const WX_KF_APPID = window.WX_KF_APPID
@@ -12,6 +13,8 @@ const DOMAIN_URL = window.DOMAIN_URL
 
 const WX_QRCODE_TRY = window.WX_QRCODE_TRY
 const WX_QRCODE_DELAY = window.WX_QRCODE_DELAY
+
+const COOKIE_DOMAIN = window.COOKIE_DOMAIN
 
 export default function LoginQrcode() {
   let wx_qrcode_url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${WX_GZ_APPID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
@@ -51,6 +54,9 @@ export default function LoginQrcode() {
     }
     axios.get(url, { params: params }).then(res => {
       console.log(res.data)
+      cookie.save('token', res.data.token, {
+        domain: COOKIE_DOMAIN
+      })
       setIsChecking(false)
       setGetToken(true)
     }).catch(err => {
