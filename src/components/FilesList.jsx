@@ -25,7 +25,7 @@ export default function UsersList({ update }) {
 
   const imgRender = (item) => {
     if (item.previews.length>0) {
-      return <img height={100} alt="img" src={item.previews[0].url} />
+      return <img height={100} alt="img" src={item.previews[item.previews.length-1].url} />
     } else {
       return <div className='t-a:c' style={{height:'100px',width:'150px', color:'#fff', lineHeight:'100px', background:'#eee'}}><h1>{item.format}</h1></div>
     }
