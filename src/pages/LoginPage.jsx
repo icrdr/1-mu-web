@@ -48,6 +48,7 @@ export default function LoginPage() {
     }
     axios.get(url, { params: params }).then(res => {
       console.log(res.data)
+      setIsChecking(false)
     }).catch(err => {
       if (err.response) console.log(err.response.data)
     })
