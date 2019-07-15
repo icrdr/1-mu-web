@@ -24,7 +24,7 @@ export default function MainPage(props) {
 
   const args = {
     name: 'file',
-    action: `${DOMAIN_URL}/api/file`,
+    action: `${DOMAIN_URL}/api/files`,
     withCredentials: true,
     multiple: true,
     onChange(info) {

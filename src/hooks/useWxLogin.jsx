@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
 import queryString from 'query-string'
 import axios from 'axios'
+import { isWx } from '../utility'
 import cookie from 'react-cookies'
-// import { isWx } from "../utility";
 
 const DOMAIN_URL = window.DOMAIN_URL
 const COOKIE_DOMAIN = window.COOKIE_DOMAIN
 
-export default function useWxLogin(props) {
+export default function useWxLogin({location}) {
   const [state, setState] = useState('pending');
 
   useEffect(() => {
-    const values = queryString.parse(props.location.search)
+    const values = queryString.parse(location.search)
     if (values.code) {
       let url = `${DOMAIN_URL}/api/wechat/auth`
       let params = {
         wxcode: values.code,
-        // wxtype: isWx() ? 'gz' : 'kf'
+        wxtype: isWx()?'gz':'kf'
       }
       axios.get(url, {
         params: params
@@ -33,7 +33,7 @@ export default function useWxLogin(props) {
     } else {
       setState('ok')
     }
-  }, [props]);
+  }, [location]);
 
   return state;
 };

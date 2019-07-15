@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { List,Avatar } from 'antd';
+import { List} from 'antd';
+import Avatarx from './Avatarx';
 
 
 const DOMAIN_URL = window.DOMAIN_URL
@@ -8,7 +9,7 @@ export default function UsersList({ update }) {
   const [userLiset, setUserLiset] = useState([]);
 
   useEffect(() => {
-    let url = DOMAIN_URL + '/api/file'
+    let url = DOMAIN_URL + '/api/files'
     let params = {
       order: 'desc'
     }
@@ -28,13 +29,6 @@ export default function UsersList({ update }) {
       return <img height={100} alt="img" src={item.previews[item.previews.length-1].url} />
     } else {
       return <div className='t-a:c' style={{height:'100px',width:'150px', color:'#fff', lineHeight:'100px', background:'#eee'}}><h1>{item.format}</h1></div>
-    }
-  }
-  const avatarRender = (item) => {
-    if (item.uploader.wx_user) {
-      return <Avatar src={item.uploader.wx_user.headimg_url} />
-    } else {
-      return <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
     }
   }
 
@@ -59,7 +53,7 @@ export default function UsersList({ update }) {
             }
           >
             <List.Item.Meta
-              avatar={avatarRender(item)}
+              avatar={<Avatarx user={item.uploader}/>}
               title={item.name}
               description={item.uploader.name}
             />
