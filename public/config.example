@@ -1,5 +1,5 @@
 var SERVER_URL = 'http://'
-var DOMAIN_URl = 'http://'
+var DOMAIN_URL = 'http://'
 var COOKIE_DOMAIN = 'localhost'
 var WX_GZ_APPID = ''
 var WX_KF_APPID = ''

@@ -7,7 +7,7 @@ import axios from 'axios'
 import useInterval from '../hooks/useInterval'
 import { useCookies } from 'react-cookie';
 
-const DOMAIN_URl = window.DOMAIN_URl
+const DOMAIN_URL = window.DOMAIN_URL
 const WX_KF_APPID = window.WX_KF_APPID
 const WX_GZ_APPID = window.WX_GZ_APPID
 const SERVER_URL = window.SERVER_URL
@@ -21,9 +21,9 @@ function LoginQrcode({location, match}) {
   console.log(location)
   console.log(match)
   if (isWx()) {
-    wx_qrcode_url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${WX_GZ_APPID}&redirect_uri=${DOMAIN_URl+location.pathname}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
+    wx_qrcode_url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${WX_GZ_APPID}&redirect_uri=${DOMAIN_URL+location.pathname}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
   }else{
-    wx_qrcode_url = `https://open.weixin.qq.com/connect/qrconnect?appid=${WX_KF_APPID}&redirect_uri=${DOMAIN_URl+location.pathname}&response_type=code&scope=snsapi_login&state=STATE#wechat_redirect`
+    wx_qrcode_url = `https://open.weixin.qq.com/connect/qrconnect?appid=${WX_KF_APPID}&redirect_uri=${DOMAIN_URL+location.pathname}&response_type=code&scope=snsapi_login&state=STATE#wechat_redirect`
   }
 
   const [qrcode, setQrcode] = useState('');
