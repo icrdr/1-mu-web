@@ -4,7 +4,7 @@ import { Table, Card } from 'antd'
 import axios from 'axios'
 import queryString from 'query-string'
 import Avatarx from '../components/Avatarx'
-const DOMAIN_URL = window.DOMAIN_URL
+const SERVER_URL = window.SERVER_URL
 
 const columns = [
   {
@@ -17,7 +17,7 @@ const columns = [
     key:'key',
     width: '5%',
     render: (user) => {
-      return <Avatarx user={user} />
+      return <Avatarx url={user.avatar_url} name={user.name} />
     }
   },
   {
@@ -46,7 +46,7 @@ const columns = [
 
 ];
 
-export default function UserListPage({ location, history }) {
+export default function UserList({ location, history }) {
 
   const [userList, setUserList] = useState([]);
   const [isloading, setLoading] = useState(false);
@@ -54,7 +54,7 @@ export default function UserListPage({ location, history }) {
 
   useEffect(() => {
     setLoading(true)
-    let url = DOMAIN_URL + '/api/users'
+    let url = SERVER_URL + '/api/users'
     let params = {
       order: 'desc',
       pre_page: pagination.pageSize,

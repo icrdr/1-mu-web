@@ -2,18 +2,20 @@ import { useEffect, useState } from "react";
 import queryString from 'query-string'
 import axios from 'axios'
 import { isWx } from '../utility'
-import cookie from 'react-cookies'
+import { useCookies } from 'react-cookie';
 
-const DOMAIN_URL = window.DOMAIN_URL
-const COOKIE_DOMAIN = window.COOKIE_DOMAIN
+const SERVER_URL = window.SERVER_URL
 
-export default function useWxLogin({location}) {
-  const [state, setState] = useState('pending');
+export default function useWxLogin(location) {
+  const [state, setState] = useState('none');
+  // eslint-disable-next-line
+  const [cookies, setCookie] = useCookies([]);
 
   useEffect(() => {
     const values = queryString.parse(location.search)
     if (values.code) {
-      let url = `${DOMAIN_URL}/api/wechat/auth`
+      setState('pending')
+      let url = `${SERVER_URL}/api/wechat/auth`
       let params = {
         wxcode: values.code,
         wxtype: isWx()?'gz':'kf'
@@ -22,9 +24,7 @@ export default function useWxLogin({location}) {
         params: params
       }).then(res => {
         console.log(res.data)
-        cookie.save('token', res.data.token, {
-          domain: COOKIE_DOMAIN
-        })
+        setCookie('token', res.data.token, { path: '/' });
         setState('ok')
       }).catch(err => {
         if (err.response) console.log(err.response.data)
@@ -33,7 +33,8 @@ export default function useWxLogin({location}) {
     } else {
       setState('ok')
     }
-  }, [location]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return state;
 };

@@ -1,17 +1,3 @@
-import jwtDecode from 'jwt-decode'
-import cookie from 'react-cookies'
-
-export function hasToken() {
-  const token = cookie.load('token')
-
-  if (token) {
-    if (jwtDecode(token).exp > Date.now() / 1000) {
-      return true
-    }
-  }
-  return false
-}
-
 export function isWx() {
   let ua = window.navigator.userAgent.toLowerCase();
   if (ua.indexOf('micromessenger') !== -1) {
@@ -64,8 +50,7 @@ export function timeLeft(stage) {
   return Math.floor(difference/(1000*60*60*24))
 }
 
-export function parseTimeLeft(stage){
-  const x_days = timeLeft(stage)
+export function parseTimeLeft(x_days){
   if(x_days>=0){
     return x_days<1?'剩余不足1天':`剩余${x_days}天余`
   }else{

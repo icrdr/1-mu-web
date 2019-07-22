@@ -5,9 +5,9 @@ import { Upload, message, Icon, Card, Row, Col } from 'antd';
 import { hasToken } from '../utility'
 import LoginQrcode from '../components/LoginQrcode'
 const { Dragger } = Upload;
-const DOMAIN_URL = window.DOMAIN_URL
+const SERVER_URL = window.SERVER_URL
 
-export default function MainPage(props) {
+export default function Main(props) {
 
   const wxLoginState = useWxLogin(props)
   const [update, setUpdate] = useState(0);
@@ -24,7 +24,7 @@ export default function MainPage(props) {
 
   const args = {
     name: 'file',
-    action: `${DOMAIN_URL}/api/files`,
+    action: `${SERVER_URL}/api/files`,
     withCredentials: true,
     multiple: true,
     onChange(info) {
@@ -49,13 +49,13 @@ export default function MainPage(props) {
       <Col xs={24} md={20}>
         <Card>
           <Dragger  {...args}>
-              <p className="ant-upload-drag-icon">
-                <Icon type="inbox" />
-              </p>
-              <p className="ant-upload-text">Click or drag file to this area to upload</p>
-              <p className="ant-upload-hint">
-                Support for a single or bulk upload. Strictly prohibit from uploading company data or other
-                band files
+            <p className="ant-upload-drag-icon">
+              <Icon type="inbox" />
+            </p>
+            <p className="ant-upload-text">Click or drag file to this area to upload</p>
+            <p className="ant-upload-hint">
+              Support for a single or bulk upload. Strictly prohibit from uploading company data or other
+              band files
               </p>
           </Dragger>
           <FilesList update={update} />

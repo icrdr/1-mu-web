@@ -3,13 +3,13 @@ import { Card, Row, Col, Descriptions, Statistic} from 'antd'
 import Loading from '../components/Loading'
 import axios from 'axios'
 import Avatarx from '../components/Avatarx'
-const DOMAIN_URL = window.DOMAIN_URL
+const SERVER_URL = window.SERVER_URL
 
-export default function UserPage({ match }) {
+export default function User({ match }) {
   const [userData, setUserData] = useState();
 
   useEffect(() => {
-    let url = DOMAIN_URL + '/api/users'
+    let url = SERVER_URL + '/api/users'
     let params = {
       include: match.params.id
     }
@@ -32,7 +32,7 @@ export default function UserPage({ match }) {
 
   return (
     <Card className='p:2' title={'用户：' + userData.name}>
-      <div className='t-a:c'><Avatarx size={128} user={userData} /></div>
+      <div className='t-a:c'><Avatarx size={128}  url={userData.avatar_url} name={userData.name}/></div>
       <div className='m-t:4 t-a:c' style={{ fontSize: '25px' }}>{userData.name}</div>
       <div className='m-t:.8 t-a:c'>{userData.title}</div>
       <Row className='m-t:4 t-a:c' gutter={16}>

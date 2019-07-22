@@ -4,12 +4,12 @@ import { List} from 'antd';
 import Avatarx from './Avatarx';
 
 
-const DOMAIN_URL = window.DOMAIN_URL
+const SERVER_URL = window.SERVER_URL
 export default function UsersList({ update }) {
   const [userLiset, setUserLiset] = useState([]);
 
   useEffect(() => {
-    let url = DOMAIN_URL + '/api/files'
+    let url = SERVER_URL + '/api/files'
     let params = {
       order: 'desc'
     }

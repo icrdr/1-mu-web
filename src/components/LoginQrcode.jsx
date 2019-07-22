@@ -1,30 +1,30 @@
 import React, { useEffect, useState } from 'react'
 import { Redirect } from 'react-router-dom'
+import { withRouter } from "react-router";
 import { isWx } from '../utility'
 import { Button, Row, Col, Card } from 'antd';
 import axios from 'axios'
 import useInterval from '../hooks/useInterval'
-import cookie from 'react-cookies'
+import { useCookies } from 'react-cookie';
 
-const REDIRECT_URI = window.REDIRECT_URI
+const DOMAIN_URl = window.DOMAIN_URl
 const WX_KF_APPID = window.WX_KF_APPID
 const WX_GZ_APPID = window.WX_GZ_APPID
-const DOMAIN_URL = window.DOMAIN_URL
+const SERVER_URL = window.SERVER_URL
 
 const WX_QRCODE_TRY = window.WX_QRCODE_TRY
 const WX_QRCODE_DELAY = window.WX_QRCODE_DELAY
 
-const COOKIE_DOMAIN = window.COOKIE_DOMAIN
 
-export default function LoginQrcode() {
+function LoginQrcode({location, match}) {
   let wx_qrcode_url=''
-
+  console.log(location)
+  console.log(match)
   if (isWx()) {
-    wx_qrcode_url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${WX_GZ_APPID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
+    wx_qrcode_url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${WX_GZ_APPID}&redirect_uri=${DOMAIN_URl+location.pathname}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
   }else{
-    wx_qrcode_url = `https://open.weixin.qq.com/connect/qrconnect?appid=${WX_KF_APPID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=snsapi_login&state=STATE#wechat_redirect`
+    wx_qrcode_url = `https://open.weixin.qq.com/connect/qrconnect?appid=${WX_KF_APPID}&redirect_uri=${DOMAIN_URl+location.pathname}&response_type=code&scope=snsapi_login&state=STATE#wechat_redirect`
   }
-  
 
   const [qrcode, setQrcode] = useState('');
   const [scene_str, setScene_str] = useState('');
@@ -32,6 +32,8 @@ export default function LoginQrcode() {
   const [isChecking, setChecking] = useState(false);
   const [isShowing, setShowing] = useState(false);
   const [getToken, setGetToken] = useState(false);
+  // eslint-disable-next-line
+  const [cookies, setCookie] = useCookies();
 
   useInterval(() => {
     fetchCheck()
@@ -42,7 +44,7 @@ export default function LoginQrcode() {
   }, isChecking ? WX_QRCODE_DELAY : null);
 
   useEffect(() => {
-    let url = DOMAIN_URL + '/api/wechat/qrcode'
+    let url = SERVER_URL + '/api/wechat/qrcode'
     if (isShowing) {
       setCount(1);
       axios.get(url).then(res => {
@@ -58,15 +60,13 @@ export default function LoginQrcode() {
   }, [isShowing]);
 
   const fetchCheck = () => {
-    let url = DOMAIN_URL + '/api/wechat/check'
+    let url = SERVER_URL + '/api/wechat/check'
     let params = {
       'scene_str': scene_str
     }
     axios.get(url, { params: params }).then(res => {
       console.log(res.data)
-      cookie.save('token', res.data.token, {
-        domain: COOKIE_DOMAIN
-      })
+      setCookie('token', res.data.token, { path: '/' });
       setChecking(false)
       setShowing(false)
       setGetToken(true)
@@ -100,3 +100,5 @@ export default function LoginQrcode() {
     </Row>
   )
 }
+
+export default withRouter(LoginQrcode)

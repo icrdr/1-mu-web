@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { DOMAIN_URL } from '../config'
+import { SERVER_URL } from '../config'
 import { Redirect } from 'react-router-dom'
 import axios from 'axios'
 import { List, Card } from 'antd';
@@ -10,7 +10,7 @@ export default function UsersList({ update }) {
 
   useEffect(() => {
     if (hasToken()) {
-      axios.get(DOMAIN_URL + '/api/user', {
+      axios.get(SERVER_URL + '/api/user', {
         withCredentials: true
       }).then(res => {
         console.log(res.data)
