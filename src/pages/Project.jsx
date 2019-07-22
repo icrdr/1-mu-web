@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Link } from 'react-router-dom'
-import { Card, Row, Col, Descriptions, Steps, Button, Tabs, Icon } from 'antd'
+import { Card, Row, Col, Descriptions, Steps, Button, Tabs } from 'antd'
 import Loading from '../components/Loading'
 import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
@@ -13,10 +13,9 @@ const { Meta } = Card;
 const { TabPane } = Tabs;
 const SERVER_URL = window.SERVER_URL
 
-export default function Project({ history, match, location }) {
+export default function Project({ history, match }) {
   const [projectData, setProjectData] = useState();
   const [isloading, setLoading] = useState(false);
-  const [stageShow, setStageShow] = useState(-1);
 
   useEffect(() => {
     setLoading(true)
@@ -26,13 +25,12 @@ export default function Project({ history, match, location }) {
     }).then(res => {
       console.log(res.data)
       setProjectData(res.data)
-      setStageShow(res.data.status === 'await' ? -1 : res.data.current_stage_index)
       setLoading(false)
     }).catch(err => {
       if (err.response) console.log(err.response.data)
       setLoading(false)
     })
-  }, [match.params.project_id]);
+  }, [match.params.project_id, match]);
 
   if (isloading) {
     return <Loading />
@@ -40,10 +38,10 @@ export default function Project({ history, match, location }) {
     return <div>没有内容</div>
   }
 
-  const operateProject = (action) => {
+  const startProject = () => {
     let url = SERVER_URL + '/api/projects/' + match.params.project_id
     let params = {
-      action: action,
+      action: 'start',
     }
     axios.put(url, { ...params }, {
       withCredentials: true
@@ -137,7 +135,7 @@ export default function Project({ history, match, location }) {
             <div dangerouslySetInnerHTML={{
               __html: projectData.design
             }} />
-            {projectData.status === 'await' && <Button size='large' type="primary" block onClick={() => operateProject('start')}>确认开始企划</Button>}
+            {projectData.status === 'await' && <Button size='large' type="primary" block onClick={() => startProject()}>确认开始企划</Button>}
           </>}
         />
         <Route path={`${match.path}/stages/:stage_index(\\d+)`} render={props => <Stage {...props} project={projectData} />} />
@@ -146,10 +144,23 @@ export default function Project({ history, match, location }) {
   )
 }
 
-function Stage({ match, project }) {
+function Stage({ history, match, project }) {
   const index = parseInt(match.params.stage_index)
   const stage = project.stages[index]
-
+  const operateProject = (action) => {
+    let url = SERVER_URL + '/api/projects/' + match.params.project_id
+    let params = {
+      action: action,
+    }
+    axios.put(url, { ...params }, {
+      withCredentials: true
+    }).then(res => {
+      console.log(res.data)
+      history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
+    }).catch(err => {
+      if (err.response) console.log(err.response.data)
+    })
+  }
   const operationRender = status => {
     switch (status) {
       case 'progress':
@@ -171,7 +182,7 @@ function Stage({ match, project }) {
           <Route exact path={match.path} render={() =>
             <Row gutter={12}>
               <Col sm={24} md={12} className='m-b:2'>
-                {/* <Button type="primary" size='large' block onClick={() => operateProject('finish')}>确认通过</Button> */}
+                <Button type="primary" size='large' block onClick={() => operateProject('finish')}>确认通过</Button>
               </Col>
               <Col sm={24} md={12}>
                 <Link to={`${match.url}/feedback`}>
@@ -212,6 +223,7 @@ function Stage({ match, project }) {
       </>
     }
   }
+
   return (<>
     {project.current_stage_index === index &&
       <div className='m-t:4'>

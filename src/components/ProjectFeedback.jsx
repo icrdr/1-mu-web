@@ -28,14 +28,14 @@ export default function ProjectFeedback({ history, match, feedback }) {
       final['action'] = 'modify'
     }
     console.log(final);
-    let url = SERVER_URL + '/api/projects/' + match.params.id
+    let url = SERVER_URL + '/api/projects/' + match.params.project_id
     axios.put(url, {
       ...final,
     }, { withCredentials: true }
     ).then(res => {
       console.log(res.data)
       if (submit === 'feedback') {
-        history.push("/projects/" + match.params.id)
+        history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
       }
     }).catch(err => {
       if (err.response) console.log(err.response.data)

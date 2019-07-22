@@ -28,10 +28,10 @@ function Menux({location, history}) {
         <Icon type="desktop" />
         <span>企划列表</span>
       </Menu.Item>
-      <Menu.Item key="files">
+      {/* <Menu.Item key="files">
         <Icon type="file" />
         <span>文件列表</span>
-      </Menu.Item>
+      </Menu.Item> */}
     </Menu>
   )
 }

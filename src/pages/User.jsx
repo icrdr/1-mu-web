@@ -11,7 +11,7 @@ export default function User({ match }) {
   useEffect(() => {
     let url = SERVER_URL + '/api/users'
     let params = {
-      include: match.params.id
+      include: match.params.user_id
     }
     axios.get(url, {
       params: params,
