@@ -16,14 +16,12 @@ const WX_QRCODE_TRY = window.WX_QRCODE_TRY
 const WX_QRCODE_DELAY = window.WX_QRCODE_DELAY
 
 
-function LoginQrcode({location, match}) {
+function LoginQrcode({match}) {
   let wx_qrcode_url=''
-  console.log(location)
-  console.log(match)
   if (isWx()) {
-    wx_qrcode_url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${WX_GZ_APPID}&redirect_uri=${DOMAIN_URL+location.pathname}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
+    wx_qrcode_url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${WX_GZ_APPID}&redirect_uri=${DOMAIN_URL+match.url}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
   }else{
-    wx_qrcode_url = `https://open.weixin.qq.com/connect/qrconnect?appid=${WX_KF_APPID}&redirect_uri=${DOMAIN_URL+location.pathname}&response_type=code&scope=snsapi_login&state=STATE#wechat_redirect`
+    wx_qrcode_url = `https://open.weixin.qq.com/connect/qrconnect?appid=${WX_KF_APPID}&redirect_uri=${DOMAIN_URL+match.url}&response_type=code&scope=snsapi_login&state=STATE#wechat_redirect`
   }
 
   const [qrcode, setQrcode] = useState('');
