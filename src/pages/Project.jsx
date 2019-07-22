@@ -16,6 +16,7 @@ const SERVER_URL = window.SERVER_URL
 export default function Project({ history, match }) {
   const [projectData, setProjectData] = useState();
   const [isloading, setLoading] = useState(false);
+  const [update, setUpdate] = useState(true);
 
   useEffect(() => {
     setLoading(true)
@@ -30,7 +31,7 @@ export default function Project({ history, match }) {
       if (err.response) console.log(err.response.data)
       setLoading(false)
     })
-  }, [match.params.project_id, match]);
+  }, [match.params.project_id, update]);
 
   if (isloading) {
     return <Loading />
@@ -47,7 +48,8 @@ export default function Project({ history, match }) {
       withCredentials: true
     }).then(res => {
       console.log(res.data)
-      history.push("/projects/" + match.params.project_id)
+      history.push(`/projects/${match.params.project_id}/stages/0`)
+      setUpdate(!update)
     }).catch(err => {
       if (err.response) console.log(err.response.data)
     })
@@ -138,25 +140,26 @@ export default function Project({ history, match }) {
             {projectData.status === 'await' && <Button size='large' type="primary" block onClick={() => startProject()}>确认开始企划</Button>}
           </>}
         />
-        <Route path={`${match.path}/stages/:stage_index(\\d+)`} render={props => <Stage {...props} project={projectData} />} />
+        <Route path={`${match.path}/stages/:stage_index(\\d+)`} render={props => <Stage {...props} callback={()=>setUpdate(!update)} project={projectData} />} />
       </div>
     </Card>
   )
 }
 
-function Stage({ history, match, project }) {
+function Stage({ history, match, project, callback}) {
   const index = parseInt(match.params.stage_index)
   const stage = project.stages[index]
-  const operateProject = (action) => {
+  const finishProject = (action) => {
     let url = SERVER_URL + '/api/projects/' + match.params.project_id
     let params = {
-      action: action,
+      action: 'finish',
     }
     axios.put(url, { ...params }, {
       withCredentials: true
     }).then(res => {
       console.log(res.data)
-      history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
+      history.push(`/projects/${match.params.project_id}/stages/${index+1}`)
+      callback()
     }).catch(err => {
       if (err.response) console.log(err.response.data)
     })
@@ -173,6 +176,7 @@ function Stage({ history, match, project }) {
           } />
           <Route path={`${match.path}/upload`} render={
             props => <ProjectUpload {...props}
+              callback = {callback}
               file={getPhase(stage).upload_files}
               upload={getPhase(stage).creator_upload} />
           } />
@@ -182,7 +186,7 @@ function Stage({ history, match, project }) {
           <Route exact path={match.path} render={() =>
             <Row gutter={12}>
               <Col sm={24} md={12} className='m-b:2'>
-                <Button type="primary" size='large' block onClick={() => operateProject('finish')}>确认通过</Button>
+                <Button type="primary" size='large' block onClick={() => finishProject()}>确认通过</Button>
               </Col>
               <Col sm={24} md={12}>
                 <Link to={`${match.url}/feedback`}>
@@ -192,7 +196,7 @@ function Stage({ history, match, project }) {
             </Row>
           } />
           <Route path={`${match.path}/feedback`} render={
-            props => <ProjectFeedback {...props} feedback={getPhase(stage).client_feedback} />
+            props => <ProjectFeedback {...props} callback = {callback} feedback={getPhase(stage).client_feedback} />
           } />
         </>
       default:

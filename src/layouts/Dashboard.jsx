@@ -1,38 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Route, Link } from 'react-router-dom'
 
 import LoginQrcode from '../components/LoginQrcode'
-import useToken from '../hooks/useToken'
+import useLogin from '../hooks/useLogin'
 
 import Avatarx from '../components/Avatarx'
-import axios from 'axios'
+
 import Menux from '../components/Menux'
 
 import { Layout, Icon, Button } from 'antd';
 
 const { Header, Content, Footer, Sider } = Layout;
-const SERVER_URL = window.SERVER_URL
+
 
 function Dashboard({ component: Component, ...rest }) {
   
-  const token = useToken()
-  const [meData, setMeData] = useState()
+  const meData = useLogin()
   const [isCollapsed, setCollapse] = useState(false);
   const [isSmall, setSmall] = useState(false);
-
-  useEffect(() => {
-    if (token) {
-      let url = SERVER_URL + '/api/me'
-      axios.get(url, {
-        withCredentials: true
-      }).then(res => {
-        console.log(res.data)
-        setMeData(res.data)
-      }).catch(err => {
-        if (err.response) console.log(err.response.data)
-      })
-    }
-  }, [token]);
   
   const onCollapse = () => {
     setCollapse(!isCollapsed)
@@ -42,7 +27,7 @@ function Dashboard({ component: Component, ...rest }) {
     setSmall(broken)
   };
 
-  if (!token) {
+  if (!meData) {
     return <LoginQrcode/>
   }
 

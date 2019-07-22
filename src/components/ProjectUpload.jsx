@@ -8,7 +8,7 @@ const { Paragraph } = Typography;
 const SERVER_URL = window.SERVER_URL
 const { Dragger } = Upload;
 
-export default function ProjectUpload({ history, match, upload, file }) {
+export default function ProjectUpload({ history, match, upload, file, callback }) {
   let submit = ''
   const [fileArray, setFileArray] = useState(file)
 
@@ -41,6 +41,7 @@ export default function ProjectUpload({ history, match, upload, file }) {
       console.log(res.data)
       if (submit === 'upload') {
         history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
+        callback()
       }
     }).catch(err => {
       if (err.response) console.log(err.response.data)

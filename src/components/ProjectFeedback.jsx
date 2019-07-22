@@ -6,7 +6,7 @@ import BraftEditor from 'braft-editor'
 const { Paragraph } = Typography;
 const SERVER_URL = window.SERVER_URL
 
-export default function ProjectFeedback({ history, match, feedback }) {
+export default function ProjectFeedback({ history, match, feedback, callback }) {
   let submit = ''
   const validation = {
     'feedback': [
@@ -36,6 +36,7 @@ export default function ProjectFeedback({ history, match, feedback }) {
       console.log(res.data)
       if (submit === 'feedback') {
         history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
+        callback()
       }
     }).catch(err => {
       if (err.response) console.log(err.response.data)
