@@ -3,7 +3,7 @@ import { Route, Link } from 'react-router-dom'
 
 import LoginQrcode from '../components/LoginQrcode'
 import useLogin from '../hooks/useLogin'
-
+import Loading from '../components/Loading'
 import Avatarx from '../components/Avatarx'
 
 import Menux from '../components/Menux'
@@ -14,23 +14,28 @@ const { Header, Content, Footer, Sider } = Layout;
 
 
 function Dashboard({ component: Component, ...rest }) {
-  
-  const meData = useLogin()
+
+  const { meData, status } = useLogin()
   const [isCollapsed, setCollapse] = useState(false);
   const [isSmall, setSmall] = useState(false);
-  
+
   const onCollapse = () => {
     setCollapse(!isCollapsed)
   };
-  
+
   const onBreakpoint = broken => {
     setSmall(broken)
   };
 
-  if (!meData) {
-    return <LoginQrcode/>
+  switch (status) {
+    case 'pending':
+      return <Loading />
+    case 'no':
+    case 'error':
+      return <LoginQrcode />
+    default:
   }
-
+  
   return (
     <Route {...rest} render={matchProps => (
       <Layout style={{ minHeight: '100vh' }}>
