@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { Redirect } from 'react-router-dom'
 import { withRouter } from "react-router";
 import { isWx } from '../utility'
 import { Button, Row, Col, Card } from 'antd';
@@ -17,7 +16,7 @@ const WX_QRCODE_DELAY = window.WX_QRCODE_DELAY
 
 const COOKIE_DOMAIN = window.COOKIE_DOMAIN
 
-function LoginQrcode({location}) {
+function LoginQrcode({location, history}) {
   let wx_qrcode_url=''
   if (isWx()) {
     wx_qrcode_url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${WX_GZ_APPID}&redirect_uri=${DOMAIN_URL+location.pathname}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
@@ -30,7 +29,6 @@ function LoginQrcode({location}) {
   const [count, setCount] = useState(1);
   const [isChecking, setChecking] = useState(false);
   const [isShowing, setShowing] = useState(false);
-  const [getToken, setGetToken] = useState(false);
   // eslint-disable-next-line
   const [cookies, setCookie] = useCookies();
 
@@ -68,7 +66,7 @@ function LoginQrcode({location}) {
       setCookie('token', res.data.token, { path: '/', domain:COOKIE_DOMAIN});
       setChecking(false)
       setShowing(false)
-      setGetToken(true)
+      history.push(location.pathname)
     }).catch(err => {
       if (err.response) console.log(err.response.data)
     })
@@ -83,10 +81,6 @@ function LoginQrcode({location}) {
     } else {
       loginRender = <Button onClick={() => setShowing(true)} block>微信登陆</Button>
     }
-  }
-
-  if (getToken) {
-    return <Redirect to='/' />
   }
 
   return (
