@@ -5,6 +5,7 @@ import { isWx } from '../utility'
 import { useCookies } from 'react-cookie';
 
 const SERVER_URL = window.SERVER_URL
+const COOKIE_DOMAIN = window.COOKIE_DOMAIN
 
 export default function useWxLogin(location) {
   const [state, setState] = useState('none');
@@ -24,7 +25,7 @@ export default function useWxLogin(location) {
         params: params
       }).then(res => {
         console.log(res.data)
-        setCookie('token', res.data.token, { path: '/' });
+        setCookie('token', res.data.token, { path: '/', domain:COOKIE_DOMAIN});
         setState('ok')
       }).catch(err => {
         if (err.response) console.log(err.response.data)

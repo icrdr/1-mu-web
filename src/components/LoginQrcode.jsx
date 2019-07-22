@@ -8,13 +8,14 @@ import useInterval from '../hooks/useInterval'
 import { useCookies } from 'react-cookie';
 
 const DOMAIN_URL = window.DOMAIN_URL
-const WX_KF_APPID = window.WX_KF_APPID
-const WX_GZ_APPID = window.WX_GZ_APPID
 const SERVER_URL = window.SERVER_URL
 
+const WX_KF_APPID = window.WX_KF_APPID
+const WX_GZ_APPID = window.WX_GZ_APPID
 const WX_QRCODE_TRY = window.WX_QRCODE_TRY
 const WX_QRCODE_DELAY = window.WX_QRCODE_DELAY
 
+const COOKIE_DOMAIN = window.COOKIE_DOMAIN
 
 function LoginQrcode({match}) {
   let wx_qrcode_url=''
@@ -64,7 +65,7 @@ function LoginQrcode({match}) {
     }
     axios.get(url, { params: params }).then(res => {
       console.log(res.data)
-      setCookie('token', res.data.token, { path: '/' });
+      setCookie('token', res.data.token, { path: '/', domain:COOKIE_DOMAIN});
       setChecking(false)
       setShowing(false)
       setGetToken(true)
