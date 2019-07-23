@@ -1,12 +1,11 @@
-import React, {  } from 'react'
+import React from 'react'
 import { Card, Typography, Button, Row, Col, Alert } from 'antd';
 import useForm from '../hooks/useForm'
-import axios from 'axios'
 import BraftEditor from 'braft-editor'
+import {updateData} from '../utility'
 const { Paragraph } = Typography;
-const SERVER_URL = window.SERVER_URL
 
-export default function ProjectFeedback({ history, match, feedback, callback }) {
+export default function ProjectFeedback({ history, match, feedback, onSuccess }) {
   let submit = ''
   const validation = {
     'feedback': [
@@ -20,26 +19,20 @@ export default function ProjectFeedback({ history, match, feedback, callback }) 
   const { errors, field, handleSubmit } = useForm(onSubmit, undefined, validation)
 
   function onSubmit(v) {
-    let final = {
+    let path = '/projects/' + match.params.project_id
+    let data = {
       ...v,
       feedback: v.feedback.toHTML(),
     }
     if (submit === 'feedback') {
-      final['action'] = 'modify'
+      data['action'] = 'modify'
     }
-    console.log(final);
-    let url = SERVER_URL + '/api/projects/' + match.params.project_id
-    axios.put(url, {
-      ...final,
-    }, { withCredentials: true }
-    ).then(res => {
-      console.log(res.data)
+    
+    updateData(path, data).then(res => {
       if (submit === 'feedback') {
         history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
-        callback()
+        onSuccess()
       }
-    }).catch(err => {
-      if (err.response) console.log(err.response.data)
     })
   }
 

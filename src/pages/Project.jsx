@@ -1,36 +1,45 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Link } from 'react-router-dom'
-import { Card, Row, Col, Descriptions, Steps, Button, Tabs } from 'antd'
+import { Card, Row, Col, Descriptions, Steps, Button, Tabs, message, Icon } from 'antd'
 import Loading from '../components/Loading'
 import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
 import ProjectFeedback from '../components/ProjectFeedback'
-import axios from 'axios'
-import { parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft } from '../utility'
+import { parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
 import Avatarx from '../components/Avatarx'
 const { Step } = Steps;
 const { Meta } = Card;
 const { TabPane } = Tabs;
-const SERVER_URL = window.SERVER_URL
 
-export default function Project({ history, match }) {
+export default function Project({ history, match, location }) {
   const [projectData, setProjectData] = useState();
   const [isloading, setLoading] = useState(false);
   const [update, setUpdate] = useState(true);
 
   useEffect(() => {
     setLoading(true)
-    let url = SERVER_URL + '/api/projects/' + match.params.project_id
-    axios.get(url, {
-      withCredentials: true
-    }).then(res => {
-      console.log(res.data)
+    const path = '/projects/' + match.params.project_id
+    fetchData(path).then(res => {
+      if (location.pathname === match.url) {
+        switch (res.data.status) {
+          case 'draft':
+          case 'await':
+            history.push(`${match.url}/design`)
+            break;
+          case 'finish':
+            history.push(`${match.url}/done`)
+            break;
+          default:
+            history.push(`${match.url}/stages/${res.data.current_stage_index}`)
+            break;
+        }
+        
+      }
       setProjectData(res.data)
-      setLoading(false)
-    }).catch(err => {
-      if (err.response) console.log(err.response.data)
+    }).finally(() => {
       setLoading(false)
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match.params.project_id, update]);
 
   if (isloading) {
@@ -39,19 +48,14 @@ export default function Project({ history, match }) {
     return <div>没有内容</div>
   }
 
-  const startProject = () => {
-    let url = SERVER_URL + '/api/projects/' + match.params.project_id
-    let params = {
+  const onStart = () => {
+    const path = '/projects/' + match.params.project_id
+    let data = {
       action: 'start',
     }
-    axios.put(url, { ...params }, {
-      withCredentials: true
-    }).then(res => {
-      console.log(res.data)
+    updateData(path, data).then(() => {
       history.push(`/projects/${match.params.project_id}/stages/0`)
       setUpdate(!update)
-    }).catch(err => {
-      if (err.response) console.log(err.response.data)
     })
   }
 
@@ -118,8 +122,8 @@ export default function Project({ history, match }) {
 
       <Steps className="m-t:6" status={stepStatus(projectData)} current={stepCurrent(projectData)}>
         <Step title={
-          <Link to={match.url}>
-            <Button type="link" >{'设计初稿'}</Button>
+          <Link to={`${match.url}/design`}>
+            <Button type="link" >设计初稿</Button>
           </Link>
         } description={projectData.status === 'await' ? '未确认' : '确认'} />
         {projectData.stages.map((stage, index) =>
@@ -129,41 +133,80 @@ export default function Project({ history, match }) {
             </Link>
           } description={setDescription(stage, index)} />
         )}
-        <Step title='完成' description='' />
+        <Step title={projectData.status === 'finish' ?
+          <Link to={`${match.url}/done`}>
+            <Button type="link" >完成</Button>
+          </Link> : '完成'
+        } description='' />
       </Steps>
       <div className='m-t:4'>
-        <Route exact path={match.path} render={() =><>
-            <h1>初始设计稿</h1>
-            <div dangerouslySetInnerHTML={{
-              __html: projectData.design
-            }} />
-            {projectData.status === 'await' && <Button size='large' type="primary" block onClick={() => startProject()}>确认开始企划</Button>}
-          </>}
+        <Route path={`${match.path}/design`} render={() => <>
+          <h1>初始设计稿</h1>
+          <div dangerouslySetInnerHTML={{
+            __html: projectData.design
+          }} />
+          {projectData.status === 'await' && <Button size='large' type="primary" block onClick={onStart}>确认开始企划</Button>}
+        </>}
         />
-        <Route path={`${match.path}/stages/:stage_index(\\d+)`} render={props => <Stage {...props} callback={()=>setUpdate(!update)} project={projectData} />} />
+        <Route path={`${match.path}/done`} render={() => {
+          const phase = getPhase(getStage(projectData))
+          return <>
+          <h1>最终成品</h1>
+          <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
+          {phase.upload_files.map((item, j) =>
+            <Card key={j} className='m-t:2'
+              cover={<ImgCard file={item} />}>
+              <a href={item.url}><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
+            </Card>
+          )}
+        </>}}
+        />
+        <Route path={`${match.path}/stages/:stage_index(\\d+)`} render={props => <Stage {...props} onSuccess={() => setUpdate(!update)} project={projectData} />} />
       </div>
     </Card>
   )
 }
 
-function Stage({ history, match, project, callback}) {
+function Stage({ history, match, project, onSuccess }) {
   const index = parseInt(match.params.stage_index)
   const stage = project.stages[index]
-  const finishProject = (action) => {
-    let url = SERVER_URL + '/api/projects/' + match.params.project_id
-    let params = {
-      action: 'finish',
+
+  const onBatchDownload = phase => {
+    let file_id = []
+    for (let i in phase.upload_files) {
+      file_id.push(phase.upload_files[i].id)
     }
-    axios.put(url, { ...params }, {
-      withCredentials: true
-    }).then(res => {
-      console.log(res.data)
-      history.push(`/projects/${match.params.project_id}/stages/${index+1}`)
-      callback()
-    }).catch(err => {
-      if (err.response) console.log(err.response.data)
+
+    if (file_id.length === 0) {
+      console.log('No file.')
+      message.info('没有文件，下载取消')
+      return false
+    }
+
+    const path = '/download'
+    const params = {
+      file_id: file_id.join(',')
+    }
+    fetchData(path, params).then(res => {
+      window.location.href = res.data.download_url
     })
   }
+
+  const onFinish = () => {
+    const path = '/projects/' + match.params.project_id
+    const data = {
+      action: 'finish',
+    }
+    updateData(path, data).then(() => {
+      if(project.stages.length - 1 > index){
+        history.push(`/projects/${match.params.project_id}/stages/${index+1}`)
+      }else{
+        history.push(`/projects/${match.params.project_id}/done`)
+      }
+      onSuccess()
+    })
+  }
+
   const operationRender = status => {
     switch (status) {
       case 'progress':
@@ -176,7 +219,7 @@ function Stage({ history, match, project, callback}) {
           } />
           <Route path={`${match.path}/upload`} render={
             props => <ProjectUpload {...props}
-              callback = {callback}
+              onSuccess={onSuccess}
               file={getPhase(stage).upload_files}
               upload={getPhase(stage).creator_upload} />
           } />
@@ -186,7 +229,7 @@ function Stage({ history, match, project, callback}) {
           <Route exact path={match.path} render={() =>
             <Row gutter={12}>
               <Col sm={24} md={12} className='m-b:2'>
-                <Button type="primary" size='large' block onClick={() => finishProject()}>确认通过</Button>
+                <Button type="primary" size='large' block onClick={onFinish}>确认通过</Button>
               </Col>
               <Col sm={24} md={12}>
                 <Link to={`${match.url}/feedback`}>
@@ -196,7 +239,7 @@ function Stage({ history, match, project, callback}) {
             </Row>
           } />
           <Route path={`${match.path}/feedback`} render={
-            props => <ProjectFeedback {...props} callback = {callback} feedback={getPhase(stage).client_feedback} />
+            props => <ProjectFeedback {...props} onSuccess={onSuccess} feedback={getPhase(stage).client_feedback} />
           } />
         </>
       default:
@@ -210,11 +253,16 @@ function Stage({ history, match, project, callback}) {
         <Tabs className='m-t:4' tabPosition='top'>
           {phaseArr.map((phase, i) =>
             <TabPane tab={parseDate(phase.upload_date).split(' ')[0]} key={i}>
+              <Row>
+                <Col><h2 className='fl:l'>提交的文件</h2></Col>
+                <Col><Button className='fl:r' type='primary' onClick={() => onBatchDownload(phase)}>批量下载</Button></Col>
+              </Row>
+
               <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
               {phase.upload_files.map((item, j) =>
                 <Card key={j} className='m-t:2'
                   cover={<ImgCard file={item} />}>
-                  <div className="t-a:c">{item.name}.{item.format}</div>
+                  <a href={item.url}><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
                 </Card>
               )}
               {phase.feedback_date && <>

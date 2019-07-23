@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
-import { Card, Typography, Button, Row, Col, Upload, Icon, Alert } from 'antd';
+import { Card, Typography, Button, Row, Col, Upload, Icon, Alert, message } from 'antd';
 import useForm from '../hooks/useForm'
 import ImgCard from './ImgCard'
-import axios from 'axios'
+import {updateData} from '../utility'
 import BraftEditor from 'braft-editor'
 const { Paragraph } = Typography;
 const SERVER_URL = window.SERVER_URL
 const { Dragger } = Upload;
 
-export default function ProjectUpload({ history, match, upload, file, callback }) {
+export default function ProjectUpload({ history, match, upload, file, onSuccess }) {
   let submit = ''
   const [fileArray, setFileArray] = useState(file)
 
@@ -24,27 +24,25 @@ export default function ProjectUpload({ history, match, upload, file, callback }
   const { errors, field, handleSubmit } = useForm(onSubmit, undefined, validation)
 
   function onSubmit(v) {
-    let final = {
+    const data = {
       ...v,
       upload: v.upload.toHTML(),
       upload_files: fileArray
     }
     if (submit === 'upload') {
-      final['action'] = 'upload'
+      if(fileArray.length===0){
+        message.info('没有文件，提交取消')
+        console.log('No file.')
+        return false
+      }
+      data['action'] = 'upload'
     }
-    console.log(final);
-    let url = SERVER_URL + '/api/projects/' + match.params.project_id
-    axios.put(url, {
-      ...final,
-    }, { withCredentials: true }
-    ).then(res => {
-      console.log(res.data)
+    const path = '/projects/' + match.params.project_id
+    updateData(path, data).then(res => {
       if (submit === 'upload') {
         history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
-        callback()
+        onSuccess()
       }
-    }).catch(err => {
-      if (err.response) console.log(err.response.data)
     })
   }
   const removeFile = key => {
@@ -54,13 +52,13 @@ export default function ProjectUpload({ history, match, upload, file, callback }
   const imgRender = [...fileArray].reverse().map(item =>
     <Card key={item.id} className='m-t:2'
       cover={<ImgCard file={item} />}>
-      <Icon type="close" onClick={() => removeFile(item.id)} /><div className='fl:r'>{item.name}.{item.format}</div>
+      <Icon type="close-circle" theme="twoTone" onClick={() => removeFile(item.id)} /><div className='fl:r'>{item.name}.{item.format}</div>
     </Card>
   )
 
   const uploadArgs = {
     name: 'file',
-    action: `${SERVER_URL}/api/files`,
+    action: `${SERVER_URL}/files`,
     withCredentials: true,
     multiple: true,
     onChange(info) {

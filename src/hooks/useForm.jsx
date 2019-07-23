@@ -159,7 +159,7 @@ export default function useForm(onSubmit, onError = undefined, validation = [], 
     }
 
     v = (v === null) ? undefined : v
-    setValues(values => setFieldValue(values, field, v));
+    setValues(prevState => setFieldValue(prevState, field, v));
   }
 
   // const handleBlur = async f => {

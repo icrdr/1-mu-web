@@ -1,34 +1,25 @@
 import React, { useEffect, useState } from 'react'
 import { Card, Row, Col, Descriptions, Statistic} from 'antd'
 import Loading from '../components/Loading'
-import axios from 'axios'
+import {fetchData} from '../utility'
 import Avatarx from '../components/Avatarx'
-const SERVER_URL = window.SERVER_URL
 
 export default function User({ match }) {
   const [userData, setUserData] = useState();
 
   useEffect(() => {
-    let url = SERVER_URL + '/api/users'
+    let path = '/users'
     let params = {
       include: match.params.user_id
     }
-    axios.get(url, {
-      params: params,
-      withCredentials: true
-    }).then(res => {
-      console.log(res.data)
+    fetchData(path, params).then(res => {
       setUserData(res.data.users[0])
-    }).catch(err => {
-      if (err.response) console.log(err.response.data)
     })
-  }, [match]);
+  }, [match.params.user_id]);
 
   if (!userData) {
     return <Loading />
   }
-
-
 
   return (
     <Card className='p:2' title={'用户：' + userData.name}>

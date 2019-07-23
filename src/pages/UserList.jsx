@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Table, Card } from 'antd'
-import axios from 'axios'
+import {fetchData} from '../utility'
 import queryString from 'query-string'
 import Avatarx from '../components/Avatarx'
-const SERVER_URL = window.SERVER_URL
 
 const columns = [
   {
@@ -54,7 +53,7 @@ export default function UserList({ location, history }) {
 
   useEffect(() => {
     setLoading(true)
-    let url = SERVER_URL + '/api/users'
+    let path = '/users'
     let params = {
       order: 'desc',
       pre_page: pagination.pageSize,
@@ -68,16 +67,11 @@ export default function UserList({ location, history }) {
       params.page = pagination.current
     }
 
-    axios.get(url, {
-      params: params,
-      withCredentials: true
-    }).then(res => {
-      console.log(res.data)
+    fetchData(path, params).then(res => {
       setUserList(res.data.users)
       setPagination(prevState => { return { ...prevState, total: res.data.total } })
       setLoading(false)
     }).catch(err => {
-      if (err.response) console.log(err.response.data)
       setUserList([])
       setLoading(false)
     })

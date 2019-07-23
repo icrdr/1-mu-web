@@ -12,6 +12,7 @@ import { Layout, Icon, Button } from 'antd';
 
 const { Header, Content, Footer, Sider } = Layout;
 
+export const meContext = React.createContext();
 
 function Dashboard({ component: Component, ...rest }) {
 
@@ -38,6 +39,9 @@ function Dashboard({ component: Component, ...rest }) {
   
   return (
     <Route {...rest} render={matchProps => (
+      <meContext.Provider
+        value={{ meData }}
+      >
       <Layout style={{ minHeight: '100vh' }}>
         <Sider trigger={null} collapsible
           collapsed={isCollapsed}
@@ -72,6 +76,7 @@ function Dashboard({ component: Component, ...rest }) {
           <Footer style={{ textAlign: 'center' }}>1-mu ©2019 Created by emu</Footer>
         </Layout>
       </Layout>
+      </meContext.Provider>
     )} />
   )
 }

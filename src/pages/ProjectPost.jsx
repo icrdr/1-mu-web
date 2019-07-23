@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
 import { Card, Input, InputNumber, Button, Icon, Row, Col, Alert, Typography } from 'antd';
 import useForm from '../hooks/useForm'
-
+import {postData} from '../utility'
 import axios from 'axios'
 import BraftEditor from 'braft-editor'
 const { Title, Paragraph } = Typography;
-const SERVER_URL = window.SERVER_URL
 
 function PostProjectForm({ history }) {
   const [stageArray, setStageArray] = useState([0])
@@ -47,17 +46,10 @@ function PostProjectForm({ history }) {
   const { va, errors, field, validate, handleSubmit } = useForm(onSubmit, undefined, validation)
 
   function onSubmit(v) {
-    const final = { ...v, design: v.design.toHTML() }
-    console.log(final)
-    let url = SERVER_URL + '/api/projects'
-    axios.post(url, {
-      ...final,
-    }, { withCredentials: true }
-    ).then(res => {
-      console.log(res.data)
+    let path = '/projects'
+    const data = { ...v, design: v.design.toHTML() }
+    postData(path, data).then(res => {
       history.push("/projects/" + res.data.id)
-    }).catch(err => {
-      if (err.response) console.log(err.response.data)
     })
   }
 
@@ -106,7 +98,7 @@ function PostProjectForm({ history }) {
             {errors[`stages[${k}].days_need`] && <Alert message={errors[`stages[${k}].days_need`]} type="error" showIcon />}
           </Col>
           {i === 0 ? null :
-            (<Icon className='pos:a' style={{ top: '0', right: '0' }} type="close" onClick={() => removeStage(k)} />)
+            (<Icon className='pos:a' style={{top: '0', right: '0' }} theme="twoTone" type="close-circle" onClick={() => removeStage(k)} />)
           }
         </Row>
       </Card>)
@@ -194,11 +186,8 @@ export default function ProjectPost({ history }) {
 
 function isUserExist(v) {
   return new Promise(resolve => {
-    let url = SERVER_URL + '/api/users'
-    axios.get(url, {
-      params: { include: v },
-      withCredentials: true
-    }).then(() => {
+    let path = '/users'
+    axios.get(path, { include: v }).then(() => {
       resolve(true)
     }).catch(() => {
       resolve(false)

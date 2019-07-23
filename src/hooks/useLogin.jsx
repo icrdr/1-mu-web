@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import jwtDecode from 'jwt-decode'
-import axios from 'axios'
-const SERVER_URL = window.SERVER_URL
+import {fetchData} from '../utility'
 
 export default function useLogin() {
   const [cookies] = useCookies();
@@ -16,16 +15,12 @@ export default function useLogin() {
       }
     }
     if (hasToken) {
-      let url = SERVER_URL + '/api/me'
-      axios.get(url, {
-        withCredentials: true
-      }).then(res => {
-        console.log(res.data)
+      let path = '/me'
+      fetchData(path).then(res => {
         setMeData(res.data)
         setStatus('ok')
       }).catch(err => {
         setStatus('error')
-        if (err.response) console.log(err.response.data)
       })
     }else{
       setStatus('no')
