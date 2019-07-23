@@ -41,8 +41,8 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
     updateData(path, data).then(res => {
       if (submit === 'upload') {
         history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
-        onSuccess()
       }
+      onSuccess()
     })
   }
   const removeFile = key => {
