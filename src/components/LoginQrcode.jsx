@@ -3,7 +3,7 @@ import { withRouter } from "react-router";
 import { isWx } from '../utility'
 import { Button, Row, Col, Card } from 'antd';
 import useInterval from '../hooks/useInterval'
-import {fetchData} from '../utility'
+import { fetchData } from '../utility'
 import { useCookies } from 'react-cookie';
 
 const DOMAIN_URL = window.DOMAIN_URL
@@ -15,12 +15,12 @@ const WX_QRCODE_DELAY = window.WX_QRCODE_DELAY
 
 const COOKIE_DOMAIN = window.COOKIE_DOMAIN
 
-function LoginQrcode({location, history}) {
-  let wx_qrcode_url=''
+function LoginQrcode({ location, history }) {
+  let wx_qrcode_url = ''
   if (isWx()) {
-    wx_qrcode_url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${WX_GZ_APPID}&redirect_uri=${DOMAIN_URL+location.pathname}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
-  }else{
-    wx_qrcode_url = `https://open.weixin.qq.com/connect/qrconnect?appid=${WX_KF_APPID}&redirect_uri=${DOMAIN_URL+location.pathname}&response_type=code&scope=snsapi_login&state=STATE#wechat_redirect`
+    wx_qrcode_url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${WX_GZ_APPID}&redirect_uri=${DOMAIN_URL + location.pathname}&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect`
+  } else {
+    wx_qrcode_url = `https://open.weixin.qq.com/connect/qrconnect?appid=${WX_KF_APPID}&redirect_uri=${DOMAIN_URL + location.pathname}&response_type=code&scope=snsapi_login&state=STATE#wechat_redirect`
   }
 
   const [qrcode, setQrcode] = useState('');
@@ -59,10 +59,12 @@ function LoginQrcode({location, history}) {
       'scene_str': scene_str
     }
     fetchData(path, params).then(res => {
-      setCookie('token', res.data.token, { path: '/', domain:COOKIE_DOMAIN});
-      setChecking(false)
-      setShowing(false)
-      history.push(location.pathname)
+      if (res.data.token) {
+        setCookie('token', res.data.token, { path: '/', domain: COOKIE_DOMAIN });
+        setChecking(false)
+        setShowing(false)
+        history.push(location.pathname)
+      }
     })
   }
   let loginRender
