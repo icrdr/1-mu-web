@@ -1,4 +1,4 @@
-var SERVER_URL = 'http://'
+var API_URL = 'http://'
 var DOMAIN_URL = 'http://'
 var COOKIE_DOMAIN = 'localhost'
 var WX_GZ_APPID = ''

@@ -5,7 +5,7 @@ import ImgCard from './ImgCard'
 import {updateData} from '../utility'
 import BraftEditor from 'braft-editor'
 const { Paragraph } = Typography;
-const SERVER_URL = window.SERVER_URL
+const API_URL = window.API_URL
 const { Dragger } = Upload;
 
 export default function ProjectUpload({ history, match, upload, file, onSuccess }) {
@@ -58,7 +58,7 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
 
   const uploadArgs = {
     name: 'file',
-    action: `${SERVER_URL}/files`,
+    action: `${API_URL}/files`,
     withCredentials: true,
     multiple: true,
     onChange(info) {

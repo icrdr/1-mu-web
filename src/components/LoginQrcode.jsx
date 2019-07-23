@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { withRouter } from "react-router";
 import { isWx } from '../utility'
 import { Button, Row, Col, Card } from 'antd';
-import axios from 'axios'
 import useInterval from '../hooks/useInterval'
+import {fetchData} from '../utility'
 import { useCookies } from 'react-cookie';
 
 const DOMAIN_URL = window.DOMAIN_URL
-const SERVER_URL = window.SERVER_URL
 
 const WX_KF_APPID = window.WX_KF_APPID
 const WX_GZ_APPID = window.WX_GZ_APPID
@@ -41,34 +40,29 @@ function LoginQrcode({location, history}) {
   }, isChecking ? WX_QRCODE_DELAY : null);
 
   useEffect(() => {
-    let url = SERVER_URL + '/api/wechat/qrcode'
+    const path = '/wechat/qrcode'
     if (isShowing) {
       setCount(1);
-      axios.get(url).then(res => {
-        console.log(res.data)
+      fetchData(path).then(res => {
         setQrcode(`https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=${res.data.ticket}`)
         setScene_str(res.data.scene_str)
         setChecking(true)
       }).catch(err => {
-        if (err.response) console.log(err.response.data)
         setShowing(false)
       })
     }
   }, [isShowing]);
 
   const fetchCheck = () => {
-    let url = SERVER_URL + '/api/wechat/check'
-    let params = {
+    const path = '/wechat/check'
+    const params = {
       'scene_str': scene_str
     }
-    axios.get(url, { params: params }).then(res => {
-      console.log(res.data)
+    fetchData(path, params).then(res => {
       setCookie('token', res.data.token, { path: '/', domain:COOKIE_DOMAIN});
       setChecking(false)
       setShowing(false)
       history.push(location.pathname)
-    }).catch(err => {
-      if (err.response) console.log(err.response.data)
     })
   }
   let loginRender

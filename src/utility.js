@@ -1,8 +1,8 @@
 
 import axios from 'axios'
 import { message } from 'antd'
-const SERVER_URL = window.SERVER_URL
-axios.defaults.baseURL = SERVER_URL
+const API_URL = window.API_URL
+axios.defaults.baseURL = API_URL
 
 export function isWx() {
   let ua = window.navigator.userAgent.toLowerCase();
