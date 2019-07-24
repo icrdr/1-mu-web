@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Button, Popconfirm, Checkbox, Divider, Radio } from 'antd'
+import { Table, Card, Tag, Row, Col, Button, Popconfirm, Checkbox, Divider, Radio, Input, message } from 'antd'
 import { parseStatus, getStage, fetchData, updateData } from '../utility'
 import { meContext } from '../layouts/Dashboard';
+import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
+const { Search } = Input;
 
 export default function ProjectList({ location, history }) {
-  const plainOptions = ['未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '异常']
+  const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '异常']
 
   const [projectList, setProjectList] = useState([]);
   const [isloading, setLoading] = useState(false);
@@ -15,15 +17,24 @@ export default function ProjectList({ location, history }) {
   const [indeterminate, setIndeterminate] = useState(false);
   const [checkAll, setCheckAll] = useState(true);
   const [meFilter, setMefilter] = useState('all');
+  const [update, setUpdate] = useState(false);
   const { meData } = useContext(meContext);
 
   const columns = [
     {
       title: '企划名',
       dataIndex: 'title',
-      width: '30%',
+      width: '20%',
       render: (name, project) => {
         return <Link to={"/projects/" + project.id}>{name}</Link>
+      }
+    },
+    {
+      title: '标签',
+      dataIndex: 'tags',
+      width: '20%',
+      render: (tags, project) => {
+        return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)
       }
     },
     {
@@ -71,11 +82,11 @@ export default function ProjectList({ location, history }) {
             color = 'red'
             break
           default:
-            color = '#eee'
+            color = '#ddd'
         }
         return <Tag color={color} >{str}</Tag>
       },
-      width: '10%',
+      width: '5%',
     },
     {
       title: '发起方',
@@ -117,17 +128,14 @@ export default function ProjectList({ location, history }) {
             </Popconfirm>
           )}
       </>),
-      width: '15%',
+      width: '5%',
     }
   ];
 
   const operateProject = (id, action) => {
-    let path = '/projects/' + id
-    let data = {
-      action: action,
-    }
-    updateData(path, data).then(res => {
-      history.push("/projects")
+    const path = `/projects/${id}/${action}`
+    updateData(path).then(res => {
+      setUpdate(!update)
     })
   }
 
@@ -135,6 +143,7 @@ export default function ProjectList({ location, history }) {
     setLoading(true)
     const path = '/projects'
     const status = checkedList.join(',')
+      .replace('草稿', 'draft')
       .replace('未开始', 'await')
       .replace('进行中', 'progress')
       .replace('修改中', 'modify')
@@ -164,6 +173,10 @@ export default function ProjectList({ location, history }) {
       params.page = pagination.current
     }
 
+    if (values.search) {
+      params.search = values.search
+    }
+
     fetchData(path, params).then(res => {
       setProjectList(res.data.projects)
       setPagination(prevState => { return { ...prevState, total: res.data.total } })
@@ -174,17 +187,27 @@ export default function ProjectList({ location, history }) {
     })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, checkedList, meFilter]);
+  }, [location, checkedList, meFilter, update]);
 
   const onChangePage = (pagination) => {
-    const params = queryString.stringify({ page: pagination.current });
-    history.push("/projects?" + params)
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, page: pagination.current });
+    history.push(`${location.pathname}?${params}`)
   }
 
   const onChangeMeFilter = e => {
     setMefilter(e.target.value)
   }
-
+  const onSearch = v => {
+    if (v.length < 2) {
+      message.info('关键词太短，至少2个字符')
+      console.log('Too short.')
+      return false
+    }
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, search: v, page: 1 });
+    history.push(`${location.pathname}?${params}`)
+  }
   const onChangeStatusFilter = checkedList => {
     setCheckedList(checkedList)
     setCheckAll(checkedList.length === plainOptions.length)
@@ -199,9 +222,15 @@ export default function ProjectList({ location, history }) {
 
   return (
     <Card>
-      <Row gutter={16} className='m-b:1'>
-        <Col>
+      <Row gutter={16}>
+        <Col xs={8} md={4} className='m-b:1'>
           <Button type='primary'><Link to='/projects/post'>添加企划</Link></Button>
+        </Col>
+        <Col xs={16} md={10} className='m-b:1'>
+          <ProjectPostByCsv />
+        </Col>
+        <Col xs={24} md={10} className='m-b:1'>
+          <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
         </Col>
       </Row>
       <Row gutter={16}>
@@ -213,8 +242,6 @@ export default function ProjectList({ location, history }) {
           </Radio.Group>
         </Col>
         <Col xs={24} md={16} className='m-b:1'>
-
-
           <Checkbox
             indeterminate={indeterminate}
             onChange={onCheckAllStatusFilter}

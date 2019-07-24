@@ -35,9 +35,10 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
         console.log('No file.')
         return false
       }
-      data['action'] = 'upload'
+      data.confirm = 1
     }
-    const path = '/projects/' + match.params.project_id
+
+    const path = `/projects/${match.params.project_id}/upload`
     updateData(path, data).then(res => {
       if (submit === 'upload') {
         history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
@@ -66,7 +67,6 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
       }
       if (info.file.status === 'done') {
         const res = info.file.response
-        console.log(res)
         setFileArray(fileArray.concat(res))
       } else if (info.file.status === 'error') {
         console.log(info.file.response)

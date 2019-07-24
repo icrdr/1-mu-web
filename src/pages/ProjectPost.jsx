@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
-import { Card, Input, InputNumber, Button, Icon, Row, Col, Alert, Typography } from 'antd';
+import { Card, Input, InputNumber, Button, Icon, Row, Col, Alert, Typography, Select } from 'antd';
 import useForm from '../hooks/useForm'
-import {postData} from '../utility'
+import { postData } from '../utility'
 import axios from 'axios'
 import BraftEditor from 'braft-editor'
 const { Title, Paragraph } = Typography;
 
 function PostProjectForm({ history }) {
+  let submit = ''
   const [stageArray, setStageArray] = useState([0])
   const [stageKey, setStageKey] = useState(0)
   const [creatorArray, setCreatorArray] = useState([0])
@@ -23,12 +24,12 @@ function PostProjectForm({ history }) {
         validate: v => va.inLength(v, 1, 30)
       }
     ],
-    'design': [
-      {
-        error: '请填写设计',
-        validate: v => !v.isEmpty()
-      }
-    ],
+    // 'design': [
+    //   {
+    //     error: '请填写设计',
+    //     validate: v => !v.isEmpty()
+    //   }
+    // ],
     'client_id': [
       {
         error: 'id不存在',
@@ -46,10 +47,24 @@ function PostProjectForm({ history }) {
   const { va, errors, field, validate, handleSubmit } = useForm(onSubmit, undefined, validation)
 
   function onSubmit(v) {
-    let path = '/projects'
-    const data = { ...v, design: v.design.toHTML() }
+    const path = '/projects'
+    const data = {
+      ...v, 
+      design: v.design.isEmpty() ? '<p>企划初始设计<p>' : v.design.toHTML()
+    }
+    //auto complete
+    if (!data.title) data.title = '[企划标题]'
+    for (let i in data.stages) {
+      const stage = data.stages[i]
+      if (!stage.stage_name) stage.stage_name = '[阶段名]'
+    }
+    if (submit === 'post') {
+      data.confirm = 1
+    }
     postData(path, data).then(res => {
-      history.push("/projects/" + res.data.id)
+      if (submit === 'post') {
+        history.push("/projects/" + res.data.id)
+      }
     })
   }
 
@@ -72,18 +87,18 @@ function PostProjectForm({ history }) {
   }
 
   const stagesRender = stageArray.map((k, i) => {
-    validation[`stages[${k}].stage_name`] = [
-      {
-        error: '请填写阶段名',
-        validate: v => va.isRequired(v)
-      }
-    ]
-    validation[`stages[${k}].days_need`] = [
-      {
-        error: '不能大于56天，不能少于2天',
-        validate: v => va.inRange(v, 2, 56)
-      }
-    ]
+    // validation[`stages[${k}].stage_name`] = [
+    //   {
+    //     error: '请填写阶段名',
+    //     validate: v => va.isRequired(v)
+    //   }
+    // ]
+    // validation[`stages[${k}].days_need`] = [
+    //   {
+    //     error: '不能大于56天，不能少于2天',
+    //     validate: v => va.inRange(v, 2, 56)
+    //   }
+    // ]
     return (
       <Card key={k} className='m-b:2'>
         <Row className='pos:r' gutter={12}>
@@ -98,7 +113,7 @@ function PostProjectForm({ history }) {
             {errors[`stages[${k}].days_need`] && <Alert message={errors[`stages[${k}].days_need`]} type="error" showIcon />}
           </Col>
           {i === 0 ? null :
-            (<Icon className='pos:a' style={{top: '0', right: '0' }} theme="twoTone" type="close-circle" onClick={() => removeStage(k)} />)
+            (<Icon className='pos:a' style={{ top: '0', right: '0' }} theme="twoTone" type="close-circle" onClick={() => removeStage(k)} />)
           }
         </Row>
       </Card>)
@@ -142,12 +157,13 @@ function PostProjectForm({ history }) {
           {errors['creators'] && <Alert message={errors['creators']} type="error" showIcon />}
         </Col>
       </Row>
+      
       <div className='m-t:1'>
         <Paragraph>*设计初稿</Paragraph>
         <Card size='small' cover={
           <BraftEditor contentStyle={{ height: '200px' }}
             placeholder="初始设计简单描述，或者填写企划方要求。作为日后凭证依据。"
-            {...field('design', BraftEditor.createEditorState(null),true)}
+            {...field('design', BraftEditor.createEditorState(null), true)}
             controls={['bold', 'headings', 'separator', 'link', 'separator']}
           />
         }>
@@ -159,9 +175,13 @@ function PostProjectForm({ history }) {
         {stagesRender}
         <Button onClick={() => addStage()} block>添加验收阶段</Button>
       </div>
+      <div className='m-t:2'>
+      <Paragraph>标签</Paragraph>
+      <Select mode="tags" style={{ width: '100%' }} {...field('tags')}/>
+      </div>
       <Row className='m-t:2' gutter={12}>
         <Col span={12}>
-          <Button block type="primary" htmlType="submit">提交</Button>
+          <Button block type="primary" name='post' onClick={(e) => submit = e.target.name} htmlType="submit">提交</Button>
         </Col>
         <Col span={12}>
           <Button disabled block htmlType="submit">保存</Button>
@@ -176,7 +196,7 @@ export default function ProjectPost({ history }) {
     <Card className='p:2'>
       <Row type="flex" justify="space-around" align="middle">
         <Col xs={24} md={20} lg={16}>
-          <Title>企划申请</Title>
+          <Title>企划编辑</Title>
           <PostProjectForm history={history} />
         </Col>
       </Row>

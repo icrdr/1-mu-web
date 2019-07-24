@@ -15,6 +15,8 @@ export function isWx() {
 
 export function parseStatus(status) {
   switch (status) {
+    case 'draft':
+      return '草稿'
     case 'await':
       return '未开始'
     case 'finish':

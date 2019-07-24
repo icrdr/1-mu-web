@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Link } from 'react-router-dom'
-import { Card, Row, Col, Descriptions, Steps, Button, Tabs, message, Icon } from 'antd'
+import { Card, Row, Col, Descriptions, Steps, Button, Tabs, message, Icon, Tag } from 'antd'
 import Loading from '../components/Loading'
 import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
@@ -49,18 +49,15 @@ export default function Project({ history, match, location }) {
   }
 
   const onStart = () => {
-    const path = '/projects/' + match.params.project_id
-    let data = {
-      action: 'start',
-    }
-    updateData(path, data).then(() => {
+    const path = `/projects/${match.params.project_id}/start`
+    updateData(path).then(() => {
       history.push(`/projects/${match.params.project_id}/stages/0`)
       setUpdate(!update)
     })
   }
 
   const stepStatus = (project) => {
-    if (projectData.status === 'await') return 'wait'
+    if (projectData.status === 'await'||'draft') return 'wait'
     const x_days = timeLeft(getStage(project))
     if (x_days >= 0) {
       return 'process'
@@ -71,6 +68,7 @@ export default function Project({ history, match, location }) {
 
   const stepCurrent = (project) => {
     switch (project.status) {
+      case 'draft':
       case 'await':
         return project.current_stage_index
       case 'finish':
@@ -94,7 +92,9 @@ export default function Project({ history, match, location }) {
   }
 
   return (
-    <Card className='p:2' title={'企划：' + projectData.title}>
+    <Card className='p:2' title={'企划：' + projectData.title}
+    extra={projectData.tags.map((tag, index)=><Tag key={index}>{tag.name}</Tag>)}
+    >
       <Row className='m-t:2' gutter={12}>
         <Col sm={24} md={12} className='m-b:4'>
           <Meta
@@ -193,11 +193,8 @@ function Stage({ history, match, project, onSuccess }) {
   }
 
   const onFinish = () => {
-    const path = '/projects/' + match.params.project_id
-    const data = {
-      action: 'finish',
-    }
-    updateData(path, data).then(() => {
+    const path = `/projects/${match.params.project_id}/finish`
+    updateData(path).then(() => {
       if(project.stages.length - 1 > index){
         history.push(`/projects/${match.params.project_id}/stages/${index+1}`)
       }else{
