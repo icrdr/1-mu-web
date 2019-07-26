@@ -66,23 +66,23 @@ export function parseTimeLeft(x_days) {
   }
 }
 
-function handleError(err) {
+function handleError(err, showMsg) {
   if (err.response) {
     console.log('ERROR:')
     console.log(err.response)
     if (err.response.data.message) {
-      message.error(`发生错误！错误内容：${err.response.data.message}`)
+      if(showMsg)message.error(`发生错误！错误内容：${err.response.data.message}`)
     } else {
-      message.error(`发生错误！错误内容：${JSON.stringify(err.response.data)}`)
+      if(showMsg)message.error(`发生错误！错误内容：${JSON.stringify(err.response.data)}`)
     }
   } else {
     console.log('ERROR:')
     console.log(err)
-    message.error('未知错误！')
+    if(showMsg)message.error('未知错误！')
   }
 }
 
-export function fetchData(path, params) {
+export function fetchData(path, params, showMsg=true) {
   console.debug(`PATH: "${path}"`)
   if(params){
     console.debug('PARAMS:')
@@ -99,13 +99,13 @@ export function fetchData(path, params) {
       }
       resolve(res)
     }).catch(err => {
-      handleError(err)
+      handleError(err, showMsg)
       reject(err)
     })
   });
 }
 
-export function updateData(path, data) {
+export function updateData(path, data, showMsg=true) {
   console.debug(`PATH: "${path}"`)
   console.debug('DATA:')
   console.debug(data)
@@ -115,15 +115,15 @@ export function updateData(path, data) {
     }).then(res => {
       console.debug('RESPOND:')
       console.debug(res.data)
-      message.success('更新成功');
+      if(showMsg)message.success('更新成功');
       resolve(res)
     }).catch(err => {
-      handleError(err)
+      handleError(err, showMsg)
       reject(err)
     })
   });
 } 
-export function postData(path, data) {
+export function postData(path, data, showMsg=true) {
   console.debug(`PATH: "${path}"`)
   console.debug('DATA:')
   console.debug(data);
@@ -133,10 +133,10 @@ export function postData(path, data) {
     }).then(res => {
       console.debug('RESPOND:')
       console.debug(res.data)
-      message.success('提交成功');
+      if(showMsg)message.success('提交成功');
       resolve(res)
     }).catch(err => {
-      handleError(err)
+      handleError(err, showMsg)
       reject(err)
     })
   });

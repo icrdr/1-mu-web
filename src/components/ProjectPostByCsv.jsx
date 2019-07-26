@@ -24,7 +24,7 @@ export default function ProjectPostByCsv() {
       const row = newLinebrk[i].split("\r")[0].split(",").slice(0, 3)
       if (!row[1]) continue
       const path = '/projects'
-      await fetchData(path, { title: row[1] }).then(res => {
+      await fetchData(path, { title: row[1] }, false).then(res => {
         const path = '/projects/' + res.data.projects[0].id
         const data = {
           title: row[1],
@@ -33,7 +33,9 @@ export default function ProjectPostByCsv() {
           client_id: 1,
           tags: row[2].split("/"),
         }
-        updateData(path, data)
+        return updateData(path, data).then(res=>{
+        }).catch(err => {
+        })
       }).catch(err => {
         console.log(err.response.status)
         if (err.response.status === 400) {
@@ -50,7 +52,9 @@ export default function ProjectPostByCsv() {
             tags: row[2].split("/"),
             confirm: 1
           }
-          postData(path, data)
+          return postData(path, data).then(res=>{
+          }).catch(err => {
+          })
         }
       })
       console.log(i)
