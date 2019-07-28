@@ -33,7 +33,7 @@ function App({ location }) {
       <Route exact path="/" component={Main} />
       <Route path="/me" component={Me} />
       <Dashboard exact path="/projects" component={ProjectList} />
-      <Dashboard path="/projects/:project_id(\d+)" component={Project} />
+      <Dashboard path="/projects/:project_id(\d+)" component={Project}/>
       <Dashboard path="/projects/post" component={ProjectPost} />
       <Dashboard exact path="/users" component={UserList} />
       <Dashboard path="/users/:user_id(\d+)" component={User} />

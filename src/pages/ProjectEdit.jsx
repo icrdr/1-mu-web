@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { Card, Input, InputNumber, Button, Icon, Row, Col, Alert, Typography, Select,Upload } from 'antd';
+import { Card, Input, InputNumber, Button, Icon, Row, Col, Alert, Typography, Select } from 'antd';
 import useForm from '../hooks/useForm'
-import { ContentUtils } from 'braft-utils'
-import { postData, uploadData } from '../utility'
+import { postData } from '../utility'
 import axios from 'axios'
 import BraftEditor from 'braft-editor'
 const { Title, Paragraph } = Typography;
@@ -45,7 +44,7 @@ function PostProjectForm({ history }) {
     ]
   }
 
-  const { va, errors, setValues, field, validate, handleSubmit } = useForm(onSubmit, undefined, validation)
+  const { va, errors, field, validate, handleSubmit } = useForm(onSubmit, undefined, validation)
 
   function onSubmit(v) {
     const path = '/projects'
@@ -135,47 +134,7 @@ function PostProjectForm({ history }) {
       </div>
     )
   })
-  const uploadHandler = async (param) => {
-    console.log(param)
-    if (!param.file) {
-      return false
-    }
-    const path = '/files'
-    let formData = new FormData();
-    formData.append('file', param.file);
 
-    let url = ''
-    await uploadData(path, formData).then(res => {
-      url = res.data.previews[0].url
-    })
-
-    setValues(preState=> {return {
-      ...preState,
-      'design':ContentUtils.insertMedias(preState['design'], [{
-        type: 'IMAGE',
-        url: url
-      }])
-    }})
-  }
-
-  const extendControls = [
-    {
-      key: 'antd-uploader',
-      type: 'component',
-      component: (
-        <Upload
-          accept="image/*"
-          showUploadList={false}
-          customRequest={uploadHandler}
-        >
-          {/* 这里的按钮最好加上type="button"，以避免在表单容器中触发表单提交，用Antd的Button组件则无需如此 */}
-          <button type="button" className="control-item button upload-button" data-title="插入图片">
-            <Icon type="picture" theme="filled" />
-          </button>
-        </Upload>
-      )
-    }
-  ]
   return (
     <form onSubmit={handleSubmit}>
       <div>
@@ -202,11 +161,10 @@ function PostProjectForm({ history }) {
       <div className='m-t:1'>
         <Paragraph>*设计初稿</Paragraph>
         <Card size='small' cover={
-          <BraftEditor contentStyle={{ height: '400px' }}
+          <BraftEditor contentStyle={{ height: '200px' }}
             placeholder="初始设计简单描述，或者填写企划方要求。作为日后凭证依据。"
             {...field('design', BraftEditor.createEditorState(null), true)}
             controls={['bold', 'headings', 'separator', 'link', 'separator']}
-            extendControls={extendControls}
           />
         }>
           {errors['design'] && <Alert message={errors['design']} type="error" showIcon />}

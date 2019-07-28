@@ -1,5 +1,4 @@
 import React from 'react'
-import { postData, fetchData, updateData } from '../utility'
 
 export default function Main() {
   async function test(e) {

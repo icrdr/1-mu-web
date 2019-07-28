@@ -5,6 +5,7 @@ import Loading from '../components/Loading'
 import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
 import ProjectFeedback from '../components/ProjectFeedback'
+import ProjectDesign from '../components/ProjectDesign'
 import { parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
 import Avatarx from '../components/Avatarx'
 const { Step } = Steps;
@@ -20,21 +21,6 @@ export default function Project({ history, match, location }) {
     setLoading(true)
     const path = '/projects/' + match.params.project_id
     fetchData(path).then(res => {
-      if (location.pathname === match.url) {
-        switch (res.data.status) {
-          case 'draft':
-          case 'await':
-            history.push(`${match.url}/design`)
-            break;
-          case 'finish':
-            history.push(`${match.url}/done`)
-            break;
-          default:
-            history.push(`${match.url}/stages/${res.data.current_stage_index}`)
-            break;
-        }
-        
-      }
       setProjectData(res.data)
     }).finally(() => {
       setLoading(false)
@@ -48,16 +34,10 @@ export default function Project({ history, match, location }) {
     return <div>没有内容</div>
   }
 
-  const onStart = () => {
-    const path = `/projects/${match.params.project_id}/start`
-    updateData(path).then(() => {
-      history.push(`/projects/${match.params.project_id}/stages/0`)
-      setUpdate(!update)
-    })
-  }
+
 
   const stepStatus = (project) => {
-    if (projectData.status === 'await'||'draft') return 'wait'
+    if (projectData.status === 'await' || 'draft') return 'wait'
     const x_days = timeLeft(getStage(project))
     if (x_days >= 0) {
       return 'process'
@@ -93,7 +73,7 @@ export default function Project({ history, match, location }) {
 
   return (
     <Card className='p:2' title={'企划：' + projectData.title}
-    extra={projectData.tags.map((tag, index)=><Tag key={index}>{tag.name}</Tag>)}
+      extra={projectData.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
     >
       <Row className='m-t:2' gutter={12}>
         <Col sm={24} md={12} className='m-b:4'>
@@ -140,33 +120,59 @@ export default function Project({ history, match, location }) {
         } description='' />
       </Steps>
       <div className='m-t:4'>
-        <Route path={`${match.path}/design`} render={() => <>
-          <h1>初始设计稿</h1>
-          <div dangerouslySetInnerHTML={{
-            __html: projectData.design
-          }} />
-          {projectData.status === 'await' && <Button size='large' type="primary" block onClick={onStart}>确认开始企划</Button>}
-        </>}
+        <Route path={`${match.path}/design`} render={props =>
+          <Design {...props} onSuccess={() => setUpdate(!update)} project={projectData} />}
         />
         <Route path={`${match.path}/done`} render={() => {
           const phase = getPhase(getStage(projectData))
           return <>
-          <h1>最终成品</h1>
-          <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
-          {phase.upload_files.map((item, j) =>
-            <Card key={j} className='m-t:2'
-              cover={<ImgCard file={item} />}>
-              <a href={item.url}><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
-            </Card>
-          )}
-        </>}}
+            <h1>最终成品</h1>
+            <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
+            {phase.upload_files.map((item, j) =>
+              <Card key={j} className='m-t:2'
+                cover={<ImgCard file={item} />}>
+                <a href={item.url}><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
+              </Card>
+            )}
+          </>
+        }}
         />
         <Route path={`${match.path}/stages/:stage_index(\\d+)`} render={props => <Stage {...props} onSuccess={() => setUpdate(!update)} project={projectData} />} />
       </div>
     </Card>
   )
 }
+function Design({ history, match, project, onSuccess }) {
+  const onStart = () => {
+    const path = `/projects/${match.params.project_id}/start`
+    updateData(path).then(() => {
+      history.push(`/projects/${match.params.project_id}/stages/0`)
+      onSuccess()
+    })
+  }
 
+  return (
+    <>
+      <Route exact path={match.path} render={() => <>
+        {project.status === 'await' && <Button size='large' type="primary" block onClick={onStart}>确认开始企划</Button>}
+        <h1>初始设计稿</h1>
+        <div dangerouslySetInnerHTML={{
+          __html: project.design
+        }} />
+        <Link to={`${match.url}/edit`}>
+          <Button size='large' type="primary" block>修改</Button>
+        </Link>
+        
+        </>
+      } />
+      <Route path={`${match.path}/edit`} render={
+        props => <ProjectDesign {...props} onSuccess={onSuccess} design={project.design} />
+      } />
+
+      
+    </>
+  )
+}
 function Stage({ history, match, project, onSuccess }) {
   const index = parseInt(match.params.stage_index)
   const stage = project.stages[index]
@@ -195,9 +201,9 @@ function Stage({ history, match, project, onSuccess }) {
   const onFinish = () => {
     const path = `/projects/${match.params.project_id}/finish`
     updateData(path).then(() => {
-      if(project.stages.length - 1 > index){
-        history.push(`/projects/${match.params.project_id}/stages/${index+1}`)
-      }else{
+      if (project.stages.length - 1 > index) {
+        history.push(`/projects/${match.params.project_id}/stages/${index + 1}`)
+      } else {
         history.push(`/projects/${match.params.project_id}/done`)
       }
       onSuccess()

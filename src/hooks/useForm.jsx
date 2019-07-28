@@ -221,6 +221,8 @@ export default function useForm(onSubmit, onError = undefined, validation = [], 
   }
   return {
     va,
+    values, 
+    setValues,
     handleSubmit,
     validate,
     errors,

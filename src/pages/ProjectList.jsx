@@ -26,7 +26,20 @@ export default function ProjectList({ location, history }) {
       dataIndex: 'title',
       width: '20%',
       render: (name, project) => {
-        return <Link to={"/projects/" + project.id}>{name}</Link>
+        let link_url = ''
+        switch (project.status) {
+          case 'draft':
+          case 'await':
+            link_url = `/projects/${project.id}/design`
+            break;
+          case 'finish':
+            link_url = `/projects/${project.id}/done`
+            break;
+          default:
+            link_url = `/projects/${project.id}/stages/${project.current_stage_index}`
+            break;
+        }
+        return <Link to={link_url}>{name}</Link>
       }
     },
     {
@@ -58,7 +71,7 @@ export default function ProjectList({ location, history }) {
         let color = ''
         switch (status) {
           case 'await':
-            color = 'cyan'
+            color = 'orange'
             break
           case 'finish':
             color = 'green'

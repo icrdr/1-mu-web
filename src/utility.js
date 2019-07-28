@@ -71,20 +71,20 @@ function handleError(err, showMsg) {
     console.log('ERROR:')
     console.log(err.response)
     if (err.response.data.message) {
-      if(showMsg)message.error(`发生错误！错误内容：${err.response.data.message}`)
+      if (showMsg) message.error(`发生错误！错误内容：${err.response.data.message}`)
     } else {
-      if(showMsg)message.error(`发生错误！错误内容：${JSON.stringify(err.response.data)}`)
+      if (showMsg) message.error(`发生错误！错误内容：${JSON.stringify(err.response.data)}`)
     }
   } else {
     console.log('ERROR:')
     console.log(err)
-    if(showMsg)message.error('未知错误！')
+    if (showMsg) message.error('未知错误！')
   }
 }
 
-export function fetchData(path, params, showMsg=true) {
+export function fetchData(path, params, showMsg = true) {
   console.debug(`PATH: "${path}"`)
-  if(params){
+  if (params) {
     console.debug('PARAMS:')
     console.debug(params)
   }
@@ -93,7 +93,7 @@ export function fetchData(path, params, showMsg=true) {
       params: params,
       withCredentials: true
     }).then(res => {
-      if(res.data){
+      if (res.data) {
         console.debug('RESPOND:')
         console.debug(res.data)
       }
@@ -105,7 +105,7 @@ export function fetchData(path, params, showMsg=true) {
   });
 }
 
-export function updateData(path, data, showMsg=true) {
+export function updateData(path, data, showMsg = true) {
   console.debug(`PATH: "${path}"`)
   console.debug('DATA:')
   console.debug(data)
@@ -115,15 +115,15 @@ export function updateData(path, data, showMsg=true) {
     }).then(res => {
       console.debug('RESPOND:')
       console.debug(res.data)
-      if(showMsg)message.success('更新成功');
+      if (showMsg) message.success('更新成功');
       resolve(res)
     }).catch(err => {
       handleError(err, showMsg)
       reject(err)
     })
   });
-} 
-export function postData(path, data, showMsg=true) {
+}
+export function postData(path, data, showMsg = true) {
   console.debug(`PATH: "${path}"`)
   console.debug('DATA:')
   console.debug(data);
@@ -133,7 +133,27 @@ export function postData(path, data, showMsg=true) {
     }).then(res => {
       console.debug('RESPOND:')
       console.debug(res.data)
-      if(showMsg)message.success('提交成功');
+      if (showMsg) message.success('提交成功');
+      resolve(res)
+    }).catch(err => {
+      handleError(err, showMsg)
+      reject(err)
+    })
+  });
+}
+
+export function uploadData(path, formData, showMsg = true) {
+  console.debug(`PATH: "${path}"`)
+  return new Promise((resolve, reject) => {
+    axios.post(path, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      withCredentials: true
+    }).then(res => {
+      console.debug('RESPOND:')
+      console.debug(res.data)
+      if (showMsg) message.success('提交成功');
       resolve(res)
     }).catch(err => {
       handleError(err, showMsg)
