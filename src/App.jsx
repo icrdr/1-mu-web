@@ -6,11 +6,14 @@ import Main from './pages/Main'
 import Me from './pages/Me'
 import ProjectList from './pages/ProjectList'
 import Project from './pages/Project'
-import UserList from './pages/UserList'
-import ProjectPost from './pages/ProjectPost'
-import User from './pages/User'
+import AProjectList from './pages/AProjectList'
+import AProject from './pages/AProject'
+import AUserList from './pages/AUserList'
+import AProjectPost from './pages/AProjectPost'
+import AUser from './pages/AUser'
 import NotFound from './pages/NotFound'
 // layouts
+import Web from './layouts/Web'
 import Dashboard from './layouts/Dashboard'
 import useWxLogin from './hooks/useWxLogin'
 import { withRouter } from "react-router";
@@ -30,13 +33,15 @@ function App({ location }) {
 
   return (
     <Switch>
-      <Route exact path="/" component={Main} />
-      <Route path="/me" component={Me} />
-      <Dashboard exact path="/projects" component={ProjectList} />
-      <Dashboard path="/projects/:project_id(\d+)" component={Project}/>
-      <Dashboard path="/projects/post" component={ProjectPost} />
-      <Dashboard exact path="/users" component={UserList} />
-      <Dashboard path="/users/:user_id(\d+)" component={User} />
+      <Web exact path="/" component={Main} />
+      <Web path="/me" component={Me} />
+      <Web exact path="/projects" component={ProjectList} />
+      <Web path="/projects/:project_id(\d+)" component={Project}/>
+      <Dashboard exact path="/admin/projects" component={AProjectList} />
+      <Dashboard path="/admin/projects/:project_id(\d+)" component={AProject}/>
+      <Dashboard path="/admin/projects/post" component={AProjectPost} />
+      <Dashboard exact path="/admin/users" component={AUserList} />
+      <Dashboard path="/admin/users/:user_id(\d+)" component={AUser} />
       <Route component={NotFound} />
     </Switch>
   )

@@ -1,6 +1,6 @@
-import React, { useEffect, useState,useContext } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Route, Link } from 'react-router-dom'
-import { Card, Row, Col, Descriptions, Steps, Button, Tabs, message, Icon, Tag,Breadcrumb } from 'antd'
+import { Card, Row, Col, Descriptions, Steps, Button, Tabs, message, Icon, Tag } from 'antd'
 import Loading from '../components/Loading'
 import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
@@ -8,7 +8,6 @@ import ProjectFeedback from '../components/ProjectFeedback'
 import ProjectDesign from '../components/ProjectDesign'
 import { parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
 import Avatarx from '../components/Avatarx'
-import { meContext } from '../layouts/Web';
 const { Step } = Steps;
 const { Meta } = Card;
 const { TabPane } = Tabs;
@@ -17,7 +16,6 @@ export default function Project({ history, match, location }) {
   const [projectData, setProjectData] = useState();
   const [isloading, setLoading] = useState(false);
   const [update, setUpdate] = useState(true);
-  
 
   useEffect(() => {
     setLoading(true)
@@ -74,19 +72,9 @@ export default function Project({ history, match, location }) {
   }
 
   return (
-    <>
-    <Breadcrumb className='m-b:1'>
-    <Breadcrumb.Item>
-    <Link to='/projects'>企划列表</Link>
-    </Breadcrumb.Item>
-    <Breadcrumb.Item>
-    <Link to={location.pathname}>{projectData.title}</Link>
-    </Breadcrumb.Item>
-  </Breadcrumb>
     <Card className='p:2' title={'企划：' + projectData.title}
       extra={projectData.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
     >
-    
       <Row className='m-t:2' gutter={12}>
         <Col sm={24} md={12} className='m-b:4'>
           <Meta
@@ -152,15 +140,13 @@ export default function Project({ history, match, location }) {
         <Route path={`${match.path}/stages/:stage_index(\\d+)`} render={props => <Stage {...props} onSuccess={() => setUpdate(!update)} project={projectData} />} />
       </div>
     </Card>
-    </>
   )
 }
 function Design({ history, match, project, onSuccess }) {
-  const { meData } = useContext(meContext);
   const onStart = () => {
-    const path = `/projects/${match.params.project_id}/start`
+    const path = `/admin/projects/${match.params.project_id}/start`
     updateData(path).then(() => {
-      history.push(`/projects/${match.params.project_id}/stages/0`)
+      history.push(`/admin/projects/${match.params.project_id}/stages/0`)
       onSuccess()
     })
   }
@@ -168,7 +154,7 @@ function Design({ history, match, project, onSuccess }) {
   return (
     <>
       <Route exact path={match.path} render={() => <>
-        {project.status === 'await' && project.client.id === meData.id && <Button size='large' type="primary" block onClick={onStart}>确认开始企划</Button>}
+        {project.status === 'await' && <Button size='large' type="primary" block onClick={onStart}>确认开始企划</Button>}
         <h1>初始设计稿</h1>
         <div dangerouslySetInnerHTML={{
           __html: project.design
@@ -190,7 +176,6 @@ function Design({ history, match, project, onSuccess }) {
 function Stage({ history, match, project, onSuccess }) {
   const index = parseInt(match.params.stage_index)
   const stage = project.stages[index]
-  const { meData } = useContext(meContext);
 
   const onBatchDownload = phase => {
     let file_id = []
@@ -214,12 +199,12 @@ function Stage({ history, match, project, onSuccess }) {
   }
 
   const onFinish = () => {
-    const path = `/projects/${match.params.project_id}/finish`
+    const path = `/admin/projects/${match.params.project_id}/finish`
     updateData(path).then(() => {
       if (project.stages.length - 1 > index) {
-        history.push(`/projects/${match.params.project_id}/stages/${index + 1}`)
+        history.push(`/admin/projects/${match.params.project_id}/stages/${index + 1}`)
       } else {
-        history.push(`/projects/${match.params.project_id}/done`)
+        history.push(`/admin/projects/${match.params.project_id}/done`)
       }
       onSuccess()
     })
@@ -229,14 +214,7 @@ function Stage({ history, match, project, onSuccess }) {
     switch (status) {
       case 'progress':
       case 'modify':
-        let isCreator = false
-        for (let i in project.creators){
-          if(project.creators[i].id === meData.id){
-            isCreator = true
-            break
-          }
-        }
-        return isCreator? <>
+        return <>
           <Route exact path={match.path} render={() =>
             <Link to={`${match.url}/upload`}>
               <Button size='large' type="primary" block>阶段成品提交</Button>
@@ -248,9 +226,9 @@ function Stage({ history, match, project, onSuccess }) {
               file={getPhase(stage).upload_files}
               upload={getPhase(stage).creator_upload} />
           } />
-        </>:null
+        </>
       case 'pending':
-        return project.client.id === meData.id? <>
+        return <>
           <Route exact path={match.path} render={() =>
             <Row gutter={12}>
               <Col sm={24} md={12} className='m-b:2'>
@@ -266,7 +244,7 @@ function Stage({ history, match, project, onSuccess }) {
           <Route path={`${match.path}/feedback`} render={
             props => <ProjectFeedback {...props} onSuccess={onSuccess} feedback={getPhase(stage).client_feedback} />
           } />
-        </>:null
+        </>
       default:
         break;
     }

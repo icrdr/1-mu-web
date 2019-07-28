@@ -37,11 +37,10 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
       }
       data.confirm = 1
     }
-
     const path = `/projects/${match.params.project_id}/upload`
     updateData(path, data).then(res => {
       if (submit === 'upload') {
-        history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
+        history.push(match.url.split('/').slice(0,-1).join('/'))
       }
       onSuccess()
     })

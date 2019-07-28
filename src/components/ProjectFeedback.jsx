@@ -27,10 +27,9 @@ export default function ProjectFeedback({ history, match, feedback, onSuccess })
     if (submit === 'feedback') {
       data.confirm = 1
     }
-    
     updateData(path, data).then(res => {
       if (submit === 'feedback') {
-        history.push(`/projects/${match.params.project_id}/stages/${match.params.stage_index}`)
+        history.push(match.url.split('/').slice(0,-1).join('/'))
       }
       onSuccess()
     })

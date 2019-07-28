@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Button, Popconfirm, Checkbox, Divider, Radio, Input, message,Breadcrumb } from 'antd'
+import { Table, Card, Tag, Row, Col, Button, Popconfirm, Checkbox, Divider, Radio, Input, message } from 'antd'
 import { parseStatus, getStage, fetchData, updateData } from '../utility'
-import { meContext } from '../layouts/Web';
+import { meContext } from '../layouts/Dashboard';
+import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
 const { Search } = Input;
 
-export default function Main({ location, history }) {
+export default function ProjectList({ location, history, match }) {
   const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '异常']
 
   const [projectList, setProjectList] = useState([]);
@@ -15,7 +16,7 @@ export default function Main({ location, history }) {
   const [checkedList, setCheckedList] = useState(plainOptions);
   const [indeterminate, setIndeterminate] = useState(false);
   const [checkAll, setCheckAll] = useState(true);
-  const [meFilter, setMefilter] = useState('creator');
+  const [meFilter, setMefilter] = useState('all');
   const [update, setUpdate] = useState(false);
   const { meData } = useContext(meContext);
 
@@ -29,13 +30,13 @@ export default function Main({ location, history }) {
         switch (project.status) {
           case 'draft':
           case 'await':
-            link_url = `/projects/${project.id}/design`
+            link_url = `${match.path}/${project.id}/design`
             break;
           case 'finish':
-            link_url = `/projects/${project.id}/done`
+            link_url = `${match.path}/${project.id}/done`
             break;
           default:
-            link_url = `/projects/${project.id}/stages/${project.current_stage_index}`
+            link_url = `${match.path}/${project.id}/stages/${project.current_stage_index}`
             break;
         }
         return <Link to={link_url}>{name}</Link>
@@ -177,7 +178,7 @@ export default function Main({ location, history }) {
         break;
       default:
     }
-
+    
     const values = queryString.parse(location.search)
     if (values.page) {
       setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
@@ -234,20 +235,22 @@ export default function Main({ location, history }) {
   }
 
   return (
-    <>
-    <Breadcrumb className='m-b:1'>
-    <Breadcrumb.Item>
-    <Link to='/projects'>企划列表</Link>
-    </Breadcrumb.Item>
-  </Breadcrumb>
     <Card>
-      <div className='m-b:1'>
-        <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
-      </div>
-
+      <Row gutter={16}>
+        <Col xs={8} md={4} className='m-b:1'>
+          <Button type='primary'><Link to='/projects/post'>添加企划</Link></Button>
+        </Col>
+        <Col xs={16} md={10} className='m-b:1'>
+          <ProjectPostByCsv />
+        </Col>
+        <Col xs={24} md={10} className='m-b:1'>
+          <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
+        </Col>
+      </Row>
       <Row gutter={16}>
         <Col xs={24} md={8} className='m-b:1'>
           <Radio.Group value={meFilter} onChange={onChangeMeFilter}>
+            <Radio value='all'>全部</Radio>
             <Radio value='client'>我作为发起方</Radio>
             <Radio value='creator'>我作为制作方</Radio>
           </Radio.Group>
@@ -277,7 +280,6 @@ export default function Main({ location, history }) {
         onChange={onChangePage}
       />
     </Card>
-    </>
   )
 }
 
