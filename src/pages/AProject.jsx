@@ -160,7 +160,7 @@ function Design({ history, match, project, onSuccess }) {
           __html: project.design
         }} />
         <Link to={`${match.url}/edit`}>
-          <Button size='large' type="primary" block>修改</Button>
+          <Button size='large' block>修改</Button>
         </Link>
         
         </>
