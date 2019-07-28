@@ -24,20 +24,21 @@ export default function ProjectPostByCsv() {
       const row = newLinebrk[i].split("\r")[0].split(",").slice(0, 5)
       if (!row[1]) continue
       const path = '/projects'
+      const client_id = row[3] ? row[3] : 1
+      const creators = row[4] ? row[4].split(";").concat(client_id) : [1]
+      const tags = row[2].split(";")
       await fetchData(path, { title: row[1] }, false).then(res => {
         if (res.data.projects.length>0) {
           const path = '/projects/' + res.data.projects[0].id
           const data = {
             title: row[1],
-            client_id: row[3]? row[3] : 1,
-            creators: row[4] ? row[4].split(";") : [1],
-            tags: row[2].split("/"),
+            client_id: client_id,
+            creators: creators,
+            tags: tags,
           }
           return updateData(path, data)
         } else {
           const path = '/projects'
-          const client_id = row[3] ? row[3] : 1
-          const creators = row[4] ? row[4].split(";").push(client_id) : [1]
           const data = {
             title: row[1],
             design: `<p>${row[1]}</p>`,
@@ -52,7 +53,7 @@ export default function ProjectPostByCsv() {
               stage_name: '细化-特效',
               days_need: 350
             }],
-            tags: row[2].split("/"),
+            tags: tags,
             confirm: 1
           }
           return postData(path, data)
