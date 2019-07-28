@@ -2,8 +2,7 @@ import React, { useState } from 'react'
 import { Card, Input, InputNumber, Button, Icon, Row, Col, Alert, Typography, Select,Upload } from 'antd';
 import useForm from '../hooks/useForm'
 import { ContentUtils } from 'braft-utils'
-import { postData, uploadData } from '../utility'
-import axios from 'axios'
+import { postData, uploadData, fetchData } from '../utility'
 import BraftEditor from 'braft-editor'
 const { Title, Paragraph } = Typography;
 
@@ -64,7 +63,7 @@ function PostProjectForm({ history }) {
     }
     postData(path, data).then(res => {
       if (submit === 'post') {
-        history.push("/projects/" + res.data.id)
+        history.push("/admin/projects/" + res.data.id)
       }
     })
   }
@@ -248,10 +247,13 @@ export default function ProjectPost({ history }) {
 
 function isUserExist(v) {
   return new Promise(resolve => {
-    let path = '/users'
-    axios.get(path, { include: v }).then(() => {
+    const path = '/users'
+    const params = {
+      include: v
+    }
+    fetchData(path, params, false).then(res => {
       resolve(true)
-    }).catch(() => {
+    }).catch(err => {
       resolve(false)
     })
   });

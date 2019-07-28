@@ -279,7 +279,7 @@ function Stage({ history, match, project, onSuccess }) {
           {phaseArr.map((phase, i) =>
             <TabPane tab={parseDate(phase.upload_date).split(' ')[0]} key={i}>
               <Row>
-                <Col><h2 className='fl:l'>提交的文件</h2></Col>
+                <Col><h2 className='fl:l'>提交的文件（{phase.creator.name}）</h2></Col>
                 <Col><Button className='fl:r' type='primary' onClick={() => onBatchDownload(phase)}>批量下载</Button></Col>
               </Row>
 

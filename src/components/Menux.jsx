@@ -11,7 +11,7 @@ function Menux({location, history}) {
 
   const changeMenu = ({ key }) => {
     setMenu([key])
-    history.replace('/'+key)
+    history.replace('/admin/'+key)
   }
 
   return (

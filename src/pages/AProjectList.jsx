@@ -238,7 +238,7 @@ export default function ProjectList({ location, history, match }) {
     <Card>
       <Row gutter={16}>
         <Col xs={8} md={4} className='m-b:1'>
-          <Button type='primary'><Link to='/projects/post'>添加企划</Link></Button>
+          <Button type='primary'><Link to='/admin/projects/post'>添加企划</Link></Button>
         </Col>
         <Col xs={16} md={10} className='m-b:1'>
           <ProjectPostByCsv />

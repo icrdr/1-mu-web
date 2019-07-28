@@ -144,7 +144,7 @@ export default function Project({ history, match, location }) {
 }
 function Design({ history, match, project, onSuccess }) {
   const onStart = () => {
-    const path = `/admin/projects/${match.params.project_id}/start`
+    const path = `/projects/${match.params.project_id}/start`
     updateData(path).then(() => {
       history.push(`/admin/projects/${match.params.project_id}/stages/0`)
       onSuccess()
@@ -257,7 +257,7 @@ function Stage({ history, match, project, onSuccess }) {
           {phaseArr.map((phase, i) =>
             <TabPane tab={parseDate(phase.upload_date).split(' ')[0]} key={i}>
               <Row>
-                <Col><h2 className='fl:l'>提交的文件</h2></Col>
+                <Col><h2 className='fl:l'>提交的文件（{phase.creator.name}）</h2></Col>
                 <Col><Button className='fl:r' type='primary' onClick={() => onBatchDownload(phase)}>批量下载</Button></Col>
               </Row>
 
