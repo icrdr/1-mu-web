@@ -34,6 +34,9 @@ function Dashboard({ component: Component, ...rest }) {
         <Layout style={{ minHeight: '100vh' }}>
 
           <Header className="p:0" style={{ background: '#fff' }} >
+            <div className='m-l:2 fl:l'>
+              一目 - 企划管理系统
+            </div>
             {meData && <Link to={'/users/' + meData.id}><div className="fl:r m-r:2">
               <Button type="link">{meData.name}</Button>
               <Avatarx url={meData.avatar_url} name={meData.name} />

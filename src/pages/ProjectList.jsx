@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Button, Popconfirm, Checkbox, Divider, Radio, Input, message,Breadcrumb } from 'antd'
-import { parseStatus, getStage, fetchData, updateData } from '../utility'
+import { Table, Card, Tag, Row, Col, Checkbox, Divider, Radio, Input, message,Breadcrumb } from 'antd'
+import { parseStatus, getStage, fetchData } from '../utility'
 import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
 const { Search } = Input;
@@ -16,7 +16,7 @@ export default function Main({ location, history }) {
   const [indeterminate, setIndeterminate] = useState(false);
   const [checkAll, setCheckAll] = useState(true);
   const [meFilter, setMefilter] = useState('creator');
-  const [update, setUpdate] = useState(false);
+  const [update] = useState(false);
   const { meData } = useContext(meContext);
 
   const columns = [
@@ -45,7 +45,7 @@ export default function Main({ location, history }) {
       title: '标签',
       dataIndex: 'tags',
       width: '20%',
-      render: (tags, project) => {
+      render: (tags) => {
         return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)
       }
     },
@@ -111,45 +111,12 @@ export default function Main({ location, history }) {
     {
       title: '制作方',
       dataIndex: 'creators',
-      render: (creators, project) => creators.map((creator, index) => (
+      render: (creators) => creators.map((creator, index) => (
         <Link className='m-r:.5' key={index} to={"/users/" + creator.id}>{creator.name}</Link>
       )),
       width: '10%',
-    },
-    {
-      title: '删除',
-      key: 'key2',
-      render: (key, project) => (<>
-        {project.status === 'discard' ? (
-          <Popconfirm
-            title="确定如此操作么？"
-            onConfirm={() => operateProject(project.id, 'resume')}
-            okText="是"
-            cancelText="否"
-          >
-            <Button size='small'>恢复</Button>
-          </Popconfirm>
-        ) : (
-            <Popconfirm
-              title="确定如此操作么？"
-              onConfirm={() => operateProject(project.id, 'discard')}
-              okText="是"
-              cancelText="否"
-            >
-              <Button size='small'>废弃</Button>
-            </Popconfirm>
-          )}
-      </>),
-      width: '5%',
     }
   ];
-
-  const operateProject = (id, action) => {
-    const path = `/projects/${id}/${action}`
-    updateData(path).then(res => {
-      setUpdate(!update)
-    })
-  }
 
   useEffect(() => {
     setLoading(true)
@@ -194,7 +161,7 @@ export default function Main({ location, history }) {
       setProjectList(res.data.projects)
       setPagination(prevState => { return { ...prevState, total: res.data.total } })
       setLoading(false)
-    }).catch(err => {
+    }).catch(() => {
       setProjectList([])
       setLoading(false)
     })

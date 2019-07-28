@@ -11,6 +11,7 @@ import AProject from './pages/AProject'
 import AUserList from './pages/AUserList'
 import AProjectPost from './pages/AProjectPost'
 import AUser from './pages/AUser'
+import User from './pages/User'
 import NotFound from './pages/NotFound'
 // layouts
 import Web from './layouts/Web'
@@ -37,6 +38,7 @@ function App({ location }) {
       <Web path="/me" component={Me} />
       <Web exact path="/projects" component={ProjectList} />
       <Web path="/projects/:project_id(\d+)" component={Project}/>
+      <Web path="/users/:user_id(\d+)" component={User} />
       <Dashboard exact path="/admin/projects" component={AProjectList} />
       <Dashboard path="/admin/projects/:project_id(\d+)" component={AProject}/>
       <Dashboard path="/admin/projects/post" component={AProjectPost} />

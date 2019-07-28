@@ -17,7 +17,7 @@ export default function Project({ history, match, location }) {
   const [projectData, setProjectData] = useState();
   const [isloading, setLoading] = useState(false);
   const [update, setUpdate] = useState(true);
-  
+
 
   useEffect(() => {
     setLoading(true)
