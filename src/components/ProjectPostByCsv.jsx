@@ -25,7 +25,7 @@ export default function ProjectPostByCsv() {
       if (!row[1]) continue
       const path = '/projects'
       const client_id = row[3] ? row[3] : 1
-      const creators = row[4] ? row[4].split(";").concat(client_id) : [1]
+      const group_id = row[4] ? row[4]:1
       const tags = row[2].split(";")
       await fetchData(path, { title: row[1] }, false).then(res => {
         if (res.data.projects.length>0) {
@@ -33,7 +33,7 @@ export default function ProjectPostByCsv() {
           const data = {
             title: row[1],
             client_id: client_id,
-            creators: creators,
+            group_id: group_id,
             tags: tags,
           }
           return updateData(path, data)
@@ -43,7 +43,7 @@ export default function ProjectPostByCsv() {
             title: row[1],
             design: `<p>${row[1]}</p>`,
             client_id: client_id,
-            creators: creators,
+            group_id: group_id,
             stages: [
             {
               stage_name: '线稿-铺色',

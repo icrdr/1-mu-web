@@ -114,8 +114,8 @@ export default function Main({ location, history }) {
     },
     {
       title: '制作方',
-      dataIndex: 'creators',
-      render: (creators) => creators.map((creator, index) => (
+      dataIndex: 'creator_group',
+      render: (creator_group) => creator_group.users.map((creator, index) => (
         <Link className='m-r:.5' key={index} to={"/users/" + creator.id}>{creator.name}</Link>
       )),
       width: '10%',

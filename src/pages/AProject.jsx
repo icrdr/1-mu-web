@@ -84,7 +84,7 @@ export default function Project({ history, match, location }) {
           />
         </Col>
         <Col sm={24} md={12} className='d:f flx-w:w'>
-          {projectData.creators.map((creator, index) =>
+          {projectData.creator_group.users.map((creator, index) =>
             <Meta key={index} className='m-b:.5 m-r:1'
               avatar={<Avatarx url={creator.avatar_url} name={creator.name} />}
               title={<Link to={"/users/" + creator.id}>{creator.name}</Link>}

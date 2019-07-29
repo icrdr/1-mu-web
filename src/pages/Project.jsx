@@ -96,7 +96,7 @@ export default function Project({ history, match, location }) {
             />
           </Col>
           <Col sm={24} md={12} className='d:f flx-w:w'>
-            {projectData.creators.map((creator, index) =>
+            {projectData.creator_group.users.map((creator, index) =>
               <Meta key={index} className='m-b:.5 m-r:1'
                 avatar={<Avatarx url={creator.avatar_url} name={creator.name} />}
                 title={<Link to={"/users/" + creator.id}>{creator.name}</Link>}
@@ -235,8 +235,8 @@ function Stage({ history, match, project, onSuccess }) {
       case 'progress':
       case 'modify':
         let isCreator = false
-        for (let i in project.creators) {
-          if (project.creators[i].id === meData.id) {
+        for (let i in project.creator_group.users) {
+          if (project.creator_group.users[i].id === meData.id) {
             isCreator = true
             break
           }

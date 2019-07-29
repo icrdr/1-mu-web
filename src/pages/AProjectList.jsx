@@ -115,8 +115,8 @@ export default function ProjectList({ location, history, match }) {
     },
     {
       title: '制作方',
-      dataIndex: 'creators',
-      render: (creators, project) => creators.map((creator, index) => (
+      dataIndex: 'creator_group',
+      render: (creator_group, project) => creator_group.users.map((creator, index) => (
         <Link className='m-r:.5' key={index} to={"/users/" + creator.id}>{creator.name}</Link>
       )),
       width: '10%',
