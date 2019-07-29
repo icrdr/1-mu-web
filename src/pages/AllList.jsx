@@ -77,7 +77,7 @@ export default function Main({ location, history }) {
       order: 'desc',
       pre_page: pagination.pageSize,
       client_id:1,
-      status: ['await'],
+      status: 'await',
     }
     if(meData.groups_as_admin.length>0)setAdmin(true)
     const values = queryString.parse(location.search)
