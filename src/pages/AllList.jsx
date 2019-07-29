@@ -12,6 +12,7 @@ export default function Main({ location, history }) {
   const [isloading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [update,setUpdate] = useState(false);
+  const [isAdmin,setAdmin] = useState(false);
   const { meData } = useContext(meContext);
 
   const columns = [
@@ -44,6 +45,21 @@ export default function Main({ location, history }) {
       width: '5%',
     }
   ];
+  const columns2 = [
+    {
+      title: '企划名',
+      dataIndex: 'title',
+      width: '20%'
+    },
+    {
+      title: '标签',
+      dataIndex: 'tags',
+      width: '20%',
+      render: (tags) => {
+        return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)
+      }
+    }
+  ];
   function addProject(id){
     const path = '/projects/'+id
     const data = {
@@ -60,9 +76,10 @@ export default function Main({ location, history }) {
     const params = {
       order: 'desc',
       pre_page: pagination.pageSize,
-      client_id:1
+      client_id:1,
+      status: ['await'],
     }
-
+    if(meData.groups_as_admin.length>0)setAdmin(true)
     const values = queryString.parse(location.search)
     if (values.page) {
       setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
@@ -116,7 +133,7 @@ export default function Main({ location, history }) {
         <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
       </div>
       <Table
-        columns={columns}
+        columns={isAdmin?columns:columns2}
         rowKey={project => project.id}
         dataSource={projectList}
         loading={isloading}
