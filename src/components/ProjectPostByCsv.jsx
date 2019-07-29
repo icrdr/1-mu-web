@@ -44,6 +44,10 @@ export default function ProjectPostByCsv() {
             group_id: group_id,
             stages: [
             {
+              stage_name: '参考-草图',
+              days_need: 350
+            },
+            {
               stage_name: '线稿-铺色',
               days_need: 350
             },
