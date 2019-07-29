@@ -35,6 +35,7 @@ export default function User({ match }) {
         </Col>
       </Row>
       <Descriptions className="m-t:5" layout="vertical" bordered>
+        <Descriptions.Item label="ID">{userData.id}</Descriptions.Item>
         <Descriptions.Item label="邮箱">{userData.email}</Descriptions.Item>
         <Descriptions.Item label="手机">{userData.phone}</Descriptions.Item>
         <Descriptions.Item label="性别">{userData.sex}</Descriptions.Item>

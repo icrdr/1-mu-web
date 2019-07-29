@@ -19,8 +19,8 @@ export default function ProjectFeedback({ history, match, feedback, onSuccess })
   const { errors, field, handleSubmit } = useForm(onSubmit, undefined, validation)
 
   function onSubmit(v) {
-    let path =  `/projects/${match.params.project_id}/modify`
-    let data = {
+    const path =  `/projects/${match.params.project_id}/modify`
+    const data = {
       ...v,
       feedback: v.feedback.toHTML(),
     }

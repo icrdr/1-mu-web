@@ -6,7 +6,7 @@ function Menux({location, history}) {
   const [menu, setMenu] = useState(['']);
 
   useEffect(() => {
-    setMenu([location.pathname.split('/')[1]])
+    setMenu([location.pathname.split('/')[2]])
   }, [location])
 
   const changeMenu = ({ key }) => {
@@ -28,10 +28,10 @@ function Menux({location, history}) {
         <Icon type="desktop" />
         <span>企划列表</span>
       </Menu.Item>
-      {/* <Menu.Item key="files">
+      <Menu.Item key="groups">
         <Icon type="file" />
-        <span>文件列表</span>
-      </Menu.Item> */}
+        <span>小组列表</span>
+      </Menu.Item>
     </Menu>
   )
 }

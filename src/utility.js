@@ -160,4 +160,15 @@ export function uploadData(path, formData, showMsg = true) {
       reject(err)
     })
   });
-} 
+}
+
+export function isUserExist(v) {
+  return new Promise(resolve => {
+    const path = '/users/'+v
+    fetchData(path, null, false).then(res => {
+      resolve(true)
+    }).catch(err => {
+      resolve(false)
+    })
+  });
+}
