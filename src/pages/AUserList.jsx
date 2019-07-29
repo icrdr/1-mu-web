@@ -79,9 +79,10 @@ export default function UserList({ location, history }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
 
-  const changePage = (pagination) => {
-    const params = queryString.stringify({ page: pagination.current });
-    history.push("/users?" + params)
+  const onChangePage = (pagination) => {
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, page: pagination.current });
+    history.push(`${location.pathname}?${params}`)
   }
 
   return (
@@ -92,7 +93,7 @@ export default function UserList({ location, history }) {
         dataSource={userList}
         loading={isloading}
         pagination={pagination}
-        onChange={changePage}
+        onChange={onChangePage}
       />
     </Card>
   )

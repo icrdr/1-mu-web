@@ -69,9 +69,10 @@ export default function GroupList({ location, history, match }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
 
-  const changePage = (pagination) => {
-    const params = queryString.stringify({ page: pagination.current });
-    history.push("/groups?" + params)
+  const onChangePage = (pagination) => {
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, page: pagination.current });
+    history.push(`${location.pathname}?${params}`)
   }
 
   return (
@@ -88,7 +89,7 @@ export default function GroupList({ location, history, match }) {
         dataSource={groupList}
         loading={isloading}
         pagination={pagination}
-        onChange={changePage}
+        onChange={onChangePage}
       />
     </Card>
     </>
