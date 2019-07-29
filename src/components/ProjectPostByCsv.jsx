@@ -32,8 +32,6 @@ export default function ProjectPostByCsv() {
           const path = '/projects/' + res.data.projects[0].id
           const data = {
             title: row[1],
-            client_id: client_id,
-            group_id: group_id,
             tags: tags,
           }
           return updateData(path, data)
