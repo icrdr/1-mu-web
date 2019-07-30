@@ -51,11 +51,18 @@ export function parseDate(date_str) {
 }
 
 export function timeLeft(stage) {
-  const start_date = new Date(stage.start_date + ' UTC')
+  let start_date
+  if (stage.phases.length>1){
+    const last_phase = stage.phases[stage.phases.length-2]
+    start_date = new Date(last_phase.feedback_date + ' UTC')
+  }else{
+    start_date = new Date(stage.start_date + ' UTC')
+  }
+  
   const current_date = new Date()
   let difference = start_date - current_date;
   difference += 1000 * 60 * 60 * 24 * (getPhase(stage).days_need)
-  return Math.floor(difference / (1000 * 60 * 60 * 24))
+  return difference / (1000 * 60 * 60 * 24)
 }
 
 export function parseTimeLeft(timeleft) {
