@@ -39,7 +39,7 @@ export default function Project({ history, match, location }) {
 
 
   const stepStatus = (project) => {
-    if (projectData.status === 'await' || 'draft') return 'wait'
+    if (project.status === 'await' || project.status === 'draft') return 'wait'
     const x_days = timeLeft(getStage(project))
     if (x_days >= 0) {
       return 'process'
