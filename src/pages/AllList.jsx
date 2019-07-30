@@ -34,7 +34,7 @@ export default function Main({ location, history }) {
       title: '制作方',
       dataIndex: 'creator_group',
       render: (group, project) => {
-        if (group.id === 0) {
+        if (group.id === 1) {
           if (isAdmin) {
             return <Popconfirm
               title="确定如此操作么？"
@@ -78,7 +78,6 @@ export default function Main({ location, history }) {
     const params = {
       order: 'desc',
       pre_page: pagination.pageSize,
-      client_id: 1,
       status: 'await',
     }
     if (meData.groups_as_admin.length > 0) setAdmin(true)
