@@ -157,6 +157,15 @@ export default function Project({ history, match, location }) {
 }
 function Design({ history, match, project, onSuccess }) {
   const { meData } = useContext(meContext);
+
+  let isAdmin = false
+  for (let i in project.creator_group.admins) {
+    if (project.creator_group.admins[i].id === meData.id) {
+      isAdmin = true
+      break
+    }
+  }
+
   const onStart = () => {
     const path = `/projects/${match.params.project_id}/start`
     updateData(path).then(() => {
@@ -168,7 +177,7 @@ function Design({ history, match, project, onSuccess }) {
   return (
     <>
       <Route exact path={match.path} render={() => <>
-        {project.status === 'await' && project.client.id === meData.id &&
+        {project.status === 'await' && isAdmin &&
           <Popconfirm
             title="确定如此操作么？"
             onConfirm={onStart}
@@ -184,7 +193,7 @@ function Design({ history, match, project, onSuccess }) {
         }} />
 
         {
-          project.client.id === meData.id &&
+          isAdmin &&
           <Link to={`${match.url}/edit`}>
             <Button size='large' block>修改</Button>
           </Link>
@@ -201,10 +210,26 @@ function Design({ history, match, project, onSuccess }) {
     </>
   )
 }
+
 function Stage({ history, match, project, onSuccess }) {
   const index = parseInt(match.params.stage_index)
   const stage = project.stages[index]
   const { meData } = useContext(meContext);
+  let isCreator = false
+  for (let i in project.creator_group.users) {
+    if (project.creator_group.users[i].id === meData.id) {
+      isCreator = true
+      break
+    }
+  }
+
+  let isAdmin = false
+  for (let i in project.creator_group.admins) {
+    if (project.creator_group.admins[i].id === meData.id) {
+      isAdmin = true
+      break
+    }
+  }
 
   const onBatchDownload = phase => {
     let file_id = []
@@ -243,13 +268,6 @@ function Stage({ history, match, project, onSuccess }) {
     switch (status) {
       case 'progress':
       case 'modify':
-        let isCreator = false
-        for (let i in project.creator_group.users) {
-          if (project.creator_group.users[i].id === meData.id) {
-            isCreator = true
-            break
-          }
-        }
         return isCreator ? <>
           <Route exact path={match.path} render={() =>
             <Link to={`${match.url}/upload`}>
@@ -264,7 +282,7 @@ function Stage({ history, match, project, onSuccess }) {
           } />
         </> : null
       case 'pending':
-        return project.client.id === meData.id ? <>
+        return isAdmin ? <>
           <Route exact path={match.path} render={() =>
             <Row gutter={12}>
               <Col sm={24} md={12} className='m-b:2'>
