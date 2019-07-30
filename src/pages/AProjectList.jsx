@@ -138,8 +138,8 @@ export default function ProjectList({ location, history, match }) {
     {
       title: '制作方',
       dataIndex: 'creator_group',
-      render: (creator_group, project) =>
-        <Link to={"/admin/groups/" + creator_group.id}>{creator_group.name}</Link>
+      render: (group, project) =>
+        <Link to={"/admin/groups/" + group.id}>{group.name}</Link>
       ,
       width: '5%',
     },
