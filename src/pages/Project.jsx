@@ -304,7 +304,7 @@ function Stage({ history, match, project, onSuccess }) {
                 </Card>
               )}
               {phase.feedback_date && <>
-                <h2 className='m-t:4'>修改意见</h2>
+                <h2 className='m-t:4'>修改意见（{phase.client.name}）</h2>
                 {phase.client_feedback ?
                   <div dangerouslySetInnerHTML={{ __html: phase.client_feedback }} /> : <div>无</div>}
               </>}

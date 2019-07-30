@@ -1,16 +1,17 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Button, Popconfirm, Checkbox, Divider, Radio, Input, message } from 'antd'
-import { parseStatus, getStage, fetchData, updateData } from '../utility'
+import { Table, Card, Tag, Row, Col, Button, Popconfirm, Checkbox, Divider, Radio, Input, message, Select } from 'antd'
+import { parseStatus, getStage, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
 import { meContext } from '../layouts/Dashboard';
 import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
 const { Search } = Input;
-
+const { Option } = Select;
 export default function ProjectList({ location, history, match }) {
   const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '异常']
 
   const [projectList, setProjectList] = useState([]);
+  const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [checkedList, setCheckedList] = useState(plainOptions);
@@ -24,7 +25,7 @@ export default function ProjectList({ location, history, match }) {
     {
       title: '企划名',
       dataIndex: 'title',
-      width: '20%',
+      width: '15%',
       render: (name, project) => {
         let link_url = ''
         switch (project.status) {
@@ -45,10 +46,22 @@ export default function ProjectList({ location, history, match }) {
     {
       title: '标签',
       dataIndex: 'tags',
-      width: '20%',
+      width: '10%',
       render: (tags, project) => {
         return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)
       }
+    },
+    {
+      title: '开始时间',
+      dataIndex: 'start_date',
+      render: (start_date, project) => {
+        if (start_date) {
+          return parseDate(start_date)
+        } else {
+          return '未开始'
+        }
+      },
+      width: '10%',
     },
     {
       title: '目前阶段',
@@ -64,6 +77,22 @@ export default function ProjectList({ location, history, match }) {
             return <span>{`${(index + 1).toString()}/${project.stages.length}`}</span>
           default:
             return <span>{`${(index + 1).toString()}/${project.stages.length}：` + getStage(project).name}</span>
+        }
+      }
+    },
+    {
+      title: '死线',
+      dataIndex: 'key',
+      width: '10%',
+      render: (index, project) => {
+        const status = project.status
+        switch (status) {
+          case 'progress':
+          case 'modify':
+            const time_left = timeLeft(getStage(project))
+            return <span style={{ color: time_left >= 0 ? '' : 'red' }}>{parseTimeLeft(time_left)}</span>
+          default:
+            return ''
         }
       }
     },
@@ -105,21 +134,14 @@ export default function ProjectList({ location, history, match }) {
       },
       width: '5%',
     },
-    {
-      title: '发起方',
-      dataIndex: 'client.name',
-      render: (name, project) => {
-        return <Link to={"/users/" + project.client.id}>{name}</Link>
-      },
-      width: '10%',
-    },
+
     {
       title: '制作方',
       dataIndex: 'creator_group',
-      render: (creator_group, project) => creator_group.users.map((creator, index) => (
-        <Link className='m-r:.5' key={index} to={"/users/" + creator.id}>{creator.name}</Link>
-      )),
-      width: '10%',
+      render: (creator_group, project) =>
+        <Link to={"/admin/groups/" + creator_group.id}>{creator_group.name}</Link>
+      ,
+      width: '5%',
     },
     {
       title: '删除',
@@ -158,7 +180,12 @@ export default function ProjectList({ location, history, match }) {
 
   useEffect(() => {
     setLoading(true)
-    const path = '/projects'
+    let path = '/groups'
+
+    fetchData(path).then(res => {
+      setGroupList(res.data.groups)
+    })
+    path = '/projects'
     const status = checkedList.join(',')
       .replace('草稿', 'draft')
       .replace('未开始', 'await')
@@ -182,13 +209,17 @@ export default function ProjectList({ location, history, match }) {
         break;
       default:
     }
-    
+
     const values = queryString.parse(location.search)
     if (values.page) {
       setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
       params.page = values.page
     } else {
       params.page = pagination.current
+    }
+
+    if (values.group_id) {
+      params.group_id = values.group_id
     }
 
     if (values.search) {
@@ -216,6 +247,7 @@ export default function ProjectList({ location, history, match }) {
   const onChangeMeFilter = e => {
     setMefilter(e.target.value)
   }
+
   const onSearch = v => {
     if (v.length < 2) {
       message.info('关键词太短，至少2个字符')
@@ -226,6 +258,7 @@ export default function ProjectList({ location, history, match }) {
     const params = queryString.stringify({ ...values, search: v, page: 1 });
     history.push(`${location.pathname}?${params}`)
   }
+
   const onChangeStatusFilter = checkedList => {
     setCheckedList(checkedList)
     setCheckAll(checkedList.length === plainOptions.length)
@@ -237,17 +270,36 @@ export default function ProjectList({ location, history, match }) {
     setCheckedList(e.target.checked ? plainOptions : [])
     setIndeterminate(false)
   }
-
+  const onChangeGroupFilter = v => {
+    console.log(v)
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, group_id: v.join(','), page: 1 });
+    history.push(`${location.pathname}?${params}`)
+  }
   return (
     <Card>
       <Row gutter={16}>
-        <Col xs={8} md={4} className='m-b:1'>
+        <Col md={12} className='m-b:1'>
           <Button type='primary'><Link to='/admin/projects/post'>添加企划</Link></Button>
         </Col>
-        <Col xs={16} md={10} className='m-b:1'>
+        <Col md={12} className='m-b:1'>
           <ProjectPostByCsv />
         </Col>
-        <Col xs={24} md={10} className='m-b:1'>
+      </Row>
+      <Row gutter={16}>
+        <Col xs={24} md={12} className='m-b:1'>
+          <Select
+            mode="multiple"
+            style={{ width: '100%' }}
+            placeholder="选择小组"
+            onChange={onChangeGroupFilter}
+          >
+            {groupList.map((group, index) =>
+              <Option key={group.id}>{group.name}</Option>)
+            }
+          </Select>
+        </Col>
+        <Col xs={24} md={12} className='m-b:1'>
           <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
         </Col>
       </Row>

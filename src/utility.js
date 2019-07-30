@@ -58,11 +58,12 @@ export function timeLeft(stage) {
   return Math.floor(difference / (1000 * 60 * 60 * 24))
 }
 
-export function parseTimeLeft(x_days) {
-  if (x_days >= 0) {
-    return x_days < 1 ? '剩余不足1天' : `剩余${x_days}天余`
+export function parseTimeLeft(timeleft) {
+  const x_days = Math.floor(timeleft)
+  if (timeleft >= 0) {
+    return timeleft < 1 ? '剩余不足1天' : `剩余${x_days}天余`
   } else {
-    return -x_days < 1 ? '逾期' : `逾期${-x_days}天余`
+    return -timeleft < 1 ? '逾期' : `逾期${-x_days}天余`
   }
 }
 
