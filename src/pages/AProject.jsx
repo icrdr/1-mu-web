@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Link } from 'react-router-dom'
-import { Card, Row, Col, Descriptions, Steps, Button, Tabs, message, Icon, Tag } from 'antd'
+import { Card, Row, Col, Descriptions, Steps, Button, Tabs, message, Icon, Tag, Popconfirm } from 'antd'
 import Loading from '../components/Loading'
 import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
@@ -154,7 +154,16 @@ function Design({ history, match, project, onSuccess }) {
   return (
     <>
       <Route exact path={match.path} render={() => <>
-        {project.status === 'await' && <Button size='large' type="primary" block onClick={onStart}>确认开始企划</Button>}
+        {project.status === 'await' &&
+          <Popconfirm
+            title="确定如此操作么？"
+            onConfirm={onStart}
+            okText="是"
+            cancelText="否"
+          >
+            <Button size='large' type="primary" block>确认开始企划</Button>
+          </Popconfirm>
+        }
         <h1>初始设计稿</h1>
         <div dangerouslySetInnerHTML={{
           __html: project.design
@@ -162,14 +171,14 @@ function Design({ history, match, project, onSuccess }) {
         <Link to={`${match.url}/edit`}>
           <Button size='large' block>修改</Button>
         </Link>
-        
-        </>
+
+      </>
       } />
       <Route path={`${match.path}/edit`} render={
         props => <ProjectDesign {...props} onSuccess={onSuccess} design={project.design} />
       } />
 
-      
+
     </>
   )
 }
@@ -232,7 +241,14 @@ function Stage({ history, match, project, onSuccess }) {
           <Route exact path={match.path} render={() =>
             <Row gutter={12}>
               <Col sm={24} md={12} className='m-b:2'>
-                <Button type="primary" size='large' block onClick={onFinish}>确认通过</Button>
+                <Popconfirm
+                  title="确定如此操作么？"
+                  onConfirm={onFinish}
+                  okText="是"
+                  cancelText="否"
+                >
+                  <Button type="primary" size='large' block >确认通过</Button>
+                </Popconfirm>
               </Col>
               <Col sm={24} md={12}>
                 <Link to={`${match.url}/feedback`}>

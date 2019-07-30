@@ -168,7 +168,16 @@ function Design({ history, match, project, onSuccess }) {
   return (
     <>
       <Route exact path={match.path} render={() => <>
-        {project.status === 'await' && project.client.id === meData.id && <Button size='large' type="primary" block onClick={onStart}>确认开始企划</Button>}
+        {project.status === 'await' && project.client.id === meData.id &&
+          <Popconfirm
+            title="确定如此操作么？"
+            onConfirm={onStart}
+            okText="是"
+            cancelText="否"
+          >
+            <Button size='large' type="primary" block>确认开始企划</Button>
+          </Popconfirm>
+        }
         <h1>初始设计稿</h1>
         <div dangerouslySetInnerHTML={{
           __html: project.design
