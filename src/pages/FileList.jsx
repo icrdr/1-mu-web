@@ -100,8 +100,8 @@ export default function FileList({ location, history }) {
       <BackTop />
       <Card className='m-b:1'>
         <h1>传图</h1>
-
-        <div className='m-b:1'>
+        <span >图片要求，jpg或者png格式，尺寸小于2mb。不合要求图片可能导致无法预览。（部分图片虽然以jpg结尾，但本质不是，导致无法解析，请先格式转化）</span>
+        <div className='m-t:.5 m-b:1'>
           <Dragger
             style={{ width: '100%' }}
             onRemove={() => {
@@ -162,9 +162,13 @@ export default function FileList({ location, history }) {
         >
           {imgList.map((img, index) => {
             if (img.previews.length > 0) {
-              return <a key={index} target="_blank" rel="noopener noreferrer" href={img.url}><img width='100%' alt='图片' src={img.previews[0].url} /></a>
+              return <a key={index} target="_blank" rel="noopener noreferrer" href={img.url}>
+                <img width='100%' alt='图片' src={img.previews[0].url} />
+              </a>
             } else {
-              return <div style={{ width: '100%', height: '200px' }} key={index}>{img.name}.{img.format}</div>
+              return <a key={index} target="_blank" rel="noopener noreferrer" href={img.url}>
+                <div style={{ width: '100%', height: '200px' }} key={index}>{img.name}.{img.format}</div>
+              </a>
             }
           })}
         </StackGrid>
