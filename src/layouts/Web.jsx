@@ -56,6 +56,7 @@ function Web({ location, history, component: Component, ...rest }) {
               <Menu.Item key="groups">小组列表</Menu.Item>
               <Menu.Item key="projects">企划列表</Menu.Item>
               <Menu.Item key="all">总表</Menu.Item>
+              <Menu.Item key="files">图库</Menu.Item>
             </Menu>
             {meData && <Link to={'/users/' + meData.id}><div className="pos:a top:0 right:2">
               <Button type="link">{meData.name}</Button>

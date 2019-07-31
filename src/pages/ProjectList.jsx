@@ -160,6 +160,7 @@ export default function Main({ location, history }) {
       order: 'desc',
       pre_page: pagination.pageSize,
       status: status,
+      order_by: 'status',
     }
     switch (meFilter) {
       case 'client':
@@ -205,7 +206,7 @@ export default function Main({ location, history }) {
     setMefilter(e.target.value)
   }
   const onSearch = v => {
-    if (v.length < 2) {
+    if (v.length < 2&& v.length!==0) {
       message.info('关键词太短，至少2个字符')
       console.log('Too short.')
       return false

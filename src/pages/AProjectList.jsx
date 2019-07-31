@@ -197,6 +197,7 @@ export default function ProjectList({ location, history, match }) {
       .replace('异常', 'abnormal')
     const params = {
       order: 'desc',
+      order_by: 'status',
       pre_page: pagination.pageSize,
       status: status,
     }
@@ -249,7 +250,7 @@ export default function ProjectList({ location, history, match }) {
   }
 
   const onSearch = v => {
-    if (v.length < 2) {
+    if (v.length < 2 && v.length!==0) {
       message.info('关键词太短，至少2个字符')
       console.log('Too short.')
       return false

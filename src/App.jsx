@@ -16,6 +16,7 @@ import AGroup from './pages/AGroup'
 import GroupList from './pages/GroupList'
 import Group from './pages/Group'
 import User from './pages/User'
+import FileList from './pages/FileList'
 import AllList from './pages/AllList'
 import NotFound from './pages/NotFound'
 // layouts
@@ -43,6 +44,7 @@ function App({ location }) {
       <Web path="/me" component={Me} />
       <Web exact path="/projects" component={ProjectList} />
       <Web exact path="/all" component={AllList}/>
+      <Web exact path="/files" component={FileList}/>
       <Web path="/projects/:project_id(\d+)" component={Project}/>
       <Web path="/users/:user_id(\d+)" component={User} />
       <Web exact path="/groups" component={GroupList} />

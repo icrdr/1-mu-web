@@ -6,7 +6,7 @@ import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
 import ProjectFeedback from '../components/ProjectFeedback'
 import ProjectDesign from '../components/ProjectDesign'
-import { parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
+import { deadline, parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
 import Avatarx from '../components/Avatarx'
 const { Step } = Steps;
 const { Meta } = Card;
@@ -208,7 +208,7 @@ function Stage({ history, match, project, onSuccess }) {
   }
 
   const onFinish = () => {
-    const path = `/admin/projects/${match.params.project_id}/finish`
+    const path = `/projects/${match.params.project_id}/finish`
     updateData(path).then(() => {
       if (project.stages.length - 1 > index) {
         history.push(`/admin/projects/${match.params.project_id}/stages/${index + 1}`)
@@ -281,7 +281,7 @@ function Stage({ history, match, project, onSuccess }) {
               {phase.upload_files.map((item, j) =>
                 <Card key={j} className='m-t:2'
                   cover={<ImgCard file={item} />}>
-                  <a href={item.url}><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
+                  <a href={item.url} target="_blank" rel="noopener noreferrer"><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
                 </Card>
               )}
               {phase.feedback_date && <>
@@ -303,8 +303,9 @@ function Stage({ history, match, project, onSuccess }) {
     }
     <h1>{stage.name}</h1>
     <Descriptions layout="vertical" bordered>
-      <Descriptions.Item label="阶段起始日期">{stage.start_date ? parseDate(stage.start_date) : '未开始'}</Descriptions.Item>
-      <Descriptions.Item label="阶段计划时间（天）">{getPhase(stage).days_need}</Descriptions.Item>
+      <Descriptions.Item label="起始日期">{stage.start_date ? parseDate(stage.start_date) : '未开始'}</Descriptions.Item>
+      <Descriptions.Item label="死线">{stage.start_date ? deadline(stage) : '未开始'}</Descriptions.Item>
+      <Descriptions.Item label="计划时间（天）">{getPhase(stage).days_need}</Descriptions.Item>
     </Descriptions>
 
     {phaseRender(stage)}

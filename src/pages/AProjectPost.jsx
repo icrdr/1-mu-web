@@ -135,7 +135,6 @@ function PostProjectForm({ history }) {
     )
   })
   const uploadHandler = async (param) => {
-    console.log(param)
     if (!param.file) {
       return false
     }
