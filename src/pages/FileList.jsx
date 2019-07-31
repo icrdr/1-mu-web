@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Upload, Button, Icon, Select, Card, message, Input, BackTop } from 'antd';
+import { Row, Col, Upload, Button, Icon, Select, Card, message, Input, BackTop } from 'antd';
 import { uploadData, fetchData } from '../utility'
 import StackGrid from "react-stack-grid";
 import queryString from 'query-string'
@@ -100,7 +100,8 @@ export default function FileList({ location, history }) {
       <BackTop />
       <Card className='m-b:1'>
         <h1>传图</h1>
-        <span >图片要求，jpg或者png格式，尺寸小于2mb。不合要求图片可能导致无法预览。（部分图片虽然以jpg结尾，但本质不是，导致无法解析，请先格式转化）</span>
+        <p>图片要求：jpg或者png格式，尺寸小于2mb。不合要求图片可能导致无法预览。</p>
+        <p>（部分图片虽然以jpg结尾，但本质不是，导致无法解析，请确保图片文件正常）</p>
         <div className='m-t:.5 m-b:1'>
           <Dragger
             style={{ width: '100%' }}
@@ -130,22 +131,28 @@ export default function FileList({ location, history }) {
             <Icon type="upload" />选择文件
         </Dragger>
         </div>
+
         {fileList.length > 0 &&
           <Card className='m-b:1'><img width='100%' alt='图片' src={URL.createObjectURL(fileList[0])} /></Card>
         }
-        <div className='m-b:1'>
-          <span >图片标签</span>
-          <Select className='m-t:.5' mode="tags" style={{ width: '100%' }} placeholder='请填写标签，起码2个' value={tags} onChange={onTagsChange} />
-        </div>
-        <Button
-          type="primary"
-          onClick={handleUpload}
-          disabled={fileList.length === 0 || tags.length < 2}
-          loading={isUploading}
-          block
-        >
-          {isUploading ? '上传中' : '开始上传'}
-        </Button>
+
+        <Row gutter={12}>
+          <Col sm={24} md={12}>
+            <Select mode="tags" style={{ width: '100%' }} placeholder='请填写标签，起码2个' value={tags} onChange={onTagsChange} />
+          </Col>
+          <Col sm={24} md={12}>
+            <Button
+              type="primary"
+              onClick={handleUpload}
+              disabled={fileList.length === 0 || tags.length < 2}
+              loading={isUploading}
+              block
+            >
+              {isUploading ? '上传中' : '开始上传'}
+            </Button>
+          </Col>
+        </Row>
+
       </Card>
       <Card>
         <h1>检索库</h1>
