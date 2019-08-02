@@ -122,7 +122,9 @@ export default function FileList({ location, history }) {
           ><a target="_blank" rel="noopener noreferrer" href={lightBox.url}>
               <img width='100%' alt='图片' src={lightBox.url} />
             </a>
-            {lightBox.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
+            <div className='p:2'>
+              {lightBox.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
+            </div>
           </Modal>
         </>
       }
