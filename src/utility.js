@@ -124,6 +124,29 @@ export function fetchData(path, params, showMsg = true) {
   });
 }
 
+export function deleteData(path, params, showMsg = true) {
+  console.debug(`PATH: "${path}"`)
+  if (params) {
+    console.debug('PARAMS:')
+    console.debug(params)
+  }
+  return new Promise((resolve, reject) => {
+    axios.delete(path, {
+      params: params,
+      withCredentials: true
+    }).then(res => {
+      if (res.data) {
+        console.debug('RESPOND:')
+        console.debug(res.data)
+      }
+      resolve(res)
+    }).catch(err => {
+      handleError(err, showMsg)
+      reject(err)
+    })
+  });
+}
+
 export function updateData(path, data, showMsg = true) {
   console.debug(`PATH: "${path}"`)
   console.debug('DATA:')
@@ -142,6 +165,7 @@ export function updateData(path, data, showMsg = true) {
     })
   });
 }
+
 export function postData(path, data, showMsg = true) {
   console.debug(`PATH: "${path}"`)
   console.debug('DATA:')

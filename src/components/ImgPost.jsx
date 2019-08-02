@@ -19,7 +19,6 @@ export default function ImgPost({ onSucceed }) {
     }
 
     setUploading(true)
-    console.log('start')
     for (const file of fileList) {
       const path = '/files'
       const formData = new FormData();
@@ -29,7 +28,6 @@ export default function ImgPost({ onSucceed }) {
       formData.append('public', 1)
       await uploadData(path, formData)
     }
-    console.log('done')
     document.body.scrollTop = 0; // For Safari
     document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
     setFileList([])
@@ -126,8 +124,7 @@ export default function ImgPost({ onSucceed }) {
           </Col>
         )}
       </Row>
-
-      <Button disabled={isUploading} size='large' type="primary" onClick={handleUpload} block>
+      <Button disabled={isUploading || fileList.length===0} size='large' type="primary" onClick={handleUpload} block>
         {isUploading ? '上传中...' : '开始上传'}
       </Button>
     </Card>
