@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Row, Col, Card, message, Input, BackTop, Radio, Tag } from 'antd';
+import { Row, Col, Card, message, Input, BackTop, Radio, Tag, Modal } from 'antd';
 
 import { fetchData } from '../utility'
 import StackGrid from "react-stack-grid";
@@ -16,6 +16,7 @@ export default function FileList({ location, history }) {
   const [isLoading, setLoading] = useState(false)
   const [meFilter, setMefilter] = useState('all');
   const [selectedTags, setSelectedTags] = useState([])
+  const [lightBox, setLightBox] = useState()
   const { meData } = useContext(meContext)
   const tagsFromServer = [
     '普通外科', '骨科', '神经外科', '妇产科', '泌尿外科', '胸外科', '眼科', '耳鼻喉科', '整形',
@@ -33,7 +34,6 @@ export default function FileList({ location, history }) {
       page: page,
       public: 1
     }
-    console.log(page)
     const values = queryString.parse(location.search)
     if (values.search) {
       params.search = values.search
@@ -106,6 +106,26 @@ export default function FileList({ location, history }) {
 
   return (
     <div>
+      {lightBox != null &&
+        <>
+          <Modal
+            title={lightBox.name}
+            centered
+            visible={lightBox != null}
+            onCancel={() => setLightBox()}
+            okButtonProps={{ className: 'd:n' }}
+            cancelButtonProps={{ className: 'd:n' }}
+            width='60%'
+            bodyStyle={{
+              padding: 0
+            }}
+          ><a target="_blank" rel="noopener noreferrer" href={lightBox.url}>
+              <img width='100%' alt='图片' src={lightBox.url} />
+            </a>
+            {lightBox.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
+          </Modal>
+        </>
+      }
       <BackTop />
       <ImgPost onSucceed={() => {
         setImgList([])
@@ -144,17 +164,15 @@ export default function FileList({ location, history }) {
           gutterWidth={12}
           gutterHeight={12}
         >
-          {imgList.map((img, index) => {
-            if (img.previews.length > 0) {
-              return <a key={index} target="_blank" rel="noopener noreferrer" href={img.url}>
+          {imgList.map((img, index) =>
+            <div onClick={() => setLightBox(img)} key={index}>
+              {img.previews.length > 0 ? (
                 <img width='100%' alt='图片' src={img.previews[0].url} />
-              </a>
-            } else {
-              return <a key={index} target="_blank" rel="noopener noreferrer" href={img.url}>
-                <div style={{ width: '100%', height: '200px' }} key={index}>{img.name}.{img.format}</div>
-              </a>
-            }
-          })}
+              ) : (
+                  <div style={{ width: '100%', height: '200px' }}>{img.name}.{img.format}</div>
+                )}
+            </div>
+          )}
         </StackGrid>
       </Card>
     </div>

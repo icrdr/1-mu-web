@@ -35,6 +35,9 @@ function Dashboard({ component: Component, ...rest }) {
     case 'error':
       return <LoginQrcode />
     default:
+      if(meData.role !=='Admin'){
+        return <h1>你没有admin权限</h1>
+      }
   }
   
   return (
