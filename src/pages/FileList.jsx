@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Row, Col, Card, message, Input, BackTop, Radio, Tag, Modal } from 'antd';
+import { Row, Col, Card, message, Input, BackTop, Radio, Tag, Modal, Select } from 'antd';
 
-import { fetchData } from '../utility'
+import { fetchData, updateData } from '../utility'
 import StackGrid from "react-stack-grid";
 import queryString from 'query-string'
 import ImgPost from '../components/ImgPost'
@@ -17,6 +17,7 @@ export default function FileList({ location, history }) {
   const [meFilter, setMefilter] = useState('all');
   const [selectedTags, setSelectedTags] = useState([])
   const [lightBox, setLightBox] = useState()
+  const [newTag, setNewTag] = useState([])
   const { meData } = useContext(meContext)
   const tagsFromServer = [
     '普通外科', '骨科', '神经外科', '妇产科', '泌尿外科', '胸外科', '眼科', '耳鼻喉科', '整形',
@@ -103,7 +104,29 @@ export default function FileList({ location, history }) {
     history.push(`${location.pathname}?${params}`)
     setSelectedTags(newSelectedTags)
   }
-
+  const handleSubmitTag = (lightBox,v)=>{
+    setNewTag([])
+    const tags_name = []
+    for (const tag of lightBox.tags){
+      tags_name.push(tag.name)
+    }
+    if (tags_name.indexOf(v[0]) >= 0){
+      message.error('重复的标签')
+      return false
+    }
+    const path = `/files/${lightBox.id}/tags/add`
+    const data = {
+      tags: v
+    }
+    updateData(path,data).then(res=>{
+      for ( const img of imgList){
+        if (img === lightBox){
+          img.tags.push({name:v})
+        }
+      }
+      setImgList([...imgList])
+    })
+  }
   return (
     <div>
       {lightBox != null &&
@@ -123,8 +146,17 @@ export default function FileList({ location, history }) {
               <img width='100%' alt='图片' src={lightBox.url} />
             </a>
             <div className='p:2'>
-              {lightBox.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
+              <div className='m-b:1'>
+                {lightBox.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
+              </div>
+              <Select mode="tags"
+                style={{ width: '100%' }}
+                placeholder='新标签，回车确认'
+                value = {newTag}
+                onChange={v => handleSubmitTag(lightBox,v)}
+              />
             </div>
+
           </Modal>
         </>
       }
