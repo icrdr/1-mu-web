@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react'
-import { Row, Col, Upload, Button, Icon, Select, Card, message, Input, BackTop } from 'antd';
-import { uploadData, fetchData } from '../utility'
+import { Card, message, Input, BackTop } from 'antd';
+import { fetchData } from '../utility'
 import StackGrid from "react-stack-grid";
 import queryString from 'query-string'
+import ImgPost from '../components/ImgPost'
 const { Search } = Input;
-const { Dragger } = Upload;
+
 export default function FileList({ location, history }) {
   const [stackGrid, setStackGrid] = useState()
-  const [fileList, setFileList] = useState([])
   const [page, setPage] = useState(1)
   const [imgList, setImgList] = useState([])
-  const [tags, setTags] = useState([])
-  const [isUploading, setUploading] = useState(false)
   const [update, setUpdate] = useState(false)
   const [isLoading, setLoading] = useState(false)
+  
   useEffect(() => {
     setLoading(true)
     const path = '/files'
@@ -37,7 +36,7 @@ export default function FileList({ location, history }) {
       setTimeout(() => {
         if (stackGrid) stackGrid.updateLayout()
       }, 200);
-    }).catch(err => {
+    }).catch(() => {
     }).finally(() => {
       setLoading(false)
     })
@@ -58,30 +57,6 @@ export default function FileList({ location, history }) {
     }
   }
 
-  const handleUpload = () => {
-    setUploading(true)
-    const path = '/files'
-    const formData = new FormData();
-    formData.append('file', fileList[0]);
-    formData.append('tags', tags);
-    formData.append('public', 1);
-
-    uploadData(path, formData).then(() => {
-      setFileList([])
-      setTags([])
-      setImgList([])
-      setPage(1)
-      setUpdate(!update)
-
-    }).finally(() => {
-      setUploading(false)
-    })
-  }
-
-  const onTagsChange = v => {
-    setTags(v)
-  }
-
   const onSearch = v => {
     setImgList([])
     setPage(1)
@@ -94,66 +69,14 @@ export default function FileList({ location, history }) {
     const params = queryString.stringify({ ...values, search: v, page: 1 });
     history.push(`${location.pathname}?${params}`)
   }
-
   return (
     <div>
       <BackTop />
-      <Card className='m-b:1'>
-        <h1>传图</h1>
-        <p>图片要求：jpg或者png格式，尺寸小于2mb。不合要求图片可能导致无法预览。</p>
-        <p>（部分图片虽然以jpg结尾，但本质不是，导致无法解析，请确保图片文件正常）</p>
-        <div className='m-t:.5 m-b:1'>
-          <Dragger
-            style={{ width: '100%' }}
-            onRemove={() => {
-              setFileList([])
-            }}
-            beforeUpload={file => {
-              const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-              if (!isJpgOrPng) {
-                message.error('You can only upload JPG/PNG file!');
-                return false
-              }
-              const isLt2M = file.size / 1024 / 1024 < 2;
-              if (!isLt2M) {
-                message.error('Image must smaller than 2MB!');
-                return false
-              }
-              console.log(file)
-
-              setFileList([file])
-              return false
-            }}
-            listType='picture'
-            fileList={fileList}
-            showUploadList={false}
-          >
-            <Icon type="upload" />选择文件
-        </Dragger>
-        </div>
-
-        {fileList.length > 0 &&
-          <Card className='m-b:1'><img width='100%' alt='图片' src={URL.createObjectURL(fileList[0])} /></Card>
-        }
-
-        <Row gutter={12}>
-          <Col sm={24} md={12}>
-            <Select mode="tags" style={{ width: '100%' }} placeholder='请填写标签，起码2个' value={tags} onChange={onTagsChange} />
-          </Col>
-          <Col sm={24} md={12}>
-            <Button
-              type="primary"
-              onClick={handleUpload}
-              disabled={fileList.length === 0 || tags.length < 2}
-              loading={isUploading}
-              block
-            >
-              {isUploading ? '上传中' : '开始上传'}
-            </Button>
-          </Col>
-        </Row>
-
-      </Card>
+      <ImgPost onSucceed={()=>{
+        setImgList([])
+        setPage(1)
+        setUpdate(preState=>!preState)
+      }}/>
       <Card>
         <h1>检索库</h1>
         <div className='m-b:1'>
