@@ -87,6 +87,7 @@ export default function ProjectList({ location, history, match }) {
       render: (index, project) => {
         const status = project.status
         switch (status) {
+          case 'delay':
           case 'progress':
           case 'modify':
             const time_left = timeLeft(getStage(project))

@@ -34,15 +34,22 @@ export default function Project({ history, match, location }) {
     return <div>没有内容</div>
   }
 
-
-
   const stepStatus = (project) => {
-    if (projectData.status === 'await' || project.status === 'draft') return 'wait'
-    const x_days = timeLeft(getStage(project))
-    if (x_days >= 0) {
-      return 'process'
-    } else {
-      return 'error'
+    switch (project.status) {
+      case 'pending':
+        return 'process'
+      case 'draft':
+      case 'await':
+        return 'wait'
+      case 'finish':
+        return 'finish' 
+      default:
+        const x_days = timeLeft(getStage(project))
+        if (x_days >= 0) {
+          return 'process'
+        } else {
+          return 'error'
+        }
     }
   }
 
@@ -64,7 +71,7 @@ export default function Project({ history, match, location }) {
       return parseStatus('finish')
     } else if (index > projectData.current_stage_index) {
       return parseStatus('await')
-    } else if (status === 'modify' || status === 'progress') {
+    } else if (status === 'modify' || status === 'progress' || status === 'delay') {
       return parseStatus(status) + ' ' + parseTimeLeft(timeLeft(stage))
     } else {
       return parseStatus(status)
@@ -72,54 +79,56 @@ export default function Project({ history, match, location }) {
   }
 
   return (
-    <Card className='p:2' title={'企划：' + projectData.title}
-      extra={projectData.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
-    >
-      <Row className='m-t:2' gutter={12}>
-        <Col sm={24} md={12} className='m-b:4'>
-          <Meta
-            avatar={<Avatarx url={projectData.client.avatar_url} name={projectData.client.name} />}
-            title={<Link to={"/users/" + projectData.client.id}>{projectData.client.name}</Link>}
-            description="发起方"
-          />
-        </Col>
-        <Col sm={24} md={12} className='d:f flx-w:w'>
-          {projectData.creator_group.users.map((creator, index) =>
-            <Meta key={index} className='m-b:.5 m-r:1'
-              avatar={<Avatarx url={creator.avatar_url} name={creator.name} />}
-              title={<Link to={"/users/" + creator.id}>{creator.name}</Link>}
-              description="制作方"
-            />)}
-        </Col>
-      </Row>
+    <>
+      <Card className='p:2' title={'企划：' + projectData.title}
+        extra={projectData.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
+      >
+        <Row className='m-t:2' gutter={12}>
+          <Col sm={24} md={12} className='m-b:4'>
+            <Meta
+              avatar={<Avatarx url={projectData.client.avatar_url} name={projectData.client.name} />}
+              title={<Link to={"/users/" + projectData.client.id}>{projectData.client.name}</Link>}
+              description="发起方"
+            />
+          </Col>
+          <Col sm={24} md={12} className='d:f flx-w:w'>
+            {projectData.creator_group.users.map((creator, index) =>
+              <Meta key={index} className='m-b:.5 m-r:1'
+                avatar={<Avatarx url={creator.avatar_url} name={creator.name} />}
+                title={<Link to={"/users/" + creator.id}>{creator.name}</Link>}
+                description="制作方"
+              />)}
+          </Col>
+        </Row>
 
-      <Descriptions className="m-t:5" layout="vertical" bordered>
-        <Descriptions.Item label="企划起始日期">{projectData.start_date ? parseDate(projectData.start_date) : '未开始'}</Descriptions.Item>
-        <Descriptions.Item label="目前阶段">
-          {projectData.status === 'await' ? `阶段0/${projectData.stages.length}` : `阶段${(projectData.current_stage_index + 1).toString()}/${projectData.stages.length}：` + getStage(projectData).name}</Descriptions.Item>
-        <Descriptions.Item label="目前状态">{parseStatus(projectData.status)}</Descriptions.Item>
-      </Descriptions>
+        <Descriptions className="m-t:5" layout="vertical" bordered>
+          <Descriptions.Item label="企划起始日期">{projectData.start_date ? parseDate(projectData.start_date) : '未开始'}</Descriptions.Item>
+          <Descriptions.Item label="目前阶段">
+            {projectData.status === 'await' ? `阶段0/${projectData.stages.length}` : `阶段${(projectData.current_stage_index + 1).toString()}/${projectData.stages.length}：` + getStage(projectData).name}</Descriptions.Item>
+          <Descriptions.Item label="目前状态">{parseStatus(projectData.status)}</Descriptions.Item>
+        </Descriptions>
 
-      <Steps className="m-t:6" status={stepStatus(projectData)} current={stepCurrent(projectData)}>
-        <Step title={
-          <Link to={`${match.url}/design`}>
-            <Button type="link" >设计初稿</Button>
-          </Link>
-        } description={projectData.status === 'await' ? '未确认' : '确认'} />
-        {projectData.stages.map((stage, index) =>
-          <Step key={index} title={
-            <Link to={`${match.url}/stages/${index}`}>
-              <Button type="link" >{stage.name}</Button>
+        <Steps className="m-t:6" status={stepStatus(projectData)} current={stepCurrent(projectData)}>
+          <Step title={
+            <Link to={`${match.url}/design`}>
+              <Button type="link" >设计初稿</Button>
             </Link>
-          } description={setDescription(stage, index)} />
-        )}
-        <Step title={projectData.status === 'finish' ?
-          <Link to={`${match.url}/done`}>
-            <Button type="link" >完成</Button>
-          </Link> : '完成'
-        } description='' />
-      </Steps>
-      <div className='m-t:4'>
+          } description={projectData.status === 'await' ? '未确认' : '确认'} />
+          {projectData.stages.map((stage, index) =>
+            <Step key={index} title={
+              <Link to={`${match.url}/stages/${index}`}>
+                <Button type="link" >{stage.name}</Button>
+              </Link>
+            } description={setDescription(stage, index)} />
+          )}
+          <Step title={projectData.status === 'finish' ?
+            <Link to={`${match.url}/done`}>
+              <Button type="link" >完成</Button>
+            </Link> : '完成'
+          } description='' />
+        </Steps>
+      </Card>
+      <Card className='m-t:2'>
         <Route path={`${match.path}/design`} render={props =>
           <Design {...props} onSuccess={() => setUpdate(!update)} project={projectData} />}
         />
@@ -138,10 +147,11 @@ export default function Project({ history, match, location }) {
         }}
         />
         <Route path={`${match.path}/stages/:stage_index(\\d+)`} render={props => <Stage {...props} onSuccess={() => setUpdate(!update)} project={projectData} />} />
-      </div>
-    </Card>
+      </Card>
+    </>
   )
 }
+
 function Design({ history, match, project, onSuccess }) {
   const onStart = () => {
     const path = `/projects/${match.params.project_id}/start`
@@ -177,11 +187,10 @@ function Design({ history, match, project, onSuccess }) {
       <Route path={`${match.path}/edit`} render={
         props => <ProjectDesign {...props} onSuccess={onSuccess} design={project.design} />
       } />
-
-
     </>
   )
 }
+
 function Stage({ history, match, project, onSuccess }) {
   const index = parseInt(match.params.stage_index)
   const stage = project.stages[index]
@@ -221,6 +230,7 @@ function Stage({ history, match, project, onSuccess }) {
 
   const operationRender = status => {
     switch (status) {
+      case 'delay':
       case 'progress':
       case 'modify':
         return <>
@@ -272,23 +282,28 @@ function Stage({ history, match, project, onSuccess }) {
         <Tabs className='m-t:4' tabPosition='top'>
           {phaseArr.map((phase, i) =>
             <TabPane tab={parseDate(phase.upload_date).split(' ')[0]} key={i}>
-              <Row>
-                <Col><h2 className='fl:l'>提交的文件（{phase.creator.name}）</h2></Col>
-                <Col><Button className='fl:r' type='primary' onClick={() => onBatchDownload(phase)}>批量下载</Button></Col>
+              <Row gutter={16}>
+                <Col sm={24} md={12} className=''>
+                  <Row>
+                    <Col><h2 className='fl:l'>提交的文件（{phase.creator.name}）</h2></Col>
+                    <Col><Button className='fl:r' type='primary' onClick={() => onBatchDownload(phase)}>批量下载</Button></Col>
+                  </Row>
+                  <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
+                  {phase.upload_files.map((item, j) =>
+                    <Card key={j} className='m-t:2'
+                      cover={<ImgCard file={item} />}>
+                      <a href={item.url} target="_blank" rel="noopener noreferrer"><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
+                    </Card>
+                  )}
+                </Col>
+                <Col sm={24} md={12} className=''>
+                  {phase.feedback_date && <>
+                    <h2>修改意见（{phase.client.name}）</h2>
+                    {phase.client_feedback ?
+                      <div dangerouslySetInnerHTML={{ __html: phase.client_feedback }} /> : <div>无</div>}
+                  </>}
+                </Col>
               </Row>
-
-              <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
-              {phase.upload_files.map((item, j) =>
-                <Card key={j} className='m-t:2'
-                  cover={<ImgCard file={item} />}>
-                  <a href={item.url} target="_blank" rel="noopener noreferrer"><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
-                </Card>
-              )}
-              {phase.feedback_date && <>
-                <h2 className='m-t:4'>修改意见</h2>
-                {phase.client_feedback ?
-                  <div dangerouslySetInnerHTML={{ __html: phase.client_feedback }} /> : <div>无</div>}
-              </>}
             </TabPane>)}
         </Tabs>
       </>
@@ -297,7 +312,7 @@ function Stage({ history, match, project, onSuccess }) {
 
   return (<>
     {project.current_stage_index === index &&
-      <div className='m-t:4'>
+      <div>
         {operationRender(project.status)}
       </div>
     }

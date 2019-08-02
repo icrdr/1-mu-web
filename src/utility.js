@@ -81,7 +81,7 @@ export function parseTimeLeft(timeleft) {
   if (timeleft >= 0) {
     return timeleft < 1 ? '剩余不足1天' : `剩余${x_days}天余`
   } else {
-    return -timeleft < 1 ? '逾期' : `逾期${-x_days}天余`
+    return -timeleft < 1 ? '超时警告' : `逾期${-x_days}天余`
   }
 }
 

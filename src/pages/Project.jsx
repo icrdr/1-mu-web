@@ -6,7 +6,7 @@ import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
 import ProjectFeedback from '../components/ProjectFeedback'
 import ProjectDesign from '../components/ProjectDesign'
-import {deadline, parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
+import { deadline, parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
 import Avatarx from '../components/Avatarx'
 import { meContext } from '../layouts/Web';
 const { Step } = Steps;
@@ -36,16 +36,22 @@ export default function Project({ history, match, location }) {
     return <div>没有内容</div>
   }
 
-
-
   const stepStatus = (project) => {
-    if (project.status === 'await' || project.status === 'draft') return 'wait'
-    if (project.status === 'pending') return 'process'
-    const x_days = timeLeft(getStage(project))
-    if (x_days >= 0) {
-      return 'process'
-    } else {
-      return 'error'
+    switch (project.status) {
+      case 'pending':
+        return 'process'
+      case 'draft':
+      case 'await':
+        return 'wait'
+      case 'finish':
+        return 'finish'
+      default:
+        const x_days = timeLeft(getStage(project))
+        if (x_days >= 0) {
+          return 'process'
+        } else {
+          return 'error'
+        }
     }
   }
 
@@ -67,7 +73,7 @@ export default function Project({ history, match, location }) {
       return parseStatus('finish')
     } else if (index > projectData.current_stage_index) {
       return parseStatus('await')
-    } else if (status === 'modify' || status === 'progress') {
+    } else if (status === 'modify' || status === 'progress' || status === 'delay') {
       return parseStatus(status) + ' ' + parseTimeLeft(timeLeft(stage))
     } else {
       return parseStatus(status)
@@ -87,7 +93,6 @@ export default function Project({ history, match, location }) {
       <Card className='p:2' title={'企划：' + projectData.title}
         extra={projectData.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
       >
-
         <Row className='m-t:2' gutter={12}>
           <Col sm={24} md={12} className='m-b:4'>
             <Meta
@@ -132,26 +137,26 @@ export default function Project({ history, match, location }) {
             </Link> : '完成'
           } description='' />
         </Steps>
-        <div className='m-t:4'>
-          <Route path={`${match.path}/design`} render={props =>
-            <Design {...props} onSuccess={() => setUpdate(!update)} project={projectData} />}
-          />
-          <Route path={`${match.path}/done`} render={() => {
-            const phase = getPhase(getStage(projectData))
-            return <>
-              <h1>最终成品</h1>
-              <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
-              {phase.upload_files.map((item, j) =>
-                <Card key={j} className='m-t:2'
-                  cover={<ImgCard file={item} />}>
-                  <a href={item.url}><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
-                </Card>
-              )}
-            </>
-          }}
-          />
-          <Route path={`${match.path}/stages/:stage_index(\\d+)`} render={props => <Stage {...props} onSuccess={() => setUpdate(!update)} project={projectData} />} />
-        </div>
+      </Card>
+      <Card className='m-t:2'>
+        <Route path={`${match.path}/design`} render={props =>
+          <Design {...props} onSuccess={() => setUpdate(!update)} project={projectData} />}
+        />
+        <Route path={`${match.path}/done`} render={() => {
+          const phase = getPhase(getStage(projectData))
+          return <>
+            <h1>最终成品</h1>
+            <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
+            {phase.upload_files.map((item, j) =>
+              <Card key={j} className='m-t:2'
+                cover={<ImgCard file={item} />}>
+                <a href={item.url}><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
+              </Card>
+            )}
+          </>
+        }}
+        />
+        <Route path={`${match.path}/stages/:stage_index(\\d+)`} render={props => <Stage {...props} onSuccess={() => setUpdate(!update)} project={projectData} />} />
       </Card>
     </>
   )
@@ -267,6 +272,7 @@ function Stage({ history, match, project, onSuccess }) {
 
   const operationRender = status => {
     switch (status) {
+      case 'delay':
       case 'progress':
       case 'modify':
         return isCreator ? <>
@@ -319,23 +325,28 @@ function Stage({ history, match, project, onSuccess }) {
         <Tabs className='m-t:4' tabPosition='top'>
           {phaseArr.map((phase, i) =>
             <TabPane tab={parseDate(phase.upload_date).split(' ')[0]} key={i}>
-              <Row>
-                <Col><h2 className='fl:l'>提交的文件（{phase.creator.name}）</h2></Col>
-                <Col><Button className='fl:r' type='primary' onClick={() => onBatchDownload(phase)}>批量下载</Button></Col>
+              <Row gutter={16}>
+                <Col sm={24} md={12} className=''>
+                  <Row>
+                    <Col><h2 className='fl:l'>提交的文件（{phase.creator.name}）</h2></Col>
+                    <Col><Button className='fl:r' type='primary' onClick={() => onBatchDownload(phase)}>批量下载</Button></Col>
+                  </Row>
+                  <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
+                  {phase.upload_files.map((item, j) =>
+                    <Card key={j} className='m-t:2'
+                      cover={<ImgCard file={item} />}>
+                      <a href={item.url} target="_blank" rel="noopener noreferrer"><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
+                    </Card>
+                  )}
+                </Col>
+                <Col sm={24} md={12} className=''>
+                  {phase.feedback_date && <>
+                    <h2>修改意见（{phase.client.name}）</h2>
+                    {phase.client_feedback ?
+                      <div dangerouslySetInnerHTML={{ __html: phase.client_feedback }} /> : <div>无</div>}
+                  </>}
+                </Col>
               </Row>
-
-              <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
-              {phase.upload_files.map((item, j) =>
-                <Card key={j} className='m-t:2'
-                  cover={<ImgCard file={item} />}>
-                  <a href={item.url} target="_blank" rel="noopener noreferrer"><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
-                </Card>
-              )}
-              {phase.feedback_date && <>
-                <h2 className='m-t:4'>修改意见（{phase.client.name}）</h2>
-                {phase.client_feedback ?
-                  <div dangerouslySetInnerHTML={{ __html: phase.client_feedback }} /> : <div>无</div>}
-              </>}
             </TabPane>)}
         </Tabs>
       </>
@@ -344,7 +355,7 @@ function Stage({ history, match, project, onSuccess }) {
 
   return (<>
     {project.current_stage_index === index &&
-      <div className='m-t:4'>
+      <div>
         {operationRender(project.status)}
       </div>
     }
