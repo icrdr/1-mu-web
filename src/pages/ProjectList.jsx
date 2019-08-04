@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react'
+
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Checkbox, Divider, Radio, Input, message,Breadcrumb } from 'antd'
+import { Table, Card, Tag, Row, Col, Checkbox, Divider, Radio, Input, message, Breadcrumb } from 'antd'
 import { parseStatus, getStage, fetchData, parseDate, timeLeft, parseTimeLeft } from '../utility'
 import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
@@ -45,19 +46,19 @@ export default function Main({ location, history }) {
       title: '标签',
       dataIndex: 'tags',
       width: '10%',
-      render: (tags, project) => {
+      render: (tags) => {
         return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)
       }
     },
     {
       title: '开始时间',
       dataIndex: 'start_date',
-      render: (start_date, project) => {
-        if(start_date){
+      render: (start_date) => {
+        if (start_date) {
           return parseDate(start_date)
-        }else{
+        } else {
           return '未开始'
-        }  
+        }
       },
       width: '10%',
     },
@@ -89,7 +90,7 @@ export default function Main({ location, history }) {
           case 'progress':
           case 'modify':
             const time_left = timeLeft(getStage(project))
-            return <span style={{color:time_left>=0?'':'red'}}>{parseTimeLeft(time_left)}</span>  
+            return <span style={{ color: time_left >= 0 ? '' : 'red' }}>{parseTimeLeft(time_left)}</span>
           default:
             return ''
         }
@@ -133,11 +134,11 @@ export default function Main({ location, history }) {
       },
       width: '5%',
     },
-    
+
     {
       title: '制作方',
       dataIndex: 'creator_group',
-      render: (creator_group, project) => 
+      render: (creator_group) =>
         <Link to={"/groups/" + creator_group.id}>{creator_group.name}</Link>
       ,
       width: '5%',
@@ -207,7 +208,7 @@ export default function Main({ location, history }) {
     setMefilter(e.target.value)
   }
   const onSearch = v => {
-    if (v.length < 2&& v.length!==0) {
+    if (v.length < 2 && v.length !== 0) {
       message.info('关键词太短，至少2个字符')
       console.log('Too short.')
       return false
@@ -230,48 +231,48 @@ export default function Main({ location, history }) {
 
   return (
     <>
-    <Breadcrumb className='m-b:1'>
-    <Breadcrumb.Item>
-    <Link to='/projects'>企划列表</Link>
-    </Breadcrumb.Item>
-  </Breadcrumb>
-    <Card>
-      <div className='m-b:1'>
-        <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
-      </div>
+      <Breadcrumb className='m-b:1'>
+        <Breadcrumb.Item>
+          <Link to='/projects'>企划列表</Link>
+        </Breadcrumb.Item>
+      </Breadcrumb>
+      <Card>
+        <div className='m-b:1'>
+          <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
+        </div>
 
-      <Row gutter={16}>
-        <Col xs={24} md={8} className='m-b:1'>
-          <Radio.Group value={meFilter} onChange={onChangeMeFilter}>
-            <Radio value='client'>我作为发起方</Radio>
-            <Radio value='creator'>我作为制作方</Radio>
-          </Radio.Group>
-        </Col>
-        <Col xs={24} md={16} className='m-b:1'>
-          <Checkbox
-            indeterminate={indeterminate}
-            onChange={onCheckAllStatusFilter}
-            checked={checkAll}
-          >
-            全选
+        <Row gutter={16}>
+          <Col xs={24} md={8} className='m-b:1'>
+            <Radio.Group value={meFilter} onChange={onChangeMeFilter}>
+              <Radio value='client'>我作为发起方</Radio>
+              <Radio value='creator'>我作为制作方</Radio>
+            </Radio.Group>
+          </Col>
+          <Col xs={24} md={16} className='m-b:1'>
+            <Checkbox
+              indeterminate={indeterminate}
+              onChange={onCheckAllStatusFilter}
+              checked={checkAll}
+            >
+              全选
           </Checkbox>
-          <Divider type="vertical" />
-          <Checkbox.Group
-            options={plainOptions}
-            value={checkedList}
-            onChange={onChangeStatusFilter}
-          />
-        </Col>
-      </Row>
-      <Table
-        columns={columns}
-        rowKey={project => project.id}
-        dataSource={projectList}
-        loading={isloading}
-        pagination={pagination}
-        onChange={onChangePage}
-      />
-    </Card>
+            <Divider type="vertical" />
+            <Checkbox.Group
+              options={plainOptions}
+              value={checkedList}
+              onChange={onChangeStatusFilter}
+            />
+          </Col>
+        </Row>
+        <Table
+          columns={columns}
+          rowKey={project => project.id}
+          dataSource={projectList}
+          loading={isloading}
+          pagination={pagination}
+          onChange={onChangePage}
+        />
+      </Card>
     </>
   )
 }
