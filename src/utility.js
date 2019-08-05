@@ -48,12 +48,18 @@ export function getStage(project) {
 }
 
 export function parseDate(date_str) {
-  const date = new Date(date_str + ' UTC')
+  const date = toLocalDate(date_str)
+  console.log(date)
   return date.toLocaleString()
 }
-
+export function toLocalDate(date_str) {
+  const offset = new Date().getTimezoneOffset();
+  const utc_date = new Date(date_str)
+  utc_date.setMinutes(utc_date.getMinutes() - offset);
+  return utc_date
+}
 export function timeLeft(stage) {
-  const start_date = new Date(getPhase(stage).start_date + ' UTC')
+  const start_date = toLocalDate(getPhase(stage).start_date)
   const current_date = new Date()
   let difference = start_date - current_date;
   difference += 1000 * 60 * 60 * 24 * (getPhase(stage).days_need)
