@@ -32,6 +32,7 @@ export default function ProjectPostByCsv() {
           const path = '/projects/' + res.data.projects[0].id
           const data = {
             title: row[1],
+            design: ' ',
             tags: tags,
           }
           return updateData(path, data)
@@ -39,7 +40,7 @@ export default function ProjectPostByCsv() {
           const path = '/projects'
           const data = {
             title: row[1],
-            design: `<p>${row[1]}</p>`,
+            design: ' ',
             client_id: client_id,
             group_id: group_id,
             stages: [

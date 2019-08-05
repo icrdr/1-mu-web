@@ -29,6 +29,8 @@ export function parseStatus(status) {
       return '进行中（修改）'
     case 'discard':
       return '已废弃'
+    case 'pause':
+      return '暂停'
     case 'abnormal':
       return '异常？'
     case 'delay':
@@ -51,31 +53,13 @@ export function parseDate(date_str) {
 }
 
 export function timeLeft(stage) {
-  let start_date
-  if (stage.phases.length>1){
-    const last_phase = stage.phases[stage.phases.length-2]
-    start_date = new Date(last_phase.feedback_date + ' UTC')
-  }else{
-    start_date = new Date(stage.start_date + ' UTC')
-  }
-  
+  const start_date = new Date(getPhase(stage).start_date + ' UTC')
   const current_date = new Date()
   let difference = start_date - current_date;
   difference += 1000 * 60 * 60 * 24 * (getPhase(stage).days_need)
   return difference / (1000 * 60 * 60 * 24)
 }
-export function deadline(stage) {
-  let start_date
-  if (stage.phases.length>1){
-    const last_phase = stage.phases[stage.phases.length-2]
-    start_date = new Date(last_phase.feedback_date + ' UTC')
-  }else{
-    start_date = new Date(stage.start_date + ' UTC')
-  }
-  
-  let deadline = start_date.getTime() + 1000 * 60 * 60 * 24 * (getPhase(stage).days_need);
-  return new Date(deadline).toLocaleString()
-}
+
 export function parseTimeLeft(timeleft) {
   const x_days = Math.floor(timeleft)
   if (timeleft >= 0) {

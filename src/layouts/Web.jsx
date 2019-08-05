@@ -15,7 +15,6 @@ export const meContext = React.createContext();
 function Web({ location, history, component: Component, ...rest }) {
 
   const { meData, status } = useLogin()
-  const [isSmall] = useState(false);
   const [menu, setMenu] = useState(['']);
 
   useEffect(() => {
@@ -63,7 +62,7 @@ function Web({ location, history, component: Component, ...rest }) {
               <Avatarx url={meData.avatar_url} name={meData.name} />
             </div></Link>}
           </Header>
-          <Content className={isSmall ? "m-t:2 pos:r" : "m-x:2 m-t:4 pos:r"}>
+          <Content className="m-x:2 m-t:4 pos:r">
             <Component {...matchProps} />
           </Content>
           <Footer style={{ textAlign: 'center' }}>1-mu ©2019 Created by emu</Footer>

@@ -206,6 +206,9 @@ export default function Main({ location, history }) {
 
   const onChangeMeFilter = e => {
     setMefilter(e.target.value)
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, page: 1 });
+    history.push(`${location.pathname}?${params}`)
   }
   const onSearch = v => {
     if (v.length < 2 && v.length !== 0) {
@@ -221,12 +224,18 @@ export default function Main({ location, history }) {
     setCheckedList(checkedList)
     setCheckAll(checkedList.length === plainOptions.length)
     setIndeterminate(!!checkedList.length && checkedList.length < plainOptions.length)
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, page: 1 });
+    history.push(`${location.pathname}?${params}`)
   }
 
   const onCheckAllStatusFilter = e => {
     setCheckAll(e.target.checked)
     setCheckedList(e.target.checked ? plainOptions : [])
     setIndeterminate(false)
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, page: 1 });
+    history.push(`${location.pathname}?${params}`)
   }
 
   return (

@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Button, Popconfirm, Checkbox, Divider, Radio, Input, message, Select } from 'antd'
+import { Table, Card, Tag, Row, Col, Button, Popconfirm, Checkbox, Divider, Radio, Input, message, Select, Modal, InputNumber } from 'antd'
 import { parseStatus, getStage, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
 import { meContext } from '../layouts/Dashboard';
 import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
 const { Search } = Input;
 const { Option } = Select;
+const { TextArea } = Input;
 export default function ProjectList({ location, history, match }) {
-  const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '异常']
+  const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '暂停', '废弃']
 
   const [projectList, setProjectList] = useState([]);
   const [groupList, setGroupList] = useState([]);
@@ -19,13 +20,17 @@ export default function ProjectList({ location, history, match }) {
   const [checkAll, setCheckAll] = useState(true);
   const [meFilter, setMefilter] = useState('all');
   const [update, setUpdate] = useState(false);
+  const [showPostponeModel, setPostponeModel] = useState();
+  const [postponeDay, setPostponeDay] = useState(3);
+  const [showRemarkModel, setRemarkModel] = useState();
+  const [remark, setRemark] = useState('');
   const { meData } = useContext(meContext);
 
   const columns = [
     {
       title: '企划名',
       dataIndex: 'title',
-      width: '15%',
+      width: '10%',
       render: (name, project) => {
         let link_url = ''
         switch (project.status) {
@@ -52,6 +57,20 @@ export default function ProjectList({ location, history, match }) {
       }
     },
     {
+      title: '备注',
+      dataIndex: 'remark',
+      width: '10%',
+      render: (remark, project) => {
+        return <div style={{ width: '120px' }}>
+          {remark}
+          <Button type="link" size='small' onClick={() => {
+            setRemark(remark)
+            setRemarkModel(project)
+          }}>{remark ? '修改' : '添加'}</Button>
+        </div>
+      }
+    },
+    {
       title: '开始时间',
       dataIndex: 'start_date',
       render: (start_date, project) => {
@@ -69,14 +88,22 @@ export default function ProjectList({ location, history, match }) {
       width: '10%',
       render: (index, project) => {
         const status = project.status
+        const goBack = <Popconfirm
+            title="确定如此操作么？"
+            onConfirm={() => operateProject(project.id, 'back')}
+            okText="是"
+            cancelText="否"
+          >
+            <Button type="link" size='small'>回溯</Button>
+          </Popconfirm>
         switch (status) {
           case 'await':
             return <span>{`0/${project.stages.length}`}</span>
           case 'finish':
           case 'discard':
-            return <span>{`${(index + 1).toString()}/${project.stages.length}`}</span>
+            return <span>{`${(index + 1).toString()}/${project.stages.length}`}{goBack}</span>
           default:
-            return <span>{`${(index + 1).toString()}/${project.stages.length}：` + getStage(project).name}</span>
+            return <span>{`${(index + 1).toString()}/${project.stages.length}：` + getStage(project).name}{goBack}</span>
         }
       }
     },
@@ -91,7 +118,9 @@ export default function ProjectList({ location, history, match }) {
           case 'progress':
           case 'modify':
             const time_left = timeLeft(getStage(project))
-            return <span style={{ color: time_left >= 0 ? '' : 'red' }}>{parseTimeLeft(time_left)}</span>
+            return <span style={{ color: time_left >= 0 ? '' : 'red' }}>{parseTimeLeft(time_left)}
+              <Button type="link" size='small' onClick={() => setPostponeModel(project)}>延期</Button>
+            </span>
           default:
             return ''
         }
@@ -128,6 +157,9 @@ export default function ProjectList({ location, history, match }) {
           case 'delay':
             color = 'red'
             break
+          case 'pause':
+            color = 'cyan'
+            break
           default:
             color = '#ddd'
         }
@@ -140,13 +172,48 @@ export default function ProjectList({ location, history, match }) {
       title: '制作方',
       dataIndex: 'creator_group',
       render: (group, project) =>
-        <Link to={"/admin/groups/" + group.id}>{group.name}</Link>
+        <Select
+          style={{ width: '100%', maxWidth: '120px' }}
+          placeholder="选择小组"
+          onChange={v => onChangeGroup(v, project.id)}
+          value={group.name}
+        >
+          {groupList.map((item, index) =>
+            <Option key={item.id}>{item.name}</Option>)
+          }
+        </Select>
       ,
-      width: '5%',
+      width: '10%',
+    },
+    {
+      title: '暂停',
+      key: 'key2',
+      render: (key, project) => (<>
+        {project.status === 'pause' ? (
+          <Popconfirm
+            title="确定如此操作么？"
+            onConfirm={() => operateProject(project.id, 'resume')}
+            okText="是"
+            cancelText="否"
+          >
+            <Button type='primary' size='small'>恢复</Button>
+          </Popconfirm>
+        ) : (
+            <Popconfirm
+              title="确定如此操作么？"
+              onConfirm={() => operateProject(project.id, 'pause')}
+              okText="是"
+              cancelText="否"
+            >
+              <Button size='small'>暂停</Button>
+            </Popconfirm>
+          )}
+      </>),
+      width: '3%',
     },
     {
       title: '删除',
-      key: 'key2',
+      key: 'key3',
       render: (key, project) => (<>
         {project.status === 'discard' ? (
           <Popconfirm
@@ -155,7 +222,7 @@ export default function ProjectList({ location, history, match }) {
             okText="是"
             cancelText="否"
           >
-            <Button size='small'>恢复</Button>
+            <Button type='primary' size='small'>撤销</Button>
           </Popconfirm>
         ) : (
             <Popconfirm
@@ -164,14 +231,24 @@ export default function ProjectList({ location, history, match }) {
               okText="是"
               cancelText="否"
             >
-              <Button size='small'>废弃</Button>
+              <Button size='small'>删除</Button>
             </Popconfirm>
           )}
       </>),
-      width: '5%',
+      width: '3%',
     }
   ];
-
+  const onChangeGroup = (v, project_id) => {
+    const path = `/projects/${project_id}`
+    const the_group = groupList.filter(group => group.id === parseInt(v))[0]
+    const data = {
+      client_id: the_group.admins[0].id,
+      group_id: the_group.id,
+    }
+    updateData(path, data).then(res => {
+      setUpdate(!update)
+    })
+  }
   const operateProject = (id, action) => {
     const path = `/projects/${id}/${action}`
     updateData(path).then(res => {
@@ -195,7 +272,8 @@ export default function ProjectList({ location, history, match }) {
       .replace('逾期中', 'delay')
       .replace('待确认', 'pending')
       .replace('已完成', 'finish')
-      .replace('异常', 'abnormal')
+      .replace('暂停', 'pause')
+      .replace('废弃', 'discard')
     const params = {
       order: 'desc',
       order_by: 'status',
@@ -248,10 +326,13 @@ export default function ProjectList({ location, history, match }) {
 
   const onChangeMeFilter = e => {
     setMefilter(e.target.value)
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, page: 1 });
+    history.push(`${location.pathname}?${params}`)
   }
 
   const onSearch = v => {
-    if (v.length < 2 && v.length!==0) {
+    if (v.length < 2 && v.length !== 0) {
       message.info('关键词太短，至少2个字符')
       console.log('Too short.')
       return false
@@ -265,21 +346,72 @@ export default function ProjectList({ location, history, match }) {
     setCheckedList(checkedList)
     setCheckAll(checkedList.length === plainOptions.length)
     setIndeterminate(!!checkedList.length && checkedList.length < plainOptions.length)
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, page: 1 });
+    history.push(`${location.pathname}?${params}`)
   }
 
   const onCheckAllStatusFilter = e => {
     setCheckAll(e.target.checked)
     setCheckedList(e.target.checked ? plainOptions : [])
     setIndeterminate(false)
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, page: 1 });
+    history.push(`${location.pathname}?${params}`)
   }
   const onChangeGroupFilter = v => {
-    console.log(v)
     const values = queryString.parse(location.search)
     const params = queryString.stringify({ ...values, group_id: v.join(','), page: 1 });
     history.push(`${location.pathname}?${params}`)
   }
+  const handlePostpone = () => {
+    const path = `/projects/${showPostponeModel.id}/postpone`
+    const data = {
+      days: postponeDay
+    }
+    updateData(path, data).then(res => {
+      setUpdate(!update)
+      setPostponeModel()
+      setPostponeDay(3)
+    })
+  }
+
+  const handleRemark = () => {
+    console.log(remark)
+    const path = `/projects/${showRemarkModel.id}`
+    const data = {
+      remark: remark
+    }
+    updateData(path, data).then(res => {
+      setUpdate(!update)
+      setRemarkModel()
+    })
+  }
+
   return (
     <Card>
+      <Modal
+        title="备注"
+        visible={showRemarkModel !== undefined}
+        onOk={handleRemark}
+        onCancel={() => setRemarkModel()}
+      >
+        备注  <TextArea
+          placeholder="备注说明"
+          autosize={{ minRows: 2, maxRows: 6 }}
+          value={remark} onChange={e => {
+            e.persist()
+            setRemark(e.target.value)
+          }} />
+      </Modal>
+      <Modal
+        title="延期"
+        visible={showPostponeModel !== undefined}
+        onOk={handlePostpone}
+        onCancel={() => setPostponeModel()}
+      >
+        延期时间  <InputNumber value={postponeDay} onChange={v => setPostponeDay(v)} />
+      </Modal>
       <Row gutter={16}>
         <Col md={12} className='m-b:1'>
           <Button type='primary'><Link to='/admin/projects/post'>添加企划</Link></Button>

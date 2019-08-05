@@ -6,7 +6,7 @@ import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
 import ProjectFeedback from '../components/ProjectFeedback'
 import ProjectDesign from '../components/ProjectDesign'
-import { deadline, parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
+import { parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
 import Avatarx from '../components/Avatarx'
 import { meContext } from '../layouts/Web';
 const { Step } = Steps;
@@ -362,7 +362,7 @@ function Stage({ history, match, project, onSuccess }) {
     <h1>{stage.name}</h1>
     <Descriptions layout="vertical" bordered>
       <Descriptions.Item label="起始日期">{stage.start_date ? parseDate(stage.start_date) : '未开始'}</Descriptions.Item>
-      <Descriptions.Item label="死线">{stage.start_date ? deadline(stage) : '未开始'}</Descriptions.Item>
+      <Descriptions.Item label="死线">{getPhase(stage).start_date ? parseDate(getPhase(stage).deadline_date) : '未开始'}</Descriptions.Item>
       <Descriptions.Item label="计划时间（天）">{getPhase(stage).days_need}</Descriptions.Item>
     </Descriptions>
 
