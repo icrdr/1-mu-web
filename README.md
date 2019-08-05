@@ -8,3 +8,6 @@ yarn add react-cookie
 yarn add axios
 yarn add react-final-form final-form
 ```
+# TO DO
+- [ ] 甘特图
+- [ ] 标签近义词

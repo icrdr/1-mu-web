@@ -1,27 +1,36 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Link } from 'react-router-dom'
-import { Card, Row, Col, Descriptions, Steps, Button, Tabs, message, Icon, Tag, Popconfirm } from 'antd'
+import { Card, Row, Col, Select, Descriptions, Steps, Button, Tabs, message, Icon, Popconfirm } from 'antd'
 import Loading from '../components/Loading'
 import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
 import ProjectFeedback from '../components/ProjectFeedback'
 import ProjectDesign from '../components/ProjectDesign'
-import { deadline, parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
+import { parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
 import Avatarx from '../components/Avatarx'
 const { Step } = Steps;
 const { Meta } = Card;
 const { TabPane } = Tabs;
-
+const { Option } = Select;
 export default function Project({ history, match, location }) {
   const [projectData, setProjectData] = useState();
   const [isloading, setLoading] = useState(false);
   const [update, setUpdate] = useState(true);
+  const [groupList, setGroupList] = useState([]);
+  const [currentGroup, setCurrentGroup] = useState();
 
   useEffect(() => {
     setLoading(true)
-    const path = '/projects/' + match.params.project_id
+    let path = '/groups'
+
+    fetchData(path).then(res => {
+      setGroupList(res.data.groups)
+    })
+
+    path = '/projects/' + match.params.project_id
     fetchData(path).then(res => {
       setProjectData(res.data)
+      setCurrentGroup(res.data.creator_group)
     }).finally(() => {
       setLoading(false)
     })
@@ -77,11 +86,32 @@ export default function Project({ history, match, location }) {
       return parseStatus(status)
     }
   }
-
+  const onChangeGroup = v => {
+    const path = `/projects/${match.params.project_id}`
+    const the_group = groupList.filter(group=>group.id===parseInt(v))[0]
+    const data = {
+      client_id: the_group.admins[0].id,
+      group_id: the_group.id,
+    }
+    updateData(path, data).then(res => {
+      setUpdate(!update)
+    })
+  }
   return (
     <>
       <Card className='p:2' title={'企划：' + projectData.title}
-        extra={projectData.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
+        extra={
+          <Select
+            style={{ width: '200px' }}
+            placeholder="选择小组"
+            onChange={onChangeGroup}
+            value = {currentGroup.name}
+          >
+            {groupList.map((group, index) =>
+              <Option key={group.id}>{group.name}</Option>)
+            }
+          </Select>
+        }
       >
         <Row className='m-t:2' gutter={12}>
           <Col sm={24} md={12} className='m-b:4'>
@@ -319,7 +349,7 @@ function Stage({ history, match, project, onSuccess }) {
     <h1>{stage.name}</h1>
     <Descriptions layout="vertical" bordered>
       <Descriptions.Item label="起始日期">{stage.start_date ? parseDate(stage.start_date) : '未开始'}</Descriptions.Item>
-      <Descriptions.Item label="死线">{stage.start_date ? deadline(stage) : '未开始'}</Descriptions.Item>
+      <Descriptions.Item label="死线">{getPhase(stage).start_date ? parseDate(getPhase(stage).deadline_date) : '未开始'}</Descriptions.Item>
       <Descriptions.Item label="计划时间（天）">{getPhase(stage).days_need}</Descriptions.Item>
     </Descriptions>
 

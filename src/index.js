@@ -5,9 +5,10 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+import 'normalize.css'
 import "shed-css/dist/index.css";
 import 'braft-editor/dist/index.css'
-import 'normalize.css'
+import './react-timelines/lib/css/style.css'
 
 ReactDOM.render(<Router><App /></Router>, document.getElementById('root'));
 

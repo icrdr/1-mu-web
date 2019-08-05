@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { Button } from 'antd';
+import React from 'react'
 
 export default function Main() {
   
   return (
-    <div style={{height:'2000px'}}>
-      ff
+    <div>
+     main
     </div>
   )
 }
