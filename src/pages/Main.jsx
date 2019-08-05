@@ -149,6 +149,10 @@ export default function Main({ location }) {
 
   return (
     <div>
+    {/* <div className='pos:a t-a:c' style={{left:'100px', height:'100px', width:'800px', backgroundColor:'#888'}}>
+      <div className='pos:a' style={{height:'100px', width:'400px', backgroundColor:'#fff'}}/>
+      <p className='pos:r' >ddddddddddddddfffffffffffffddddddddddddddddddddddddddddddddddd</p>
+    </div> */}
       <Timeline
         scale={{
           start,
