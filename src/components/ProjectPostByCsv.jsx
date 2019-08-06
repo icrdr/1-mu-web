@@ -25,14 +25,14 @@ export default function ProjectPostByCsv() {
       if (!row[1]) continue
       const path = '/projects'
       const client_id = row[3] ? row[3] : 1
-      const group_id = row[4] ? row[4]:1
+      const group_id = row[4] ? row[4]: 1
       const tags = row[2].split(";")
       await fetchData(path, { title: row[1] }, false).then(res => {
         if (res.data.projects.length>0) {
           const path = '/projects/' + res.data.projects[0].id
           const data = {
             title: row[1],
-            design: ' ',
+            design: `<p>${row[1]}</p>`,
             tags: tags,
           }
           return updateData(path, data)
@@ -40,21 +40,21 @@ export default function ProjectPostByCsv() {
           const path = '/projects'
           const data = {
             title: row[1],
-            design: ' ',
+            design: `<p>${row[1]}</p>`,
             client_id: client_id,
             group_id: group_id,
             stages: [
             {
               stage_name: '参考-草图',
-              days_need: 350
+              days_need: 7
             },
             {
               stage_name: '线稿-铺色',
-              days_need: 350
+              days_need: 7
             },
             {
               stage_name: '细化-特效',
-              days_need: 350
+              days_need: 7
             }],
             tags: tags,
             confirm: 1
