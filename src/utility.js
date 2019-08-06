@@ -49,7 +49,6 @@ export function getStage(project) {
 
 export function parseDate(date_str) {
   const date = toLocalDate(date_str)
-  console.log(date)
   return date.toLocaleString()
 }
 export function toLocalDate(date_str) {

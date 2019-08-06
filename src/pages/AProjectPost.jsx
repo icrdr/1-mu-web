@@ -10,8 +10,6 @@ function PostProjectForm({ history }) {
   let submit = ''
   const [stageArray, setStageArray] = useState([0])
   const [stageKey, setStageKey] = useState(0)
-  const [creatorArray, setCreatorArray] = useState([0])
-  const [creatorKey, setCreatorKey] = useState(0)
 
   const validation = {
     'title': [
@@ -24,27 +22,27 @@ function PostProjectForm({ history }) {
         validate: v => va.inLength(v, 1, 30)
       }
     ],
-    // 'design': [
-    //   {
-    //     error: '请填写设计',
-    //     validate: v => !v.isEmpty()
-    //   }
-    // ],
+    'design': [
+      {
+        error: '请填写设计',
+        validate: v => !v.isEmpty()
+      }
+    ],
     'client_id': [
       {
         error: 'id不存在',
         validate: v => isUserExist(v)
       }
     ],
-    'creators': [
+    'creator_id': [
       {
-        error: '制作方间不可重复',
-        validate: v => va.isUniqueArr(v)
+        error: 'id不存在',
+        validate: v => isUserExist(v)
       }
-    ]
+    ],
   }
 
-  const { va, errors, setValues, field, validate, handleSubmit } = useForm(onSubmit, undefined, validation)
+  const { va, errors, setValues, field, handleSubmit } = useForm(onSubmit, undefined, validation)
 
   function onSubmit(v) {
     const path = '/projects'
@@ -77,28 +75,19 @@ function PostProjectForm({ history }) {
     setStageArray(stageArray.concat(stageKey + 1))
   }
 
-  const removeCreator = k => {
-    setCreatorArray(creatorArray.filter((key, index) => { return k !== key }))
-  }
-
-  const addCreator = () => {
-    setCreatorKey(creatorKey + 1)
-    setCreatorArray(creatorArray.concat(creatorKey + 1))
-  }
-
   const stagesRender = stageArray.map((k, i) => {
-    // validation[`stages[${k}].stage_name`] = [
-    //   {
-    //     error: '请填写阶段名',
-    //     validate: v => va.isRequired(v)
-    //   }
-    // ]
-    // validation[`stages[${k}].days_need`] = [
-    //   {
-    //     error: '不能大于56天，不能少于2天',
-    //     validate: v => va.inRange(v, 2, 56)
-    //   }
-    // ]
+    validation[`stages[${k}].stage_name`] = [
+      {
+        error: '请填写阶段名',
+        validate: v => va.isRequired(v)
+      }
+    ]
+    validation[`stages[${k}].days_need`] = [
+      {
+        error: '不能大于56天，不能少于2天',
+        validate: v => va.inRange(v, 2, 56)
+      }
+    ]
     return (
       <Card key={k} className='m-b:2'>
         <Row className='pos:r' gutter={12}>
@@ -119,21 +108,6 @@ function PostProjectForm({ history }) {
       </Card>)
   })
 
-  const creatorsRender = creatorArray.map((k, i) => {
-    validation[`creators[${k}]`] = [
-      {
-        error: 'id不存在',
-        validate: v => isUserExist(v)
-      }
-    ]
-    return (
-      <div key={k} className='m-l:.5 m-b:.5'>
-        <InputNumber {...field(`creators[${k}]`, 1, true)} />
-        {i === 0 ? null : <Icon type="close" className='m-l:.5' onClick={() => removeCreator(i)} />}
-        {errors[`creators[${k}]`] && <Alert message={errors[`creators[${k}]`]} type="error" showIcon />}
-      </div>
-    )
-  })
   const uploadHandler = async (param) => {
     if (!param.file) {
       return false
@@ -189,11 +163,8 @@ function PostProjectForm({ history }) {
         </Col>
         <Col xs={24} md={16}>
           <Paragraph>*制作方</Paragraph>
-          <div className='d:f flx-w:w' onBlur={() => validate('creators')}>
-            <Button className='m-b:.5' onClick={() => addCreator()} >添加制作方</Button>
-            {creatorsRender}
-          </div>
-          {errors['creators'] && <Alert message={errors['creators']} type="error" showIcon />}
+          <InputNumber {...field('creator_id', 1, true)} />
+          {errors['creator_id'] && <Alert message={errors['creator_id']} type="error" showIcon />}
         </Col>
       </Row>
       
@@ -246,11 +217,9 @@ export default function ProjectPost({ history }) {
 
 function isUserExist(v) {
   return new Promise(resolve => {
-    const path = '/users'
-    const params = {
-      include: v
-    }
-    fetchData(path, params, false).then(res => {
+    const path = '/users/'+v
+
+    fetchData(path, null, false).then(res => {
       resolve(true)
     }).catch(err => {
       resolve(false)

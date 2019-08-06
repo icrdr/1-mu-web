@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useContext } from 'react'
 
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Checkbox, Divider, Radio, Input, message, Breadcrumb } from 'antd'
-import { parseStatus, getStage, fetchData, parseDate, timeLeft, parseTimeLeft } from '../utility'
+import { Table, Card, Tag, Row, Col, Checkbox, Divider, Input, message, Breadcrumb, Select } from 'antd'
+import { parseStatus, getStage, fetchData, parseDate, timeLeft, parseTimeLeft, updateData } from '../utility'
 import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
 const { Search } = Input;
-
+const { Option } = Select;
 export default function Main({ location, history }) {
-  const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '异常']
+  const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '暂停']
 
   const [projectList, setProjectList] = useState([]);
   const [isloading, setLoading] = useState(false);
@@ -16,8 +16,8 @@ export default function Main({ location, history }) {
   const [checkedList, setCheckedList] = useState(plainOptions);
   const [indeterminate, setIndeterminate] = useState(false);
   const [checkAll, setCheckAll] = useState(true);
-  const [meFilter, setMefilter] = useState('creator');
-  const [update] = useState(false);
+  const [update, setUpdate] = useState(false);
+  const [memberList, setMemberList] = useState([]);
   const { meData } = useContext(meContext);
 
   const columns = [
@@ -121,8 +121,8 @@ export default function Main({ location, history }) {
           case 'discard':
             color = 'grey'
             break
-          case 'abnormal':
-            color = 'purple'
+          case 'pause':
+            color = 'cyan'
             break
           case 'delay':
             color = 'red'
@@ -136,80 +136,119 @@ export default function Main({ location, history }) {
     },
 
     {
-      title: '制作方',
-      dataIndex: 'creator_group',
-      render: (creator_group) =>
-        <Link to={"/groups/" + creator_group.id}>{creator_group.name}</Link>
-      ,
+      title: '制作者',
+      dataIndex: 'creator',
+      render: (creator, project) => {
+        if (project.client.id === meData.id) {
+          return <Select
+            style={{ width: '100%', maxWidth: '120px' }}
+            placeholder="选择小组"
+            onChange={v => onChangeCreator(v, project)}
+            value={creator.name}
+          >
+            {memberList.map((item, index) =>
+              <Option key={item.id}>{item.name}</Option>)
+            }
+          </Select>
+        } else {
+          return <Link to={"/users/" + creator.id}>{creator.name}</Link>
+        }
+      },
       width: '5%',
     },
   ];
 
   useEffect(() => {
     setLoading(true)
-
-    const path = '/projects'
-    const status = checkedList.join(',')
-      .replace('草稿', 'draft')
-      .replace('未开始', 'await')
-      .replace('进行中', 'progress')
-      .replace('修改中', 'modify')
-      .replace('逾期中', 'delay')
-      .replace('待确认', 'pending')
-      .replace('已完成', 'finish')
-      .replace('异常', 'abnormal')
-    const params = {
-      order: 'desc',
-      pre_page: pagination.pageSize,
-      status: status,
-      order_by: 'status',
+    let path = '/groups'
+    const group_ids = []
+    for (const group of meData.groups) {
+      group_ids.push(group.id)
     }
-    switch (meFilter) {
-      case 'client':
-        params.client_id = meData.id
-        break;
-      case 'creator':
-        params.creator_id = meData.id
-        break;
-      default:
+    let params = {
+      include: group_ids.join(',')
     }
-
-    const values = queryString.parse(location.search)
-    if (values.page) {
-      setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
-      params.page = values.page
-    } else {
-      params.page = pagination.current
-    }
-
-    if (values.search) {
-      params.search = values.search
-    }
-
     fetchData(path, params).then(res => {
+      const new_memberList = []
+      const member_ids = []
+      const admin_ids = []
+      for (const group of res.data.groups) {
+        for (const member of group.users) {
+          if (member_ids.indexOf(member.id) === -1){
+            new_memberList.push(member)
+            member_ids.push(member.id)
+          }
+        }
+        for (const admin of group.admins) {
+          admin_ids.push(admin.id)
+        }
+      }
+      setMemberList(new_memberList)
+
+      path = '/projects'
+      const status = checkedList.join(',')
+        .replace('草稿', 'draft')
+        .replace('未开始', 'await')
+        .replace('进行中', 'progress')
+        .replace('修改中', 'modify')
+        .replace('逾期中', 'delay')
+        .replace('待确认', 'pending')
+        .replace('已完成', 'finish')
+        .replace('暂停', 'pause')
+
+      params = {
+        order: 'desc',
+        pre_page: pagination.pageSize,
+        status: status,
+        order_by: 'status',
+        client_id: admin_ids.join(',')
+      }
+
+      const values = queryString.parse(location.search)
+      if (values.page) {
+        setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
+        params.page = values.page
+      } else {
+        params.page = pagination.current
+      }
+
+      if (values.creator_id) {
+        params.creator_id = values.creator_id
+      }
+
+      if (values.search) {
+        params.search = values.search
+      }
+      return fetchData(path, params)
+    }).then(res => {
       setProjectList(res.data.projects)
       setPagination(prevState => { return { ...prevState, total: res.data.total } })
       setLoading(false)
     }).catch(() => {
       setProjectList([])
+    }).finally(() => {
       setLoading(false)
     })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, checkedList, meFilter, update]);
+  }, [location, checkedList, update]);
 
   const onChangePage = (pagination) => {
     const values = queryString.parse(location.search)
     const params = queryString.stringify({ ...values, page: pagination.current });
     history.push(`${location.pathname}?${params}`)
   }
-
-  const onChangeMeFilter = e => {
-    setMefilter(e.target.value)
-    const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, page: 1 });
-    history.push(`${location.pathname}?${params}`)
+  const onChangeCreator = (v, project) => {
+    if (project.creator.id === parseInt(v))return false
+    const path = `/projects/${project.id}`
+    const data = {
+      creator_id: v,
+    }
+    updateData(path, data).then(res => {
+      setUpdate(!update)
+    })
   }
+  
   const onSearch = v => {
     if (v.length < 2 && v.length !== 0) {
       message.info('关键词太短，至少2个字符')
@@ -238,6 +277,12 @@ export default function Main({ location, history }) {
     history.push(`${location.pathname}?${params}`)
   }
 
+  const onChangeCreatorFilter = v => {
+    const values = queryString.parse(location.search)
+    const params = queryString.stringify({ ...values, creator_id: v.join(','), page: 1 });
+    history.push(`${location.pathname}?${params}`)
+  }
+
   return (
     <>
       <Breadcrumb className='m-b:1'>
@@ -252,10 +297,16 @@ export default function Main({ location, history }) {
 
         <Row gutter={16}>
           <Col xs={24} md={8} className='m-b:1'>
-            <Radio.Group value={meFilter} onChange={onChangeMeFilter}>
-              <Radio value='client'>我作为发起方</Radio>
-              <Radio value='creator'>我作为制作方</Radio>
-            </Radio.Group>
+          <Select
+            mode="multiple"
+            style={{ width: '100%' }}
+            placeholder="选择制作方"
+            onChange={onChangeCreatorFilter}
+          >
+            {memberList.map((item, index) =>
+              <Option key={item.id}>{item.name}</Option>)
+            }
+          </Select>
           </Col>
           <Col xs={24} md={16} className='m-b:1'>
             <Checkbox
