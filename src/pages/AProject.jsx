@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Route, Link } from 'react-router-dom'
-import { Card, Row, Col, Select, Descriptions, Steps, Button, Tabs, message, Icon, Popconfirm } from 'antd'
+import { Card, Row, Col, Tag, Descriptions, Steps, Button, Tabs, message, Icon, Popconfirm } from 'antd'
 import Loading from '../components/Loading'
 import ImgCard from '../components/ImgCard'
 import ProjectUpload from '../components/ProjectUpload'
@@ -11,26 +11,17 @@ import Avatarx from '../components/Avatarx'
 const { Step } = Steps;
 const { Meta } = Card;
 const { TabPane } = Tabs;
-const { Option } = Select;
+
 export default function Project({ history, match, location }) {
   const [projectData, setProjectData] = useState();
   const [isloading, setLoading] = useState(false);
   const [update, setUpdate] = useState(true);
-  const [groupList, setGroupList] = useState([]);
-  const [currentGroup, setCurrentGroup] = useState();
 
   useEffect(() => {
     setLoading(true)
-    let path = '/groups'
-
-    fetchData(path).then(res => {
-      setGroupList(res.data.groups)
-    })
-
-    path = '/projects/' + match.params.project_id
+    const path = '/projects/' + match.params.project_id
     fetchData(path).then(res => {
       setProjectData(res.data)
-      setCurrentGroup(res.data.creator_group)
     }).finally(() => {
       setLoading(false)
     })
@@ -86,32 +77,11 @@ export default function Project({ history, match, location }) {
       return parseStatus(status)
     }
   }
-  const onChangeGroup = v => {
-    const path = `/projects/${match.params.project_id}`
-    const the_group = groupList.filter(group => group.id === parseInt(v))[0]
-    const data = {
-      client_id: the_group.admins[0].id,
-      creator_id: the_group.admins[0].id,
-    }
-    updateData(path, data).then(res => {
-      setUpdate(!update)
-    })
-  }
+
   return (
     <>
       <Card className='p:2' title={'企划：' + projectData.title}
-        extra={
-          <Select
-            style={{ width: '200px' }}
-            placeholder="选择小组"
-            onChange={onChangeGroup}
-            value={currentGroup.name}
-          >
-            {groupList.map((group, index) =>
-              <Option key={group.id}>{group.name}</Option>)
-            }
-          </Select>
-        }
+        extra={ projectData.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
       >
         <Row className='m-t:2' gutter={12}>
           <Col sm={24} md={12} className='m-b:4'>

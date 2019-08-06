@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Popconfirm, Button, Input, message, Breadcrumb,Row, Col, Select} from 'antd'
-import { fetchData, updateData } from '../utility'
-import { meContext } from '../layouts/Web';
+import { Table, Card, Tag, Input, message, Breadcrumb, Row, Col, Select } from 'antd'
+import { fetchData } from '../utility'
+// import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
 const { Search } = Input;
 const { Option } = Select;
@@ -12,9 +12,8 @@ export default function Main({ location, history }) {
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
-  const [update, setUpdate] = useState(false);
-  const [isAdmin, setAdmin] = useState(false);
-  const { meData } = useContext(meContext);
+  // const [update, setUpdate] = useState(false);
+  // const { meData } = useContext(meContext);
 
   const columns = [
     {
@@ -31,41 +30,23 @@ export default function Main({ location, history }) {
       }
     },
     {
-      title: '制作方',
-      dataIndex: 'creator_group',
-      render: (group, project) => {
-        if (group.id === 1) {
-          if (isAdmin) {
-            return <Popconfirm
-              title="确定如此操作么？"
-              onConfirm={() => addProject(project.id)}
-              okText="是"
-              cancelText="否"
-            >
-              <Button size='small'>添加任务</Button>
-            </Popconfirm>
-          } else {
-            return '未确定'
-          }
-        } else {
-          return <Link to={"/groups/" + group.id}>{group.name}</Link>
-        }
-      }
-      ,
+      title: '小组',
+      dataIndex: 'client',
+      render: (client, project) => {
+        return <Link to={"/users/" + client.id}>{client.name}</Link>
+      },
+      width: '5%',
+    },
+    {
+      title: '制作者',
+      dataIndex: 'creator',
+      render: (creator, project) => {
+        return <Link to={"/users/" + creator.id}>{creator.name}</Link>
+      },
       width: '5%',
     }
   ]
 
-  function addProject(id) {
-    const path = '/projects/' + id
-    const data = {
-      client_id: meData.id,
-      group_id: meData.groups_as_admin[0].id,
-    }
-    updateData(path, data).then(() => {
-      setUpdate(!update)
-    })
-  }
   useEffect(() => {
     setLoading(true)
     let path = '/groups'
@@ -80,7 +61,7 @@ export default function Main({ location, history }) {
       pre_page: pagination.pageSize,
       status: 'await,progress,delay,pending,abnormal,modify,pause,finish'
     }
-    if (meData.groups_as_admin.length > 0) setAdmin(true)
+
     const values = queryString.parse(location.search)
     if (values.page) {
       setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
@@ -89,8 +70,8 @@ export default function Main({ location, history }) {
       params.page = pagination.current
     }
 
-    if (values.group_id) {
-      params.group_id = values.group_id
+    if (values.client_id) {
+      params.client_id = values.client_id
     }
 
     if (values.search) {
@@ -107,7 +88,7 @@ export default function Main({ location, history }) {
     })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, update]);
+  }, [location]);
 
   const onChangePage = (pagination) => {
     const values = queryString.parse(location.search)
@@ -126,9 +107,15 @@ export default function Main({ location, history }) {
     history.push(`${location.pathname}?${params}`)
   }
   const onChangeGroupFilter = v => {
-    console.log(v)
+    const client_ids = []
+    for (const group_id of v){
+      const the_groups = groupList.filter(group=>group.id===parseInt(group_id))[0]
+      if (the_groups){
+        client_ids.push(the_groups.admins[0].id)
+      }
+    }
     const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, group_id: v.join(','), page: 1 });
+    const params = queryString.stringify({ ...values, client_id: client_ids.join(','), page: 1 });
     history.push(`${location.pathname}?${params}`)
   }
   return (

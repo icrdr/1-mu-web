@@ -102,12 +102,11 @@ export default function Project({ history, match, location }) {
             />
           </Col>
           <Col sm={24} md={12} className='d:f flx-w:w'>
-            {projectData.creator_group.users.map((creator, index) =>
-              <Meta key={index} className='m-b:.5 m-r:1'
-                avatar={<Avatarx url={creator.avatar_url} name={creator.name} />}
-                title={<Link to={"/users/" + creator.id}>{creator.name}</Link>}
-                description="制作方"
-              />)}
+            <Meta className='m-b:.5 m-r:1'
+              avatar={<Avatarx url={projectData.creator.avatar_url} name={projectData.creator.name} />}
+              title={<Link to={"/users/" + projectData.creator.id}>{projectData.creator.name}</Link>}
+              description="制作方"
+            />
           </Col>
         </Row>
 
@@ -164,13 +163,7 @@ export default function Project({ history, match, location }) {
 function Design({ history, match, project, onSuccess }) {
   const { meData } = useContext(meContext);
 
-  let isAdmin = false
-  for (let i in project.creator_group.admins) {
-    if (project.creator_group.admins[i].id === meData.id) {
-      isAdmin = true
-      break
-    }
-  }
+  let isAdmin = project.client.id === meData.id
 
   const onStart = () => {
     const path = `/projects/${match.params.project_id}/start`
@@ -221,21 +214,10 @@ function Stage({ history, match, project, onSuccess }) {
   const index = parseInt(match.params.stage_index)
   const stage = project.stages[index]
   const { meData } = useContext(meContext);
-  let isCreator = false
-  for (let i in project.creator_group.users) {
-    if (project.creator_group.users[i].id === meData.id) {
-      isCreator = true
-      break
-    }
-  }
 
-  let isAdmin = false
-  for (let i in project.creator_group.admins) {
-    if (project.creator_group.admins[i].id === meData.id) {
-      isAdmin = true
-      break
-    }
-  }
+  let isCreator = project.creator.id === meData.id
+
+  let isAdmin = project.client.id === meData.id
 
   const onBatchDownload = phase => {
     let file_id = []

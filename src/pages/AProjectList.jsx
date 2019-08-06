@@ -169,20 +169,40 @@ export default function ProjectList({ location, history, match }) {
     },
 
     {
-      title: '制作方',
-      dataIndex: 'creator',
-      render: (creator, project) =>
+      title: '小组',
+      dataIndex: 'client',
+      render: (client, project) =>
         <Select
           style={{ width: '100%', maxWidth: '120px' }}
           placeholder="选择小组"
-          onChange={v => onChangeGroup(v, project.id)}
-          value={creator.name}
+          onChange={v => onChangeGroup(v, project)}
+          value={client.name}
         >
           {groupList.map((item, index) =>
             <Option key={item.id}>{item.name}</Option>)
           }
         </Select>
       ,
+      width: '10%',
+    },
+    {
+      title: '制作者',
+      dataIndex: 'creator',
+      render: (creator, project) =>{
+        const the_group = groupList.filter(group => {
+          return group.admins[0].id === project.client.id
+        })[0]
+        return <Select
+          style={{ width: '100%', maxWidth: '120px' }}
+          placeholder="选择制作"
+          onChange={v => onChangeCreator(v, project)}
+          value={creator.name}
+        >
+          {the_group && the_group.users.map((item, index) =>
+            <Option key={item.id}>{item.name}</Option>)
+          }
+        </Select>
+      },
       width: '10%',
     },
     {
@@ -238,17 +258,31 @@ export default function ProjectList({ location, history, match }) {
       width: '3%',
     }
   ];
-  const onChangeGroup = (v, project_id) => {
-    const path = `/projects/${project_id}`
+  const onChangeGroup = (v, project) => {
     const the_group = groupList.filter(group => group.id === parseInt(v))[0]
+    if (project.client.id === the_group.admins[0].id)return false
+
+    const path = `/projects/${project.id}`
     const data = {
       client_id: the_group.admins[0].id,
       creator_id: the_group.admins[0].id,
+    }
+    
+    updateData(path, data).then(res => {
+      setUpdate(!update)
+    })
+  }
+  const onChangeCreator = (v, project) => {
+    if (project.creator.id === parseInt(v))return false
+    const path = `/projects/${project.id}`
+    const data = {
+      creator_id: v,
     }
     updateData(path, data).then(res => {
       setUpdate(!update)
     })
   }
+
   const operateProject = (id, action) => {
     const path = `/projects/${id}/${action}`
     updateData(path).then(res => {
