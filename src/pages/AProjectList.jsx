@@ -170,13 +170,13 @@ export default function ProjectList({ location, history, match }) {
 
     {
       title: '制作方',
-      dataIndex: 'creator_group',
-      render: (group, project) =>
+      dataIndex: 'creator',
+      render: (creator, project) =>
         <Select
           style={{ width: '100%', maxWidth: '120px' }}
           placeholder="选择小组"
           onChange={v => onChangeGroup(v, project.id)}
-          value={group.name}
+          value={creator.name}
         >
           {groupList.map((item, index) =>
             <Option key={item.id}>{item.name}</Option>)
@@ -243,7 +243,7 @@ export default function ProjectList({ location, history, match }) {
     const the_group = groupList.filter(group => group.id === parseInt(v))[0]
     const data = {
       client_id: the_group.admins[0].id,
-      group_id: the_group.id,
+      creator_id: the_group.admins[0].id,
     }
     updateData(path, data).then(res => {
       setUpdate(!update)
@@ -298,8 +298,8 @@ export default function ProjectList({ location, history, match }) {
       params.page = pagination.current
     }
 
-    if (values.group_id) {
-      params.group_id = values.group_id
+    if (values.client_id) {
+      params.client_id = values.client_id
     }
 
     if (values.search) {
@@ -360,8 +360,15 @@ export default function ProjectList({ location, history, match }) {
     history.push(`${location.pathname}?${params}`)
   }
   const onChangeGroupFilter = v => {
+    const client_ids = []
+    for (const group_id of v){
+      const the_groups = groupList.filter(group=>group.id===parseInt(group_id))[0]
+      if (the_groups){
+        client_ids.push(the_groups.admins[0].id)
+      }
+    }
     const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, group_id: v.join(','), page: 1 });
+    const params = queryString.stringify({ ...values, client_id: client_ids.join(','), page: 1 });
     history.push(`${location.pathname}?${params}`)
   }
   const handlePostpone = () => {

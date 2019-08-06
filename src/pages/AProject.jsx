@@ -51,7 +51,7 @@ export default function Project({ history, match, location }) {
       case 'await':
         return 'wait'
       case 'finish':
-        return 'finish' 
+        return 'finish'
       default:
         const x_days = timeLeft(getStage(project))
         if (x_days >= 0) {
@@ -88,10 +88,10 @@ export default function Project({ history, match, location }) {
   }
   const onChangeGroup = v => {
     const path = `/projects/${match.params.project_id}`
-    const the_group = groupList.filter(group=>group.id===parseInt(v))[0]
+    const the_group = groupList.filter(group => group.id === parseInt(v))[0]
     const data = {
       client_id: the_group.admins[0].id,
-      group_id: the_group.id,
+      creator_id: the_group.admins[0].id,
     }
     updateData(path, data).then(res => {
       setUpdate(!update)
@@ -105,7 +105,7 @@ export default function Project({ history, match, location }) {
             style={{ width: '200px' }}
             placeholder="选择小组"
             onChange={onChangeGroup}
-            value = {currentGroup.name}
+            value={currentGroup.name}
           >
             {groupList.map((group, index) =>
               <Option key={group.id}>{group.name}</Option>)
@@ -122,12 +122,11 @@ export default function Project({ history, match, location }) {
             />
           </Col>
           <Col sm={24} md={12} className='d:f flx-w:w'>
-            {projectData.creator_group.users.map((creator, index) =>
-              <Meta key={index} className='m-b:.5 m-r:1'
-                avatar={<Avatarx url={creator.avatar_url} name={creator.name} />}
-                title={<Link to={"/users/" + creator.id}>{creator.name}</Link>}
-                description="制作方"
-              />)}
+            <Meta className='m-b:.5 m-r:1'
+              avatar={<Avatarx url={projectData.creator.avatar_url} name={projectData.creator.name} />}
+              title={<Link to={"/users/" + projectData.creator.id}>{projectData.creator.name}</Link>}
+              description="制作方"
+            />
           </Col>
         </Row>
 
