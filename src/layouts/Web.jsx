@@ -4,9 +4,10 @@ import { Route, Link, withRouter } from 'react-router-dom'
 import LoginQrcode from '../components/LoginQrcode'
 import useLogin from '../hooks/useLogin'
 import Loading from '../components/Loading'
+import Maintenance from '../components/Maintenance'
 import Avatarx from '../components/Avatarx'
 
-import { Layout, Button,Menu } from 'antd';
+import { Layout, Button, Menu } from 'antd';
 
 const { Header, Content, Footer } = Layout;
 
@@ -18,20 +19,22 @@ function Web({ location, history, component: Component, ...rest }) {
   const [menu, setMenu] = useState(['']);
 
   useEffect(() => {
-     setMenu([location.pathname.split('/')[1]])
+    setMenu([location.pathname.split('/')[1]])
   }, [location])
 
   const changeMenu = ({ key }) => {
     setMenu([key])
-    history.replace('/'+key)
+    history.replace('/' + key)
   }
 
   switch (status) {
     case 'pending':
       return <Loading />
     case 'no':
-    case 'error':
       return <LoginQrcode />
+    case 'error':
+      return <Maintenance />
+
     default:
   }
 

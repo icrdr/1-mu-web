@@ -51,6 +51,11 @@ export default function Main({ location, history }) {
       }
     },
     {
+      title: '备注',
+      dataIndex: 'remark',
+      width: '10%',
+    },
+    {
       title: '开始时间',
       dataIndex: 'start_date',
       render: (start_date) => {
