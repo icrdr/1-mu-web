@@ -5,7 +5,7 @@ import LoginQrcode from '../components/LoginQrcode'
 import useLogin from '../hooks/useLogin'
 import Loading from '../components/Loading'
 import Avatarx from '../components/Avatarx'
-
+import Maintenance from '../components/Maintenance'
 
 import { Layout, Button, Menu, Icon } from 'antd';
 
@@ -30,8 +30,9 @@ function Dashboard({ location, history, component: Component, ...rest }) {
     case 'pending':
       return <Loading />
     case 'no':
-    case 'error':
       return <LoginQrcode />
+    case 'error':
+      return <Maintenance />
     default:
       if (meData.role !== 'Admin') {
         return <h1>你没有admin权限</h1>
