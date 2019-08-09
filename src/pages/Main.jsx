@@ -1,10 +1,10 @@
 import React from 'react'
-import Index from 'react-gantt-mn'
+import MyComponent from 'react-gantt'
 export default function Main() {
 
   return (
     <div>
-      <Index />
+      <MyComponent />
       main
     </div>
   )
