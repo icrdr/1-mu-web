@@ -316,7 +316,7 @@ function Stage({ history, match, project, onSuccess }) {
                   <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
                   {phase.upload_files.map((item, j) =>
                     <Card key={j} className='m-t:2'
-                      cover={<ImgCard file={item} />}>
+                      cover={<ImgCard file={item}/>}>
                       <a href={item.url} target="_blank" rel="noopener noreferrer"><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
                     </Card>
                   )}
