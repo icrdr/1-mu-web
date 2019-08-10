@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react'
 
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Checkbox, Divider, Input, Breadcrumb, Select, Switch, Radio, Button } from 'antd'
+import { Table, Card, Tag, Row, Col, Checkbox, Divider, Input, Breadcrumb, Select, Radio, Button } from 'antd'
 import { parseStatus, getStage, fetchData, parseDate, timeLeft, parseTimeLeft, updateData } from '../utility'
 import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
@@ -13,8 +13,9 @@ export default function Main({ location, history, match }) {
   const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '暂停']
 
   const [projectList, setProjectList] = useState([]);
-  const [isGantt, setGantt] = useState(false);
+  const [projectList2, setProjectList2] = useState([]);
   const [isloading, setLoading] = useState(false);
+  const [isloading2, setLoading2] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [checkedList, setCheckedList] = useState(plainOptions);
   const [indeterminate, setIndeterminate] = useState(false);
@@ -216,53 +217,34 @@ export default function Main({ location, history, match }) {
         .replace('待确认', 'pending')
         .replace('已完成', 'finish')
         .replace('暂停', 'pause')
-      let params
-      if (isGantt) {
-        params = {
-          order: 'desc',
-          pre_page: 20,
-          status: 'progress,modify,delay,pending',
-          order_by: 'status',
-        }
-        switch (meFilter) {
-          case 'client':
-            params.client_id = meData.id
-            break;
-          case 'creator':
-            params.creator_id = meData.id
-            break;
-          default:
-        }
+
+      const params = {
+        order: 'desc',
+        pre_page: pagination.pageSize,
+        status: status,
+        order_by: 'status',
+        client_id: adminIds.join(',')
+      }
+
+      const values = queryString.parse(location.search)
+      if (values.page) {
+        setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
+        params.page = values.page
       } else {
-        params = {
-          order: 'desc',
-          pre_page: pagination.pageSize,
-          status: status,
-          order_by: 'status',
-          client_id: adminIds.join(',')
-        }
+        params.page = pagination.current
+      }
 
-        const values = queryString.parse(location.search)
-        if (values.page) {
-          setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
-          params.page = values.page
-        } else {
-          params.page = pagination.current
-        }
+      if (values.creator_id) {
+        params.creator_id = values.creator_id
+      }
 
-        if (values.creator_id) {
-          params.creator_id = values.creator_id
-        }
-
-        if (values.search) {
-          params.search = values.search
-        }
+      if (values.search) {
+        params.search = values.search
       }
 
       fetchData(path, params).then(res => {
         setProjectList(res.data.projects)
         setPagination(prevState => { return { ...prevState, total: res.data.total } })
-        setLoading(false)
       }).catch(() => {
         setProjectList([])
       }).finally(() => {
@@ -270,7 +252,37 @@ export default function Main({ location, history, match }) {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isGantt, location, checkedList, meFilter, update]);
+  }, [location, checkedList, update]);
+
+  useEffect(() => {
+    setLoading2(true)
+    setProjectList2([])
+    const path = '/projects'
+    const params = {
+      order: 'desc',
+      pre_page: 20,
+      status: 'progress,modify,delay,pending',
+      order_by: 'status',
+    }
+    switch (meFilter) {
+      case 'client':
+        params.client_id = meData.id
+        break;
+      case 'creator':
+        params.creator_id = meData.id
+        break;
+      default:
+    }
+    fetchData(path, params).then(res => {
+      setProjectList2(res.data.projects)
+    }).catch(() => {
+      setProjectList2([])
+    }).finally(() => {
+      setLoading2(false)
+    })
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meFilter]);
 
   const onChangePage = (pagination) => {
     const values = queryString.parse(location.search)
@@ -329,74 +341,70 @@ export default function Main({ location, history, match }) {
           <Link to='/projects'>企划列表</Link>
         </Breadcrumb.Item>
       </Breadcrumb>
-      <Card>
-        <div>
-          <div className='m-b:1'>
-            <span className='m-r:1'>甘特图</span><Switch className='m-r:4' checked={isGantt} onChange={checked => setGantt(checked)} />
-          </div>
-          {isGantt && <>
-            <Row gutter={16}>
-              <Col xs={12} md={12} className='m-b:1 t-a:l'>
-                <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#1890ff' }} />进行中</div>
-                <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#13c2c2' }} />等待中</div>
-                <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#ff4d4f' }} />超时</div>
-              </Col>
-              <Col xs={12} md={12} className='m-b:1 t-a:r'>
-                <Radio.Group value={meFilter} onChange={e => setMefilter(e.target.value)}>
-                  <Radio value='client'>我作为发起方</Radio>
-                  <Radio value='creator'>我作为制作方</Radio>
-                </Radio.Group>
-              </Col>
-            </Row>
-            <Button onClick={()=>{if(zoom+5<100)setZoom(zoom+5)}} className='pos:a' style={{ right: '60px', top: '20px' }} disabled={zoom+5>=100} icon="zoom-in" />
-            <Button onClick={()=>{if(zoom-5>0)setZoom(zoom-5)}} className='pos:a' style={{ right: '20px', top: '20px' }} disabled={zoom-5<=0} icon="zoom-out" />
-          </>}
-        </div>
-        {isGantt ? <Ganttx zoom={zoom} loading={isloading} projects={projectList} /> :
-          <>
-            <div className='m-b:1'>
-              <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
-            </div>
-
-            <Row gutter={16}>
-              <Col xs={24} md={8} className='m-b:1'>
-                <Select
-                  mode="multiple"
-                  style={{ width: '100%' }}
-                  placeholder="选择制作方"
-                  onChange={onChangeCreatorFilter}
-                >
-                  {memberList.map((item, index) =>
-                    <Option key={item.id}>{item.name}</Option>)
-                  }
-                </Select>
-              </Col>
-              <Col xs={24} md={16} className='m-b:1'>
-                <Checkbox
-                  indeterminate={indeterminate}
-                  onChange={onCheckAllStatusFilter}
-                  checked={checkAll}
-                >
-                  全选
-                </Checkbox>
-                <Divider type="vertical" />
-                <Checkbox.Group
-                  options={plainOptions}
-                  value={checkedList}
-                  onChange={onChangeStatusFilter}
-                />
-              </Col>
-            </Row>
-            <Table
-              columns={columns}
-              rowKey={project => project.id}
-              dataSource={projectList}
-              loading={isloading}
-              pagination={pagination}
-              onChange={onChangePage}
-            />
-          </>}
+      <Card className='m-b:2'>
+        <div><h2>进度可视化</h2></div>
+        <Row gutter={16}>
+          <Col xs={12} md={12} className='m-b:1 t-a:l'>
+            <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#1890ff' }} />进行中</div>
+            <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#13c2c2' }} />等待中</div>
+            <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#ff4d4f' }} />超时</div>
+          </Col>
+          <Col xs={12} md={12} className='m-b:1 t-a:r'>
+            <Radio.Group value={meFilter} onChange={e => setMefilter(e.target.value)}>
+              <Radio value='client'>我作为发起方</Radio>
+              <Radio value='creator'>我作为制作方</Radio>
+            </Radio.Group>
+          </Col>
+        </Row>
+        <Button onClick={() => { if (zoom + 5 < 100) setZoom(zoom + 5) }} className='pos:a' style={{ right: '60px', top: '20px' }} disabled={zoom + 5 >= 100} icon="zoom-in" />
+        <Button onClick={() => { if (zoom - 5 > 0) setZoom(zoom - 5) }} className='pos:a' style={{ right: '20px', top: '20px' }} disabled={zoom - 5 <= 0} icon="zoom-out" />
+        <Ganttx zoom={zoom} loading={isloading2} projects={projectList2} />
       </Card>
+      <Card >
+
+        <div className='m-b:1'>
+          <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
+        </div>
+
+        <Row gutter={16}>
+          <Col xs={24} md={8} className='m-b:1'>
+            <Select
+              mode="multiple"
+              style={{ width: '100%' }}
+              placeholder="选择制作方"
+              onChange={onChangeCreatorFilter}
+            >
+              {memberList.map((item, index) =>
+                <Option key={item.id}>{item.name}</Option>)
+              }
+            </Select>
+          </Col>
+          <Col xs={24} md={16} className='m-b:1'>
+            <Checkbox
+              indeterminate={indeterminate}
+              onChange={onCheckAllStatusFilter}
+              checked={checkAll}
+            >
+              全选
+                </Checkbox>
+            <Divider type="vertical" />
+            <Checkbox.Group
+              options={plainOptions}
+              value={checkedList}
+              onChange={onChangeStatusFilter}
+            />
+          </Col>
+        </Row>
+        <Table
+          columns={columns}
+          rowKey={project => project.id}
+          dataSource={projectList}
+          loading={isloading}
+          pagination={pagination}
+          onChange={onChangePage}
+        />
+      </Card>
+
     </>
   )
 }
