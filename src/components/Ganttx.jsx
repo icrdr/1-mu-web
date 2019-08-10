@@ -3,7 +3,7 @@ import { Link, withRouter } from 'react-router-dom'
 import Gantt from 'react-gantt-antd'
 import { getPhase, toLocalDate } from '../utility'
 import Loading from '../components/Loading'
-function Ganttx({ match, zoom, projects }) {
+function Ganttx({ match, zoom, loading, projects }) {
   const now = new Date()
   const [tracks, setTracks] = useState([])
   const [timelineStart, setTimelineStart] = useState(new Date(now.getTime()-1000))
@@ -157,9 +157,11 @@ function Ganttx({ match, zoom, projects }) {
       return [...state]
     })
   }
-  if (projects.length ===0){
+  
+  if (loading){
     return <Loading/>
   }
+
   return (
     <div>
       <Gantt

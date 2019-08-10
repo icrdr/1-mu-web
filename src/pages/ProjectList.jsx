@@ -352,7 +352,7 @@ export default function Main({ location, history, match }) {
             <Button onClick={()=>{if(zoom-5>0)setZoom(zoom-5)}} className='pos:a' style={{ right: '20px', top: '20px' }} disabled={zoom-5<=0} icon="zoom-out" />
           </>}
         </div>
-        {isGantt ? <Ganttx zoom={zoom} projects={projectList} /> :
+        {isGantt ? <Ganttx zoom={zoom} loading={isloading} projects={projectList} /> :
           <>
             <div className='m-b:1'>
               <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
