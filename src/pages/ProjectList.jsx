@@ -1,23 +1,29 @@
 import React, { useEffect, useState, useContext } from 'react'
 
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Checkbox, Divider, Input, message, Breadcrumb, Select } from 'antd'
+import { Table, Card, Tag, Row, Col, Checkbox, Divider, Input, message, Breadcrumb, Select, Switch, Radio, Button } from 'antd'
 import { parseStatus, getStage, fetchData, parseDate, timeLeft, parseTimeLeft, updateData } from '../utility'
 import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
+import Ganttx from '../components/Ganttx';
+
 const { Search } = Input;
 const { Option } = Select;
-export default function Main({ location, history }) {
+export default function Main({ location, history, match }) {
   const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '暂停']
 
   const [projectList, setProjectList] = useState([]);
+  const [isGantt, setGantt] = useState(true);
   const [isloading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [checkedList, setCheckedList] = useState(plainOptions);
   const [indeterminate, setIndeterminate] = useState(false);
   const [checkAll, setCheckAll] = useState(true);
   const [update, setUpdate] = useState(false);
+  const [meFilter, setMefilter] = useState('creator');
   const [memberList, setMemberList] = useState([]);
+  const [adminIds, setAdminIds] = useState([]);
+  const [zoom, setZoom] = useState(40);
   const { meData } = useContext(meContext);
 
   const columns = [
@@ -162,15 +168,14 @@ export default function Main({ location, history }) {
       width: '5%',
     },
   ];
-
   useEffect(() => {
     setLoading(true)
-    let path = '/groups'
+    const path = '/groups'
     const group_ids = []
     for (const group of meData.groups) {
       group_ids.push(group.id)
     }
-    let params = {
+    const params = {
       include: group_ids.join(',')
     }
     fetchData(path, params).then(res => {
@@ -179,7 +184,7 @@ export default function Main({ location, history }) {
       const admin_ids = []
       for (const group of res.data.groups) {
         for (const member of group.users) {
-          if (member_ids.indexOf(member.id) === -1){
+          if (member_ids.indexOf(member.id) === -1) {
             new_memberList.push(member)
             member_ids.push(member.id)
           }
@@ -189,8 +194,18 @@ export default function Main({ location, history }) {
         }
       }
       setMemberList(new_memberList)
+      setAdminIds(admin_ids)
+      setUpdate(!update)
+    }).finally(() => {
+      setLoading(false)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      path = '/projects'
+  useEffect(() => {
+    if (adminIds.length > 0) {
+      setLoading(true)
+      const path = '/projects'
       const status = checkedList.join(',')
         .replace('草稿', 'draft')
         .replace('未开始', 'await')
@@ -200,43 +215,61 @@ export default function Main({ location, history }) {
         .replace('待确认', 'pending')
         .replace('已完成', 'finish')
         .replace('暂停', 'pause')
-
-      params = {
-        order: 'desc',
-        pre_page: pagination.pageSize,
-        status: status,
-        order_by: 'status',
-        client_id: admin_ids.join(',')
-      }
-
-      const values = queryString.parse(location.search)
-      if (values.page) {
-        setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
-        params.page = values.page
+      let params
+      if (isGantt) {
+        params = {
+          order: 'desc',
+          pre_page: 20,
+          status: 'progress,modify,delay,pending',
+          order_by: 'status',
+        }
+        switch (meFilter) {
+          case 'client':
+            params.client_id = meData.id
+            break;
+          case 'creator':
+            params.creator_id = meData.id
+            break;
+          default:
+        }
       } else {
-        params.page = pagination.current
+        params = {
+          order: 'desc',
+          pre_page: pagination.pageSize,
+          status: status,
+          order_by: 'status',
+          client_id: adminIds.join(',')
+        }
+
+        const values = queryString.parse(location.search)
+        if (values.page) {
+          setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
+          params.page = values.page
+        } else {
+          params.page = pagination.current
+        }
+
+        if (values.creator_id) {
+          params.creator_id = values.creator_id
+        }
+
+        if (values.search) {
+          params.search = values.search
+        }
       }
 
-      if (values.creator_id) {
-        params.creator_id = values.creator_id
-      }
-
-      if (values.search) {
-        params.search = values.search
-      }
-      return fetchData(path, params)
-    }).then(res => {
-      setProjectList(res.data.projects)
-      setPagination(prevState => { return { ...prevState, total: res.data.total } })
-      setLoading(false)
-    }).catch(() => {
-      setProjectList([])
-    }).finally(() => {
-      setLoading(false)
-    })
-
+      fetchData(path, params).then(res => {
+        setProjectList(res.data.projects)
+        setPagination(prevState => { return { ...prevState, total: res.data.total } })
+        setLoading(false)
+      }).catch(() => {
+        setProjectList([])
+      }).finally(() => {
+        setLoading(false)
+      })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, checkedList, update]);
+  }, [isGantt, location, checkedList, meFilter, update]);
 
   const onChangePage = (pagination) => {
     const values = queryString.parse(location.search)
@@ -244,7 +277,7 @@ export default function Main({ location, history }) {
     history.push(`${location.pathname}?${params}`)
   }
   const onChangeCreator = (v, project) => {
-    if (project.creator.id === parseInt(v))return false
+    if (project.creator.id === parseInt(v)) return false
     const path = `/projects/${project.id}`
     const data = {
       creator_id: v,
@@ -253,7 +286,7 @@ export default function Main({ location, history }) {
       setUpdate(!update)
     })
   }
-  
+
   const onSearch = v => {
     if (v.length < 2 && v.length !== 0) {
       message.info('关键词太短，至少2个字符')
@@ -296,47 +329,72 @@ export default function Main({ location, history }) {
         </Breadcrumb.Item>
       </Breadcrumb>
       <Card>
-        <div className='m-b:1'>
-          <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
+        <div>
+          <div className='m-b:1'>
+            <span className='m-r:1'>甘特图</span><Switch className='m-r:4' checked={isGantt} onChange={checked => setGantt(checked)} />
+          </div>
+          {isGantt && <>
+            <Row gutter={16}>
+              <Col xs={12} md={12} className='m-b:1 t-a:l'>
+                <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#1890ff' }} />进行中</div>
+                <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#13c2c2' }} />等待中</div>
+                <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#ff4d4f' }} />超时</div>
+              </Col>
+              <Col xs={12} md={12} className='m-b:1 t-a:r'>
+                <Radio.Group value={meFilter} onChange={e => setMefilter(e.target.value)}>
+                  <Radio value='client'>我作为发起方</Radio>
+                  <Radio value='creator'>我作为制作方</Radio>
+                </Radio.Group>
+              </Col>
+            </Row>
+            <Button onClick={()=>{if(zoom+5<100)setZoom(zoom+5)}} className='pos:a' style={{ right: '60px', top: '20px' }} disabled={zoom+5>=100} icon="zoom-in" />
+            <Button onClick={()=>{if(zoom-5>0)setZoom(zoom-5)}} className='pos:a' style={{ right: '20px', top: '20px' }} disabled={zoom-5<=0} icon="zoom-out" />
+          </>}
         </div>
+        {isGantt ? <Ganttx zoom={zoom} projects={projectList} /> :
+          <>
+            <div className='m-b:1'>
+              <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
+            </div>
 
-        <Row gutter={16}>
-          <Col xs={24} md={8} className='m-b:1'>
-          <Select
-            mode="multiple"
-            style={{ width: '100%' }}
-            placeholder="选择制作方"
-            onChange={onChangeCreatorFilter}
-          >
-            {memberList.map((item, index) =>
-              <Option key={item.id}>{item.name}</Option>)
-            }
-          </Select>
-          </Col>
-          <Col xs={24} md={16} className='m-b:1'>
-            <Checkbox
-              indeterminate={indeterminate}
-              onChange={onCheckAllStatusFilter}
-              checked={checkAll}
-            >
-              全选
-          </Checkbox>
-            <Divider type="vertical" />
-            <Checkbox.Group
-              options={plainOptions}
-              value={checkedList}
-              onChange={onChangeStatusFilter}
+            <Row gutter={16}>
+              <Col xs={24} md={8} className='m-b:1'>
+                <Select
+                  mode="multiple"
+                  style={{ width: '100%' }}
+                  placeholder="选择制作方"
+                  onChange={onChangeCreatorFilter}
+                >
+                  {memberList.map((item, index) =>
+                    <Option key={item.id}>{item.name}</Option>)
+                  }
+                </Select>
+              </Col>
+              <Col xs={24} md={16} className='m-b:1'>
+                <Checkbox
+                  indeterminate={indeterminate}
+                  onChange={onCheckAllStatusFilter}
+                  checked={checkAll}
+                >
+                  全选
+                </Checkbox>
+                <Divider type="vertical" />
+                <Checkbox.Group
+                  options={plainOptions}
+                  value={checkedList}
+                  onChange={onChangeStatusFilter}
+                />
+              </Col>
+            </Row>
+            <Table
+              columns={columns}
+              rowKey={project => project.id}
+              dataSource={projectList}
+              loading={isloading}
+              pagination={pagination}
+              onChange={onChangePage}
             />
-          </Col>
-        </Row>
-        <Table
-          columns={columns}
-          rowKey={project => project.id}
-          dataSource={projectList}
-          loading={isloading}
-          pagination={pagination}
-          onChange={onChangePage}
-        />
+          </>}
       </Card>
     </>
   )
