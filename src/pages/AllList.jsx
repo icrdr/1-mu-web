@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Input, message, Breadcrumb, Row, Col, Select } from 'antd'
+import { Table, Card, Tag, Input, Breadcrumb, Row, Col, Select } from 'antd'
 import { fetchData } from '../utility'
 // import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
@@ -97,11 +97,11 @@ export default function Main({ location, history }) {
   }
 
   const onSearch = v => {
-    if (v.length < 2) {
-      message.info('关键词太短，至少2个字符')
-      console.log('Too short.')
-      return false
-    }
+    // if (v.length < 2) {
+    //   message.info('关键词太短，至少2个字符')
+    //   console.log('Too short.')
+    //   return false
+    // }
     const values = queryString.parse(location.search)
     const params = queryString.stringify({ ...values, search: v, page: 1 });
     history.push(`${location.pathname}?${params}`)

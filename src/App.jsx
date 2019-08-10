@@ -19,6 +19,7 @@ import User from './pages/User'
 import FileList from './pages/FileList'
 import AllList from './pages/AllList'
 import NotFound from './pages/NotFound'
+import SampleList from './pages/SampleList'
 // layouts
 import Web from './layouts/Web'
 import Dashboard from './layouts/Dashboard'
@@ -42,6 +43,7 @@ function App({ location }) {
     <Switch>
       <Route exact path="/" component={Main} />
       <Web path="/me" component={Me} />
+      <Web exact path="/samples" component={SampleList} />
       <Web exact path="/projects" component={ProjectList} />
       <Web exact path="/all" component={AllList}/>
       <Web exact path="/files" component={FileList}/>
