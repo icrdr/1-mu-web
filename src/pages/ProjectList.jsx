@@ -13,7 +13,7 @@ export default function Main({ location, history, match }) {
   const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '暂停']
 
   const [projectList, setProjectList] = useState([]);
-  const [isGantt, setGantt] = useState(true);
+  const [isGantt, setGantt] = useState(false);
   const [isloading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [checkedList, setCheckedList] = useState(plainOptions);
@@ -205,6 +205,7 @@ export default function Main({ location, history, match }) {
   useEffect(() => {
     if (adminIds.length > 0) {
       setLoading(true)
+      setProjectList([])
       const path = '/projects'
       const status = checkedList.join(',')
         .replace('草稿', 'draft')
