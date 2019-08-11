@@ -41,7 +41,7 @@ function App({ location }) {
 
   return (
     <Switch>
-      <Route exact path="/" component={Main} />
+      <Web exact path="/" component={Main} />
       <Web path="/me" component={Me} />
       <Web exact path="/samples" component={SampleList} />
       <Web exact path="/projects" component={ProjectList} />
