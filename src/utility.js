@@ -26,7 +26,7 @@ export function parseStatus(status) {
     case 'progress':
       return '进行中'
     case 'modify':
-      return '进行中（修改）'
+      return '修改中'
     case 'discard':
       return '已废弃'
     case 'pause':

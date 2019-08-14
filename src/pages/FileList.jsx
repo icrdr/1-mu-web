@@ -6,9 +6,11 @@ import StackGrid from "react-stack-grid";
 import queryString from 'query-string'
 import ImgPost from '../components/ImgPost'
 import { meContext } from '../layouts/Web';
+import { useMediaQuery } from 'react-responsive'
 const { Search } = Input;
 const { CheckableTag } = Tag;
 export default function FileList({ location, history }) {
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
   const [stackGrid, setStackGrid] = useState()
   const [page, setPage] = useState(1)
   const [imgList, setImgList] = useState([])
@@ -79,11 +81,6 @@ export default function FileList({ location, history }) {
     setImgList([])
     setPage(1)
     setSelectedTags([])
-    if (v.length < 2 && v.length !== 0) {
-      message.info('关键词太短，至少2个字符')
-      console.log('Too short.')
-      return false
-    }
     const values = queryString.parse(location.search)
     const params = queryString.stringify({ ...values, search: v, page: 1 });
     history.push(`${location.pathname}?${params}`)
@@ -138,7 +135,7 @@ export default function FileList({ location, history }) {
             onCancel={() => setLightBox()}
             okButtonProps={{ className: 'd:n' }}
             cancelButtonProps={{ className: 'd:n' }}
-            width='60%'
+            width={isSm?'100%':'60%'}
             bodyStyle={{
               padding: 0
             }}
@@ -156,7 +153,6 @@ export default function FileList({ location, history }) {
                 onChange={v => handleSubmitTag(lightBox,v)}
               />
             </div>
-
           </Modal>
         </>
       }
@@ -191,7 +187,7 @@ export default function FileList({ location, history }) {
           </Col>
         </Row>
         <StackGrid
-          columnWidth='33.33%'
+          columnWidth={isSm?'100%':'33.33%'}
           monitorImagesLoaded={true}
           gridRef={grid => setStackGrid(grid)}
           duration={180}
@@ -203,7 +199,7 @@ export default function FileList({ location, history }) {
               {img.previews.length > 0 ? (
                 <img width='100%' alt='图片' src={img.previews[0].url} />
               ) : (
-                  <div style={{ width: '100%', height: '200px' }}>{img.name}.{img.format}</div>
+                  <div style={{textAlign:'center', width: '100%', lineHeight:'100px', height: '100px', backgroundColor:'#eee'}}>{img.name}.{img.format} 预览错误</div>
                 )}
             </div>
           )}

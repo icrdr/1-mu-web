@@ -20,6 +20,7 @@ import FileList from './pages/FileList'
 import AllList from './pages/AllList'
 import NotFound from './pages/NotFound'
 import SampleList from './pages/SampleList'
+import AGroupAdd from './pages/AGroupAdd'
 // layouts
 import Web from './layouts/Web'
 import Dashboard from './layouts/Dashboard'
@@ -58,6 +59,7 @@ function App({ location }) {
       <Dashboard path="/admin/users/:user_id(\d+)" component={AUser} />
       <Dashboard exact path="/admin/groups" component={AGroupList} />
       <Dashboard path="/admin/groups/:group_id(\d+)" component={AGroup} />
+      <Dashboard path="/admin/groups/add" component={AGroupAdd} />
       <Route component={NotFound} />
     </Switch>
   )

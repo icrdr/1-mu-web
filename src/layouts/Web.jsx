@@ -6,8 +6,8 @@ import useLogin from '../hooks/useLogin'
 import Loading from '../components/Loading'
 import Maintenance from '../components/Maintenance'
 import Avatarx from '../components/Avatarx'
-
-import { Layout, Button, Menu } from 'antd';
+import { useMediaQuery } from 'react-responsive'
+import { Layout, Button, Menu, Row, Col } from 'antd';
 
 const { Header, Content, Footer } = Layout;
 
@@ -17,7 +17,7 @@ function Web({ location, history, component: Component, ...rest }) {
 
   const { meData, status } = useLogin()
   const [menu, setMenu] = useState(['']);
-
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
   useEffect(() => {
     setMenu([location.pathname.split('/')[1]])
   }, [location])
@@ -40,38 +40,40 @@ function Web({ location, history, component: Component, ...rest }) {
 
   return (
     <Route {...rest} render={matchProps => (
-      <meContext.Provider
-        value={{ meData }}
-      >
+      <meContext.Provider value={{ meData }}>
         <Layout style={{ minHeight: '100vh' }}>
 
           <Header className="p:0" style={{ background: '#fff' }} >
-            <div className='m-l:2 m-r:2 fl:l'>
-              一目 - 企划管理系统
-            </div>
-            <Menu
-              mode="horizontal"
-              style={{ lineHeight: '64px' }}
-              selectedKeys={menu}
-              onClick={changeMenu}
-            >
-              <Menu.Item key="groups">小组列表</Menu.Item>
-              <Menu.Item key="projects">企划列表</Menu.Item>
-              <Menu.Item key="all">总表</Menu.Item>
-              <Menu.Item key="files">图库</Menu.Item>
-              <Menu.Item key="samples">样图</Menu.Item>
-            </Menu>
-            {meData && <Link to={'/users/' + meData.id}><div className="pos:a top:0 right:2">
-              <Button type="link">{meData.name}</Button>
-              <Avatarx url={meData.avatar_url} name={meData.name} />
-            </div></Link>}
+            <Row >
+              <Col xs={8} md={20} className='t-a:l'>
+                <div className='fl:l m-l:1' style={{ height: '64px' }}>一目 - 企划管理系统</div>
+                <Menu
+                  mode="horizontal"
+                  style={{ lineHeight: '64px' }}
+                  selectedKeys={menu}
+                  onClick={changeMenu}
+                >
+                  <Menu.Item key="groups">小组列表</Menu.Item>
+                  <Menu.Item key="projects">企划列表</Menu.Item>
+                  <Menu.Item key="all">总表</Menu.Item>
+                  <Menu.Item key="files">图库</Menu.Item>
+                  <Menu.Item key="samples">样图</Menu.Item>
+                </Menu>
+              </Col>
+              <Col xs={16} md={4} className='t-a:r'>
+                {meData && <Link to={'/users/' + meData.id}><div className="pos:a top:0 right:2">
+                  <Button type="link">{meData.name}</Button>
+                  <Avatarx url={meData.avatar_url} name={meData.name} />
+                </div></Link>}
+              </Col>
+            </Row>
           </Header>
-          <Content className="m-x:2 m-t:4 pos:r">
+          <Content className={isSm ? "m-x:0 m-t:2 pos:r" : "m-x:2 m-t:4 pos:r"}>
             <Component {...matchProps} />
           </Content>
           <Footer style={{ textAlign: 'center' }}>1-mu ©2019 Created by emu</Footer>
         </Layout>
-      </meContext.Provider>
+      </ meContext.Provider>
     )} />
   )
 }

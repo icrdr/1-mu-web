@@ -1,37 +1,79 @@
 import React, { useEffect, useState, useContext } from 'react'
 
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Checkbox, Divider, Input, Breadcrumb, Select, Radio, Button } from 'antd'
+import { Table, Card, Tag, Row, Col, Input, Button, Icon, Select, Radio } from 'antd'
 import { parseStatus, getStage, fetchData, parseDate, timeLeft, parseTimeLeft, updateData } from '../utility'
 import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
 import Ganttx from '../components/Ganttx';
+import { useMediaQuery } from 'react-responsive'
 
-const { Search } = Input;
 const { Option } = Select;
-export default function Main({ location, history, match }) {
-  const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '暂停']
+export default function Main({ location, history }) {
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
+  const [tableSorter, setTableSorter] = useState({});
+  const [tableFilter, setTableFilter] = useState({});
+  const [tableSearch, setTableSearch] = useState({});
+  const allTableFilter = { status: [], creator_id:[]}
 
   const [projectList, setProjectList] = useState([]);
   const [projectList2, setProjectList2] = useState([]);
   const [isloading, setLoading] = useState(false);
   const [isloading2, setLoading2] = useState(false);
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
-  const [checkedList, setCheckedList] = useState(plainOptions);
-  const [indeterminate, setIndeterminate] = useState(false);
-  const [checkAll, setCheckAll] = useState(true);
+  
   const [update, setUpdate] = useState(false);
   const [meFilter, setMefilter] = useState('creator');
   const [memberList, setMemberList] = useState([]);
   const [adminIds, setAdminIds] = useState([]);
-  const [zoom, setZoom] = useState(40);
+
   const { meData } = useContext(meContext);
+
+  const getColumnSearchProps = dataIndex => ({
+    filterDropdown: () => (
+      <div style={{ padding: 8 }}>
+        <Input
+          placeholder='输入关键词'
+          value={tableSearch[dataIndex]}
+          onChange={e => {
+            e.persist()
+            setTableSearch(prevState => {
+              prevState[dataIndex] = e.target.value ? e.target.value : ''
+              return { ...prevState }
+            })
+          }}
+          onPressEnter={() => handleSearch(tableSearch[dataIndex])}
+          style={{ width: 188, marginBottom: 8, display: 'block' }}
+        />
+        <Button
+          type="primary"
+          onClick={() => handleSearch(tableSearch[dataIndex])}
+          icon="search"
+          size="small"
+          style={{ width: 90, marginRight: 8 }}
+        >
+          Search
+        </Button>
+        <Button onClick={() => handleSearch('')} size="small" style={{ width: 90 }}>
+          Reset
+        </Button>
+      </div>
+    ),
+    filterIcon: () => (
+      <Icon type="search" style={{ color: tableSearch[dataIndex] ? '#1890ff' : undefined }} />
+    )
+  })
 
   const columns = [
     {
       title: '企划名',
       dataIndex: 'title',
-      width: '15%',
+      width: isSm ? 150 : 200,
+      sorter: true,
+      sortOrder: tableSorter['title'],
+      sortDirections: ['descend', 'ascend'],
+      ...getColumnSearchProps('title'),
+      fixed: 'left',
       render: (name, project) => {
         let link_url = ''
         switch (project.status) {
@@ -46,25 +88,26 @@ export default function Main({ location, history, match }) {
             link_url = `/projects/${project.id}/stages/${project.current_stage_index}`
             break;
         }
-        return <Link to={link_url}>{name}</Link>
+        return <Link to={link_url} className='dont-break-out'>{name}</Link>
       }
     },
     {
       title: '标签',
       dataIndex: 'tags',
-      width: '10%',
+      ...getColumnSearchProps('tags'),
+      width: 250,
       render: (tags) => {
         return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)
       }
     },
-    {
-      title: '备注',
-      dataIndex: 'remark',
-      width: '10%',
-    },
+    
     {
       title: '开始时间',
       dataIndex: 'start_date',
+      sorter: true,
+      sortOrder: tableSorter['start_date'],
+      sortDirections: ['descend', 'ascend'],
+      width: 200,
       render: (start_date) => {
         if (start_date) {
           return parseDate(start_date)
@@ -72,12 +115,14 @@ export default function Main({ location, history, match }) {
           return '未开始'
         }
       },
-      width: '10%',
     },
     {
       title: '目前阶段',
       dataIndex: 'current_stage_index',
-      width: '10%',
+      sorter: true,
+      sortOrder: tableSorter['current_stage_index'],
+      sortDirections: ['descend', 'ascend'],
+      width: 200,
       render: (index, project) => {
         const status = project.status
         switch (status) {
@@ -93,8 +138,8 @@ export default function Main({ location, history, match }) {
     },
     {
       title: '死线',
-      dataIndex: 'key',
-      width: '10%',
+      dataIndex: 'ddl',
+      width: 160,
       render: (index, project) => {
         const status = project.status
         switch (status) {
@@ -110,8 +155,24 @@ export default function Main({ location, history, match }) {
     },
     {
       title: '状态',
-      render: (project) => {
-        const status = project.status
+      dataIndex: 'status',
+      sorter: true,
+      sortOrder: tableSorter['status'],
+      sortDirections: ['descend', 'ascend'],
+      filters: [
+        { text: '草稿', value: 'draft' },
+        { text: '未开始', value: 'await' },
+        { text: '进行中', value: 'progress' },
+        { text: '修改中', value: 'modify' },
+        { text: '逾期中', value: 'delay' },
+        { text: '待确认', value: 'pending' },
+        { text: '已完成', value: 'finish' },
+        { text: '暂停', value: 'pause' },
+        { text: '废弃', value: 'discard' },
+      ],
+      filteredValue: tableFilter['status'] || [],
+      width: 140,
+      render: (status) => {
         const str = parseStatus(status)
         let color = ''
         switch (status) {
@@ -144,21 +205,27 @@ export default function Main({ location, history, match }) {
         }
         return <Tag color={color} >{str}</Tag>
       },
-      width: '5%',
     },
 
     {
       title: '制作者',
-      dataIndex: 'creator',
-      render: (creator, project) => {
+      dataIndex: 'creator_id',
+      sorter: true,
+      sortOrder: tableSorter['creator_id'],
+      sortDirections: ['descend', 'ascend'],
+      filters: memberList.map((creator) => { return { text: creator.name, value: creator.id } }),
+      filteredValue: tableFilter['creator_id'] || [],
+      width: 200,
+      render: (creator_id, project) => {
+        const creator = project.creator
         if (project.client.id === meData.id) {
           return <Select
-            style={{ width: '100%', maxWidth: '120px' }}
+            style={{ width: '100%'}}
             placeholder="选择小组"
-            onChange={v => onChangeCreator(v, project)}
+            onChange={v => handleChangeCreator(v, project)}
             value={creator.name}
           >
-            {memberList.map((item, index) =>
+            {memberList.map((item) =>
               <Option key={item.id}>{item.name}</Option>)
             }
           </Select>
@@ -166,9 +233,13 @@ export default function Main({ location, history, match }) {
           return <Link to={"/users/" + creator.id}>{creator.name}</Link>
         }
       },
-      width: '5%',
     },
-  ];
+    {
+      title: '备注',
+      dataIndex: 'remark',
+    }
+  ]
+  
   useEffect(() => {
     setLoading(true)
     const path = '/groups'
@@ -197,8 +268,6 @@ export default function Main({ location, history, match }) {
       setMemberList(new_memberList)
       setAdminIds(admin_ids)
       setUpdate(!update)
-    }).finally(() => {
-      setLoading(false)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -206,24 +275,9 @@ export default function Main({ location, history, match }) {
   useEffect(() => {
     if (adminIds.length > 0) {
       setLoading(true)
-      setProjectList([])
       const path = '/projects'
-      const status = checkedList.join(',')
-        .replace('草稿', 'draft')
-        .replace('未开始', 'await')
-        .replace('进行中', 'progress')
-        .replace('修改中', 'modify')
-        .replace('逾期中', 'delay')
-        .replace('待确认', 'pending')
-        .replace('已完成', 'finish')
-        .replace('暂停', 'pause')
-
       const params = {
-        order: 'desc',
         pre_page: pagination.pageSize,
-        status: status,
-        order_by: 'status',
-        client_id: adminIds.join(',')
       }
 
       const values = queryString.parse(location.search)
@@ -234,13 +288,32 @@ export default function Main({ location, history, match }) {
         params.page = pagination.current
       }
 
-      if (values.creator_id) {
-        params.creator_id = values.creator_id
+      const new_tableSorter = {}
+      if (values.order) {
+        new_tableSorter[values.order_by] = values.order === "desc" ? 'descend' : 'ascend'
+        params.order = values.order
+        params.order_by = values.order_by
+      } else {
+        params.order = 'desc'
+        params.order_by = 'status'
       }
+      setTableSorter(new_tableSorter)
 
+      const new_tableFilter = {}
+      for (const filter in allTableFilter) {
+        if (filter in values) {
+          new_tableFilter[filter] = values[filter].split(',')
+          params[filter] = values[filter]
+        }
+      }
+      setTableFilter(new_tableFilter)
+
+      const new_tableSearch = {}
       if (values.search) {
+        new_tableSearch['title'] = values.search
         params.search = values.search
       }
+      setTableSearch(new_tableSearch)
 
       fetchData(path, params).then(res => {
         setProjectList(res.data.projects)
@@ -252,7 +325,7 @@ export default function Main({ location, history, match }) {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, checkedList, update]);
+  }, [location, update]);
 
   useEffect(() => {
     setLoading2(true)
@@ -284,124 +357,86 @@ export default function Main({ location, history, match }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meFilter]);
 
-  const onChangePage = (pagination) => {
+  const handleTableChange = (pagination, filters, sorter) => {
     const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, page: pagination.current });
+
+    const paramsObject = {
+      ...values,
+      page: pagination.current,
+    }
+
+    if (Object.keys(sorter).length !== 0) {
+      paramsObject.order = sorter.order === "descend" ? 'desc' : 'asc'
+      paramsObject.order_by = sorter.field
+    } else {
+      delete paramsObject.order
+      delete paramsObject.order_by
+    }
+
+    for (const filter in filters) {
+      if (filters[filter].length !== 0) {
+        paramsObject[filter] = filters[filter].join(',')
+      } else {
+        delete paramsObject[filter]
+      }
+    }
+
+    // console.log(paramsObject)
+    const params = queryString.stringify(paramsObject);
     history.push(`${location.pathname}?${params}`)
   }
-  const onChangeCreator = (v, project) => {
+
+  const handleChangeCreator = (v, project) => {
     if (project.creator.id === parseInt(v)) return false
     const path = `/projects/${project.id}`
     const data = {
       creator_id: v,
     }
-    updateData(path, data).then(res => {
+    updateData(path, data).then(() => {
       setUpdate(!update)
     })
   }
 
-  const onSearch = v => {
-    // if (v.length < 2 && v.length !== 0) {
-    //   message.info('关键词太短，至少2个字符')
-    //   console.log('Too short.')
-    //   return false
-    // }
+  const handleSearch = v => {
     const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, search: v, page: 1 });
-    history.push(`${location.pathname}?${params}`)
-  }
-  const onChangeStatusFilter = checkedList => {
-    setCheckedList(checkedList)
-    setCheckAll(checkedList.length === plainOptions.length)
-    setIndeterminate(!!checkedList.length && checkedList.length < plainOptions.length)
-    const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, page: 1 });
-    history.push(`${location.pathname}?${params}`)
-  }
-
-  const onCheckAllStatusFilter = e => {
-    setCheckAll(e.target.checked)
-    setCheckedList(e.target.checked ? plainOptions : [])
-    setIndeterminate(false)
-    const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, page: 1 });
-    history.push(`${location.pathname}?${params}`)
-  }
-
-  const onChangeCreatorFilter = v => {
-    const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, creator_id: v.join(','), page: 1 });
+    const paramsObject = {
+      ...values
+    }
+    if (v) {
+      paramsObject.search = v
+    } else {
+      delete paramsObject.search
+    }
+    const params = queryString.stringify(paramsObject);
     history.push(`${location.pathname}?${params}`)
   }
 
   return (
     <>
-      <Breadcrumb className='m-b:1'>
-        <Breadcrumb.Item>
-          <Link to='/projects'>企划列表</Link>
-        </Breadcrumb.Item>
-      </Breadcrumb>
       <Card className='m-b:2'>
-        <div><h2>进度可视化</h2></div>
-        <Row gutter={16}>
-          <Col xs={12} md={12} className='m-b:1 t-a:l'>
-            <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#1890ff' }} />进行中</div>
-            <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#13c2c2' }} />等待中</div>
-            <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '21px', height: '21px', backgroundColor: '#ff4d4f' }} />超时</div>
+        <Row gutter={16} className='m-b:1'>
+          <Col xs={24} md={12} className='t-a:l'>
+            <h2>进度可视化</h2>
           </Col>
-          <Col xs={12} md={12} className='m-b:1 t-a:r'>
+          <Col xs={24} md={12} className='t-a:r'>
             <Radio.Group value={meFilter} onChange={e => setMefilter(e.target.value)}>
               <Radio value='client'>我作为发起方</Radio>
               <Radio value='creator'>我作为制作方</Radio>
             </Radio.Group>
           </Col>
         </Row>
-        <Button onClick={() => { if (zoom + 5 < 100) setZoom(zoom + 5) }} className='pos:a' style={{ right: '60px', top: '20px' }} disabled={zoom + 5 >= 100} icon="zoom-in" />
-        <Button onClick={() => { if (zoom - 5 > 0) setZoom(zoom - 5) }} className='pos:a' style={{ right: '20px', top: '20px' }} disabled={zoom - 5 <= 0} icon="zoom-out" />
-        <Ganttx zoom={zoom} loading={isloading2} projects={projectList2} />
+        <Ganttx loading={isloading2} projects={projectList2} />
       </Card>
+
       <Card >
-
-        <div className='m-b:1'>
-          <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
-        </div>
-
-        <Row gutter={16}>
-          <Col xs={24} md={8} className='m-b:1'>
-            <Select
-              mode="multiple"
-              style={{ width: '100%' }}
-              placeholder="选择制作方"
-              onChange={onChangeCreatorFilter}
-            >
-              {memberList.map((item, index) =>
-                <Option key={item.id}>{item.name}</Option>)
-              }
-            </Select>
-          </Col>
-          <Col xs={24} md={16} className='m-b:1'>
-            <Checkbox
-              indeterminate={indeterminate}
-              onChange={onCheckAllStatusFilter}
-              checked={checkAll}
-            >
-              全选
-                </Checkbox>
-            <Divider type="vertical" />
-            <Checkbox.Group
-              options={plainOptions}
-              value={checkedList}
-              onChange={onChangeStatusFilter}
-            />
-          </Col>
-        </Row>
         <Table
           columns={columns}
           rowKey={project => project.id}
           dataSource={projectList}
           loading={isloading}
           pagination={pagination}
-          onChange={onChangePage}
+          onChange={handleTableChange}
+          scroll={{ x: 1600 }}
         />
       </Card>
 

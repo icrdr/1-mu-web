@@ -8,11 +8,13 @@ import ProjectFeedback from '../components/ProjectFeedback'
 import ProjectDesign from '../components/ProjectDesign'
 import { parseStatus, getPhase, getStage, parseDate, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
 import Avatarx from '../components/Avatarx'
+import { useMediaQuery } from 'react-responsive'
 const { Step } = Steps;
 const { Meta } = Card;
 const { TabPane } = Tabs;
 
 export default function Project({ history, match, location }) {
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
   const [projectData, setProjectData] = useState();
   const [isloading, setLoading] = useState(false);
   const [update, setUpdate] = useState(true);
@@ -81,7 +83,7 @@ export default function Project({ history, match, location }) {
   return (
     <>
       <Card className='p:2' title={'企划：' + projectData.title}
-        extra={ projectData.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
+        extra={isSm?'':projectData.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
       >
         <Row className='m-t:2' gutter={12}>
           <Col sm={24} md={12} className='m-b:4'>
@@ -206,7 +208,7 @@ function Stage({ history, match, project, onSuccess }) {
       return false
     }
 
-    const path = '/download'
+    const path = '/download/files'
     const params = {
       file_id: file_id.join(',')
     }
@@ -282,7 +284,7 @@ function Stage({ history, match, project, onSuccess }) {
           {phaseArr.map((phase, i) =>
             <TabPane tab={parseDate(phase.upload_date).split(' ')[0]} key={i}>
               <Row gutter={16}>
-                <Col sm={24} md={12} className=''>
+                <Col sm={24} md={12} className='m-b:1'>
                   <Row>
                     <Col><h2 className='fl:l'>提交的文件（{phase.creator.name}）</h2></Col>
                     <Col><Button className='fl:r' type='primary' onClick={() => onBatchDownload(phase)}>批量下载</Button></Col>

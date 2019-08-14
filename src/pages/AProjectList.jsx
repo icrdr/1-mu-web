@@ -1,36 +1,80 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Button, Popconfirm, Checkbox, Divider, Radio, Input, Select, Modal, InputNumber } from 'antd'
+import { Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon } from 'antd'
 import { parseStatus, getStage, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
-import { meContext } from '../layouts/Dashboard';
 import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
-const { Search } = Input;
+import { useMediaQuery } from 'react-responsive'
+
 const { Option } = Select;
 const { TextArea } = Input;
 export default function ProjectList({ location, history, match }) {
-  const plainOptions = ['草稿', '未开始', '进行中', '修改中', '逾期中', '待确认', '已完成', '暂停', '废弃']
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
+
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
+  const [tableSorter, setTableSorter] = useState({});
+  const [tableFilter, setTableFilter] = useState({});
+  const [tableSearch, setTableSearch] = useState({});
+  const allTableFilter = { status: [], client_id: [] }
 
   const [projectList, setProjectList] = useState([]);
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
-  const [checkedList, setCheckedList] = useState(plainOptions);
-  const [indeterminate, setIndeterminate] = useState(false);
-  const [checkAll, setCheckAll] = useState(true);
-  const [meFilter, setMefilter] = useState('all');
+
   const [update, setUpdate] = useState(false);
   const [showPostponeModel, setPostponeModel] = useState();
   const [postponeDay, setPostponeDay] = useState(3);
   const [showRemarkModel, setRemarkModel] = useState();
   const [remark, setRemark] = useState('');
-  const { meData } = useContext(meContext);
+
+  const [isBatch, setBatch] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+  const getColumnSearchProps = dataIndex => ({
+    filterDropdown: () => (
+      <div style={{ padding: 8 }}>
+        <Input
+          placeholder='输入关键词'
+          value={tableSearch[dataIndex]}
+          onChange={e => {
+            e.persist()
+            setTableSearch(prevState => {
+              prevState[dataIndex] = e.target.value ? e.target.value : ''
+              return { ...prevState }
+            })
+          }}
+          onPressEnter={() => handleSearch(tableSearch[dataIndex])}
+          style={{ width: 188, marginBottom: 8, display: 'block' }}
+        />
+        <Button
+          type="primary"
+          onClick={() => handleSearch(tableSearch[dataIndex])}
+          icon="search"
+          size="small"
+          style={{ width: 90, marginRight: 8 }}
+        >
+          Search
+        </Button>
+        <Button onClick={() => handleSearch('')} size="small" style={{ width: 90 }}>
+          Reset
+        </Button>
+      </div>
+    ),
+    filterIcon: filtered => (
+      <Icon type="search" style={{ color: tableSearch[dataIndex] ? '#1890ff' : undefined }} />
+    )
+  })
 
   const columns = [
     {
       title: '企划名',
       dataIndex: 'title',
-      width: '10%',
+      width: isSm ? 150 : 200,
+      sorter: true,
+      sortOrder: tableSorter['title'],
+      sortDirections: ['descend', 'ascend'],
+      ...getColumnSearchProps('title'),
+      fixed: 'left',
       render: (name, project) => {
         let link_url = ''
         switch (project.status) {
@@ -45,57 +89,50 @@ export default function ProjectList({ location, history, match }) {
             link_url = `${match.path}/${project.id}/stages/${project.current_stage_index}`
             break;
         }
-        return <Link to={link_url}>{name}</Link>
+        return <Link to={link_url} className='dont-break-out'>{name}</Link>
       }
     },
     {
       title: '标签',
       dataIndex: 'tags',
-      width: '10%',
-      render: (tags, project) => {
+      ...getColumnSearchProps('tags'),
+      width: 120,
+      render: (tags) => {
         return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)
-      }
-    },
-    {
-      title: '备注',
-      dataIndex: 'remark',
-      width: '10%',
-      render: (remark, project) => {
-        return <div style={{ width: '120px' }}>
-          {remark}
-          <Button type="link" size='small' onClick={() => {
-            setRemark(remark)
-            setRemarkModel(project)
-          }}>{remark ? '修改' : '添加'}</Button>
-        </div>
       }
     },
     {
       title: '开始时间',
       dataIndex: 'start_date',
-      render: (start_date, project) => {
+      sorter: true,
+      sortOrder: tableSorter['start_date'],
+      sortDirections: ['descend', 'ascend'],
+      width: 150,
+      render: (start_date) => {
         if (start_date) {
           return parseDate(start_date)
         } else {
           return '未开始'
         }
       },
-      width: '10%',
     },
     {
       title: '目前阶段',
       dataIndex: 'current_stage_index',
-      width: '10%',
+      sorter: true,
+      sortOrder: tableSorter['current_stage_index'],
+      sortDirections: ['descend', 'ascend'],
+      width: 150,
       render: (index, project) => {
         const status = project.status
         const goBack = <Popconfirm
-            title="确定如此操作么？"
-            onConfirm={() => operateProject(project.id, 'back')}
-            okText="是"
-            cancelText="否"
-          >
-            <Button type="link" size='small'>回溯</Button>
-          </Popconfirm>
+          title="确定如此操作么？"
+          onConfirm={() => operateProject(project.id, 'back')}
+          okText="是"
+          cancelText="否"
+        >
+          <Button type="link" size='small'>回溯</Button>
+        </Popconfirm>
         switch (status) {
           case 'await':
             return <span>{`0/${project.stages.length}`}</span>
@@ -109,9 +146,9 @@ export default function ProjectList({ location, history, match }) {
     },
     {
       title: '死线',
-      dataIndex: 'key',
-      width: '10%',
-      render: (index, project) => {
+      key: 'ddl',
+      width: 120,
+      render: (project) => {
         const status = project.status
         switch (status) {
           case 'delay':
@@ -128,8 +165,24 @@ export default function ProjectList({ location, history, match }) {
     },
     {
       title: '状态',
-      render: (project) => {
-        const status = project.status
+      dataIndex: 'status',
+      sorter: true,
+      sortOrder: tableSorter['status'],
+      sortDirections: ['descend', 'ascend'],
+      filters: [
+        { text: '草稿', value: 'draft' },
+        { text: '未开始', value: 'await' },
+        { text: '进行中', value: 'progress' },
+        { text: '修改中', value: 'modify' },
+        { text: '逾期中', value: 'delay' },
+        { text: '待确认', value: 'pending' },
+        { text: '已完成', value: 'finish' },
+        { text: '暂停', value: 'pause' },
+        { text: '废弃', value: 'discard' },
+      ],
+      filteredValue: tableFilter['status'] || [],
+      width: 100,
+      render: (status) => {
         const str = parseStatus(status)
         let color = ''
         switch (status) {
@@ -164,50 +217,57 @@ export default function ProjectList({ location, history, match }) {
             color = '#ddd'
         }
         return <Tag color={color} >{str}</Tag>
-      },
-      width: '5%',
+      }
     },
-
     {
       title: '小组',
-      dataIndex: 'client',
-      render: (client, project) =>
+      dataIndex: 'client_id',
+      sorter: true,
+      sortOrder: tableSorter['client_id'],
+      sortDirections: ['descend', 'ascend'],
+      filters: groupList.map((group, index) => { return { text: group.name, value: index } }),
+      filteredValue: tableFilter['client_id'] || [],
+      width: 200,
+      render: (client_id, project) =>
         <Select
           style={{ width: '100%', maxWidth: '120px' }}
           placeholder="选择小组"
-          onChange={v => onChangeGroup(v, project)}
-          value={client.name}
+          onChange={v => handleChangeGroup(v, project)}
+          value={project.client.name}
         >
-          {groupList.map((item, index) =>
+          {groupList.map((item) =>
             <Option key={item.id}>{item.name}</Option>)
           }
         </Select>
-      ,
-      width: '10%',
     },
     {
       title: '制作者',
-      dataIndex: 'creator',
-      render: (creator, project) =>{
+      dataIndex: 'creator_id',
+      sorter: true,
+      sortOrder: tableSorter['creator_id'],
+      sortDirections: ['descend', 'ascend'],
+      width: 200,
+      render: (creator_id, project) => {
+        const creator = project.creator
         const the_group = groupList.filter(group => {
           return group.admins[0].id === project.client.id
         })[0]
         return <Select
           style={{ width: '100%', maxWidth: '120px' }}
           placeholder="选择制作"
-          onChange={v => onChangeCreator(v, project)}
+          onChange={v => handleChangeCreator(v, project)}
           value={creator.name}
         >
-          {the_group && the_group.users.map((item, index) =>
+          {the_group && the_group.users.map((item) =>
             <Option key={item.id}>{item.name}</Option>)
           }
         </Select>
-      },
-      width: '10%',
+      }
     },
     {
       title: '暂停',
-      key: 'key2',
+      key: 'pause',
+      width: 80,
       render: (key, project) => (<>
         {project.status === 'pause' ? (
           <Popconfirm
@@ -229,11 +289,12 @@ export default function ProjectList({ location, history, match }) {
             </Popconfirm>
           )}
       </>),
-      width: '3%',
+
     },
     {
       title: '删除',
-      key: 'key3',
+      key: 'discard',
+      width: 50,
       render: (key, project) => (<>
         {project.status === 'discard' ? (
           <Popconfirm
@@ -255,162 +316,183 @@ export default function ProjectList({ location, history, match }) {
             </Popconfirm>
           )}
       </>),
-      width: '3%',
-    }
+    },
+    {
+      title: '备注',
+      dataIndex: 'remark',
+      render: (remark, project) => {
+        return <div>
+          {remark}
+          <Button type="link" size='small' onClick={() => {
+            setRemark(remark)
+            setRemarkModel(project)
+          }}>{remark ? '修改' : '添加'}</Button>
+        </div>
+      }
+    },
   ];
-  const onChangeGroup = (v, project) => {
+
+  const handleChangeGroup = (v, project) => {
     const the_group = groupList.filter(group => group.id === parseInt(v))[0]
-    if (project.client.id === the_group.admins[0].id)return false
+    if (project.client.id === the_group.admins[0].id) return false
 
     const path = `/projects/${project.id}`
     const data = {
       client_id: the_group.admins[0].id,
       creator_id: the_group.admins[0].id,
     }
-    
-    updateData(path, data).then(res => {
+
+    updateData(path, data).then(() => {
       setUpdate(!update)
     })
   }
-  const onChangeCreator = (v, project) => {
-    if (project.creator.id === parseInt(v))return false
+
+  const handleChangeCreator = (v, project) => {
+    if (project.creator.id === parseInt(v)) return false
     const path = `/projects/${project.id}`
     const data = {
       creator_id: v,
     }
-    updateData(path, data).then(res => {
+    updateData(path, data).then(() => {
       setUpdate(!update)
     })
   }
 
   const operateProject = (id, action) => {
     const path = `/projects/${id}/${action}`
-    updateData(path).then(res => {
+    updateData(path).then(() => {
       setUpdate(!update)
     })
   }
-
   useEffect(() => {
     setLoading(true)
-    let path = '/groups'
+    const path = '/groups'
 
     fetchData(path).then(res => {
       setGroupList(res.data.groups)
+      setUpdate(!update)
     })
-    path = '/projects'
-    const status = checkedList.join(',')
-      .replace('草稿', 'draft')
-      .replace('未开始', 'await')
-      .replace('进行中', 'progress')
-      .replace('修改中', 'modify')
-      .replace('逾期中', 'delay')
-      .replace('待确认', 'pending')
-      .replace('已完成', 'finish')
-      .replace('暂停', 'pause')
-      .replace('废弃', 'discard')
-    const params = {
-      order: 'desc',
-      order_by: 'status',
-      pre_page: pagination.pageSize,
-      status: status,
-    }
-    switch (meFilter) {
-      case 'client':
-        params.client_id = meData.id
-        break;
-      case 'creator':
-        params.creator_id = meData.id
-        break;
-      default:
-    }
-
-    const values = queryString.parse(location.search)
-    if (values.page) {
-      setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
-      params.page = values.page
-    } else {
-      params.page = pagination.current
-    }
-
-    if (values.client_id) {
-      params.client_id = values.client_id
-    }
-
-    if (values.search) {
-      params.search = values.search
-    }
-
-    fetchData(path, params).then(res => {
-      setProjectList(res.data.projects)
-      setPagination(prevState => { return { ...prevState, total: res.data.total } })
-      setLoading(false)
-    }).catch(err => {
-      setProjectList([])
-      setLoading(false)
-    })
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, checkedList, meFilter, update]);
+  }, []);
 
-  const onChangePage = (pagination) => {
-    const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, page: pagination.current });
-    history.push(`${location.pathname}?${params}`)
-  }
+  useEffect(() => {
+    if (groupList.length > 0) {
+      setLoading(true)
+      const path = '/projects'
+      const params = {
+        pre_page: pagination.pageSize,
+      }
 
-  const onChangeMeFilter = e => {
-    setMefilter(e.target.value)
-    const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, page: 1 });
-    history.push(`${location.pathname}?${params}`)
-  }
+      const values = queryString.parse(location.search)
+      if (values.page) {
+        setPagination(prevState => { return { ...prevState, current: parseInt(values.page) } })
+        params.page = values.page
+      } else {
+        params.page = pagination.current
+      }
 
-  const onSearch = v => {
-    // if (v.length < 2 && v.length !== 0) {
-    //   message.info('关键词太短，至少2个字符')
-    //   console.log('Too short.')
-    //   return false
-    // }
-    const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, search: v, page: 1 });
-    history.push(`${location.pathname}?${params}`)
-  }
+      const new_tableSorter = {}
+      if (values.order) {
+        new_tableSorter[values.order_by] = values.order === "desc" ? 'descend' : 'ascend'
+        params.order = values.order
+        params.order_by = values.order_by
+      } else {
+        params.order = 'desc'
+        params.order_by = 'status'
+      }
+      setTableSorter(new_tableSorter)
 
-  const onChangeStatusFilter = checkedList => {
-    setCheckedList(checkedList)
-    setCheckAll(checkedList.length === plainOptions.length)
-    setIndeterminate(!!checkedList.length && checkedList.length < plainOptions.length)
-    const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, page: 1 });
-    history.push(`${location.pathname}?${params}`)
-  }
+      const new_tableFilter = {}
+      for (const filter in allTableFilter) {
+        if (filter in values) {
+          new_tableFilter[filter] = values[filter].split(',')
+          params[filter] = values[filter]
+        }
+      }
+      setTableFilter(new_tableFilter)
 
-  const onCheckAllStatusFilter = e => {
-    setCheckAll(e.target.checked)
-    setCheckedList(e.target.checked ? plainOptions : [])
-    setIndeterminate(false)
+      if (values.client_id) {
+        const client_ids = []
+        for (const group_index of values.client_id.split(',')) {
+          const the_groups = groupList[group_index]
+          if (the_groups) {
+            for (const admin of the_groups.admins) {
+              client_ids.push(admin.id)
+            }
+          }
+        }
+        if (client_ids.length > 0) params.client_id = client_ids.join(',')
+      }
+
+      const new_tableSearch = {}
+      if (values.search) {
+        new_tableSearch['title'] = values.search
+        params.search = values.search
+      }
+      setTableSearch(new_tableSearch)
+
+      fetchData(path, params).then(res => {
+        setProjectList(res.data.projects)
+        setPagination(prevState => { return { ...prevState, total: res.data.total } })
+      }).catch(() => {
+        setProjectList([])
+      }).finally(() => {
+        setLoading(false)
+      })
+
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location, update]);
+
+  const handleTableChange = (pagination, filters, sorter) => {
     const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, page: 1 });
-    history.push(`${location.pathname}?${params}`)
-  }
-  const onChangeGroupFilter = v => {
-    const client_ids = []
-    for (const group_id of v){
-      const the_groups = groupList.filter(group=>group.id===parseInt(group_id))[0]
-      if (the_groups){
-        client_ids.push(the_groups.admins[0].id)
+
+    const paramsObject = {
+      ...values,
+      page: pagination.current,
+    }
+
+    if (Object.keys(sorter).length !== 0) {
+      paramsObject.order = sorter.order === "descend" ? 'desc' : 'asc'
+      paramsObject.order_by = sorter.field
+    } else {
+      delete paramsObject.order
+      delete paramsObject.order_by
+    }
+
+    for (const filter in filters) {
+      if (filters[filter].length !== 0) {
+        paramsObject[filter] = filters[filter].join(',')
+      } else {
+        delete paramsObject[filter]
       }
     }
-    const values = queryString.parse(location.search)
-    const params = queryString.stringify({ ...values, client_id: client_ids.join(','), page: 1 });
+    // console.log(paramsObject)
+    const params = queryString.stringify(paramsObject);
     history.push(`${location.pathname}?${params}`)
   }
+
+  const handleSearch = v => {
+    const values = queryString.parse(location.search)
+    const paramsObject = {
+      ...values
+    }
+    if (v) {
+      paramsObject.search = v
+    } else {
+      delete paramsObject.search
+    }
+    const params = queryString.stringify(paramsObject);
+    history.push(`${location.pathname}?${params}`)
+  }
+
   const handlePostpone = () => {
     const path = `/projects/${showPostponeModel.id}/postpone`
     const data = {
       days: postponeDay
     }
-    updateData(path, data).then(res => {
+
+    updateData(path, data).then(() => {
       setUpdate(!update)
       setPostponeModel()
       setPostponeDay(3)
@@ -423,9 +505,27 @@ export default function ProjectList({ location, history, match }) {
     const data = {
       remark: remark
     }
-    updateData(path, data).then(res => {
+    updateData(path, data).then(() => {
       setUpdate(!update)
       setRemarkModel()
+    })
+  }
+
+  const onSelectChange = selectedRowKeys => {
+    setSelectedRowKeys(selectedRowKeys)
+  }
+
+  const handleDownload = () => {
+    const project_id = []
+    for (const project of projectList) {
+      project_id.push(project.id)
+    }
+    const path = '/download/projects'
+    const params = {
+      project_id: project_id.join(',')
+    }
+    fetchData(path, params).then(res => {
+      window.location.href = res.data.download_url
     })
   }
 
@@ -453,62 +553,32 @@ export default function ProjectList({ location, history, match }) {
       >
         延期时间  <InputNumber value={postponeDay} onChange={v => setPostponeDay(v)} />
       </Modal>
-      <Row gutter={16}>
-        <Col md={12} className='m-b:1'>
-          <Button type='primary'><Link to='/admin/projects/post'>添加企划</Link></Button>
-        </Col>
-        <Col md={12} className='m-b:1'>
-          <ProjectPostByCsv />
-        </Col>
-      </Row>
-      <Row gutter={16}>
-        <Col xs={24} md={12} className='m-b:1'>
-          <Select
-            mode="multiple"
-            style={{ width: '100%' }}
-            placeholder="选择小组"
-            onChange={onChangeGroupFilter}
-          >
-            {groupList.map((group, index) =>
-              <Option key={group.id}>{group.name}</Option>)
-            }
-          </Select>
-        </Col>
-        <Col xs={24} md={12} className='m-b:1'>
-          <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
-        </Col>
-      </Row>
-      <Row gutter={16}>
-        <Col xs={24} md={8} className='m-b:1'>
-          <Radio.Group value={meFilter} onChange={onChangeMeFilter}>
-            <Radio value='all'>全部</Radio>
-            <Radio value='client'>我作为发起方</Radio>
-            <Radio value='creator'>我作为制作方</Radio>
-          </Radio.Group>
-        </Col>
-        <Col xs={24} md={16} className='m-b:1'>
-          <Checkbox
-            indeterminate={indeterminate}
-            onChange={onCheckAllStatusFilter}
-            checked={checkAll}
-          >
-            全选
-          </Checkbox>
-          <Divider type="vertical" />
-          <Checkbox.Group
-            options={plainOptions}
-            value={checkedList}
-            onChange={onChangeStatusFilter}
-          />
-        </Col>
-      </Row>
+      <div className='m-b:1'>
+        <Button className='m-r:.5' type={isBatch ? "" : 'link'} onClick={() => setBatch(!isBatch)}>批量操作</Button>
+        <Button className='m-r:.5' type='primary'><Link to='/admin/projects/post'>添加企划</Link></Button>
+        <ProjectPostByCsv onSucceed={()=>setUpdate(!update)}/>
+      </div>
+      {isBatch &&
+        <div className='m-b:1'>
+          <Button className='m-r:.5' type="primary" onClick={handleDownload} disabled={selectedRowKeys.length === 0}>批量下载成品</Button>
+          <Button className='m-r:.5' type="primary" disabled={selectedRowKeys.length === 0}>批量执行A</Button>
+          <Button className='m-r:.5' type="primary" disabled={selectedRowKeys.length === 0}>批量执行B</Button>
+        </div>
+      }
       <Table
+        rowSelection={
+          isBatch ? {
+            columnWidth: isSm ? 48 : 60,
+            selectedRowKeys,
+            onChange: onSelectChange
+          } : undefined}
         columns={columns}
         rowKey={project => project.id}
         dataSource={projectList}
         loading={isloading}
         pagination={pagination}
-        onChange={onChangePage}
+        onChange={handleTableChange}
+        scroll={{ x: 1600 }}
       />
     </Card>
   )

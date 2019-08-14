@@ -1,10 +1,9 @@
 import React from 'react'
+import { Upload, Button, message, } from 'antd'
 import { postData, fetchData, updateData } from '../utility'
 
-export default function ProjectPostByCsv() {
-  function uploadFile(e) {
-    const file = e.target.files[0];
-    console.log(file)
+export default function ProjectPostByCsv({onSucceed}) {
+  function readFile(file) {
     if (file) {
       var reader = new FileReader();
 
@@ -25,10 +24,10 @@ export default function ProjectPostByCsv() {
       if (!row[1]) continue
       const path = '/projects'
       const client_id = row[3] ? row[3] : 1
-      const creator_id = row[4] ? row[4]: 1
+      const creator_id = row[4] ? row[4] : 1
       const tags = row[2].split(";")
       await fetchData(path, { title: row[1] }, false).then(res => {
-        if (res.data.projects.length>0) {
+        if (res.data.projects.length > 0) {
           const path = '/projects/' + res.data.projects[0].id
           const data = {
             title: row[1],
@@ -44,18 +43,18 @@ export default function ProjectPostByCsv() {
             client_id: client_id,
             creator_id: creator_id,
             stages: [
-            {
-              stage_name: '参考-草图',
-              days_need: 7
-            },
-            {
-              stage_name: '线稿-铺色',
-              days_need: 7
-            },
-            {
-              stage_name: '细化-特效',
-              days_need: 7
-            }],
+              {
+                stage_name: '参考-草图',
+                days_need: 7
+              },
+              {
+                stage_name: '线稿-铺色',
+                days_need: 7
+              },
+              {
+                stage_name: '细化-特效',
+                days_need: 7
+              }],
             tags: tags,
             confirm: 1
           }
@@ -65,10 +64,25 @@ export default function ProjectPostByCsv() {
       })
       console.log(i)
     }
+    onSucceed()
   }
   return (
-    <div>
-      <input type="file" id="dealCsv" onChange={uploadFile} />
-    </div>
+    <Upload
+      beforeUpload={file => {
+        // check file type and size
+        console.debug(file)
+        if (file.type !== 'application/vnd.ms-excel') {
+          message.error('只支持.csv(utf-8)');
+          return false
+        }
+        readFile(file)
+        return false
+      }}
+      showUploadList={false}
+    >
+      <Button>
+        csv生成企划
+      </Button>
+    </Upload>
   )
 }

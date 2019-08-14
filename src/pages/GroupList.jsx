@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Breadcrumb } from 'antd'
-import {fetchData} from '../utility'
+import { Table, Card } from 'antd'
+import { fetchData } from '../utility'
 import queryString from 'query-string'
+import { useMediaQuery } from 'react-responsive'
 
 
-
-export default function GroupList({ location, history, match }) {
+export default function GroupList({ location, history }) {
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
@@ -14,12 +15,14 @@ export default function GroupList({ location, history, match }) {
     {
       title: 'ID',
       dataIndex: 'id',
-      width: '5%'
+      width: isSm ? 32 : 50,
+      fixed: 'left',
     },
     {
       title: '组名',
       dataIndex: 'name',
-      width: '20%',
+      width: isSm ? 120 : 200,
+      fixed: 'left',
       render: (name, group) => {
         return <Link to={`/groups/${group.id}`}>{name}</Link>
       }
@@ -27,19 +30,19 @@ export default function GroupList({ location, history, match }) {
     {
       title: '组长',
       dataIndex: 'admins',
-      render: (admins, group) => admins.map((admin, index) => (
+      width: 150,
+      render: (admins) => admins.map((admin, index) => (
         <Link className='m-r:.5' key={index} to={"/users/" + admin.id}>{admin.name}</Link>
       )),
-      width: '10%',
+
     },
     {
       title: '组员',
       dataIndex: 'users',
-      render: (users, group) => users.map((user, index) => (
+      render: (users) => users.map((user, index) => (
         <Link className='m-r:.5' key={index} to={"/users/" + user.id}>{user.name}</Link>
       )),
-      width: '30%',
-    },
+    }
   ];
   useEffect(() => {
     setLoading(true)
@@ -60,9 +63,9 @@ export default function GroupList({ location, history, match }) {
     fetchData(path, params).then(res => {
       setGroupList(res.data.groups)
       setPagination(prevState => { return { ...prevState, total: res.data.total } })
-      setLoading(false)
-    }).catch(err => {
+    }).catch(() => {
       setGroupList([])
+    }).finally(() => {
       setLoading(false)
     })
 
@@ -77,21 +80,17 @@ export default function GroupList({ location, history, match }) {
 
   return (
     <>
-    <Breadcrumb className='m-b:1'>
-        <Breadcrumb.Item>
-          <Link to='/groups'>小组列表</Link>
-        </Breadcrumb.Item>
-      </Breadcrumb>
-    <Card>
-      <Table
-        columns={columns}
-        rowKey={group => group.id}
-        dataSource={groupList}
-        loading={isloading}
-        pagination={pagination}
-        onChange={onChangePage}
-      />
-    </Card>
+      <Card>
+        <Table
+          columns={columns}
+          rowKey={group => group.id}
+          dataSource={groupList}
+          loading={isloading}
+          pagination={pagination}
+          onChange={onChangePage}
+          scroll={{ x: 600 }}
+        />
+      </Card>
     </>
   )
 }

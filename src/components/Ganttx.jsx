@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { Link, withRouter } from 'react-router-dom'
+import { Row, Col, Button, Empty } from 'antd'
 import Gantt from 'react-gantt-antd'
 import { getPhase, toLocalDate } from '../utility'
 import Loading from '../components/Loading'
-function Ganttx({ match, zoom, loading, projects }) {
+function Ganttx({ match, loading, projects }) {
   const now = new Date()
+  const [zoom, setZoom] = useState(40);
   const [tracks, setTracks] = useState([])
-  const [timelineStart, setTimelineStart] = useState(new Date(now.getTime()-1000))
-  const [timelineEnd, setTimelineEnd] = useState(new Date(now.getTime()+1000))
+  const [timelineStart, setTimelineStart] = useState(new Date(now.getTime() - 1000))
+  const [timelineEnd, setTimelineEnd] = useState(new Date(now.getTime() + 1000))
 
   useEffect(() => {
     const new_tracks = []
@@ -130,7 +132,7 @@ function Ganttx({ match, zoom, loading, projects }) {
       })
     }
     setTracks(new_tracks)
-    if (new_tracks.length>0) {
+    if (new_tracks.length > 0) {
       let m_start = new_tracks[0].elements[0].start
       let m_end = new_tracks[0].elements[0].end
       for (const track of new_tracks) {
@@ -139,7 +141,7 @@ function Ganttx({ match, zoom, loading, projects }) {
           if (m_end < elements.end) m_end = elements.end
         }
       }
-      
+
       setTimelineStart(toLocalDate(new Date(m_start.getTime() - 0.5 * (m_end - m_start))))
       setTimelineEnd(toLocalDate(new Date(m_end.getTime() + 0.5 * (m_end - m_start))))
 
@@ -157,13 +159,26 @@ function Ganttx({ match, zoom, loading, projects }) {
       return [...state]
     })
   }
-  
-  if (loading){
-    return <Loading/>
+
+  if (loading) {
+    return <Loading />
+  } else if (projects.length === 0) {
+    return <Empty description='没有数据'/>
   }
 
   return (
     <div>
+      <Row gutter={16} className='m-b:1'>
+        <Col span={16} className='t-a:l'>
+          <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '32px', height: '32px', backgroundColor: '#1890ff' }} />进行中</div>
+          <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '32px', height: '32px', backgroundColor: '#13c2c2' }} />等待中</div>
+          <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '32px', height: '32px', backgroundColor: '#ff4d4f' }} />超时</div>
+        </Col>
+        <Col span={8} className='t-a:r'>
+          <Button className='m-b:.5' onClick={() => { if (zoom + 5 < 100) setZoom(zoom + 5) }} disabled={zoom + 5 >= 100} icon="zoom-in" />
+          <Button className='m-l:.5' onClick={() => { if (zoom - 5 > 0) setZoom(zoom - 5) }} disabled={zoom - 5 <= 0} icon="zoom-out" />
+        </Col>
+      </Row>
       <Gantt
         scale={{
           start: timelineStart,

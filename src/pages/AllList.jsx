@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Input, Breadcrumb, Row, Col, Select } from 'antd'
+import { Table, Card, Tag, Input, Row, Col, Select } from 'antd'
 import { fetchData } from '../utility'
 // import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
+import { useMediaQuery } from 'react-responsive'
 const { Search } = Input;
 const { Option } = Select;
 export default function Main({ location, history }) {
-
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
   const [projectList, setProjectList] = useState([]);
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
@@ -19,12 +20,12 @@ export default function Main({ location, history }) {
     {
       title: '企划名',
       dataIndex: 'title',
-      width: '20%'
+      width: isSm ? 150 : 250,
+      fixed: 'left',
     },
     {
       title: '标签',
       dataIndex: 'tags',
-      width: '20%',
       render: (tags) => {
         return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)
       }
@@ -32,18 +33,19 @@ export default function Main({ location, history }) {
     {
       title: '小组',
       dataIndex: 'client',
+      width: 200,
       render: (client, project) => {
         return <Link to={"/users/" + client.id}>{client.name}</Link>
-      },
-      width: '5%',
+      }
+      
     },
     {
       title: '制作者',
       dataIndex: 'creator',
+      width: 200,
       render: (creator, project) => {
         return <Link to={"/users/" + creator.id}>{creator.name}</Link>
-      },
-      width: '5%',
+      }
     }
   ]
 
@@ -120,11 +122,6 @@ export default function Main({ location, history }) {
   }
   return (
     <>
-      <Breadcrumb className='m-b:1'>
-        <Breadcrumb.Item>
-          <Link to='/all'>总表</Link>
-        </Breadcrumb.Item>
-      </Breadcrumb>
       <Card>
         <Row gutter={16}>
           <Col xs={24} md={12} className='m-b:1'>
@@ -150,6 +147,7 @@ export default function Main({ location, history }) {
           loading={isloading}
           pagination={pagination}
           onChange={onChangePage}
+          scroll={{ x: 500 }}
         />
       </Card>
     </>

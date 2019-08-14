@@ -6,8 +6,8 @@ import useLogin from '../hooks/useLogin'
 import Loading from '../components/Loading'
 import Avatarx from '../components/Avatarx'
 import Maintenance from '../components/Maintenance'
-
-import { Layout, Button, Menu, Icon } from 'antd';
+import { useMediaQuery } from 'react-responsive'
+import { Layout, Button, Menu, Row, Col } from 'antd';
 
 const { Header, Content, Footer } = Layout;
 
@@ -17,6 +17,7 @@ function Dashboard({ location, history, component: Component, ...rest }) {
 
   const { meData, status } = useLogin()
   const [menu, setMenu] = useState(['']);
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
 
   useEffect(() => {
     setMenu([location.pathname.split('/')[2]])
@@ -41,38 +42,32 @@ function Dashboard({ location, history, component: Component, ...rest }) {
 
   return (
     <Route {...rest} render={matchProps => (
-      <meContext.Provider
-        value={{ meData }}
-      >
-
+      <meContext.Provider value={{ meData }}>
         <Layout>
-          <Header className="p:0" style={{ background: '#fff' }} >
-            <Menu
-              theme="dark"
-              mode="horizontal"
-              style={{ lineHeight: '64px' }}
-              selectedKeys={menu}
-              onClick={changeMenu}
-            >
-              <Menu.Item key="users">
-                <Icon type="pie-chart" />
-                <span>用户列表</span>
-              </Menu.Item>
-              <Menu.Item key="projects">
-                <Icon type="desktop" />
-                <span>企划列表</span>
-              </Menu.Item>
-              <Menu.Item key="groups">
-                <Icon type="file" />
-                <span>小组列表</span>
-              </Menu.Item>
-            </Menu>
-            {meData && <Link to={'/users/' + meData.id}><div className="pos:a top:0 right:2">
-              <Button type="link">{meData.name}</Button>
-              <Avatarx url={meData.avatar_url} name={meData.name} />
-            </div></Link>}
+          <Header className="p:0">
+            <Row >
+              <Col xs={16} md={20} className='t-a:l'>
+                <Menu
+                  theme="dark"
+                  mode="horizontal"
+                  style={{ lineHeight: '64px' }}
+                  selectedKeys={menu}
+                  onClick={changeMenu}
+                >
+                  <Menu.Item key="users">用户列表</Menu.Item>
+                  <Menu.Item key="projects">企划列表</Menu.Item>
+                  <Menu.Item key="groups">小组列表</Menu.Item>
+                </Menu>
+              </Col>
+              <Col xs={8} md={4} className='t-a:r'>
+                {meData && <div className='m-r:2'><Link to={'/users/' + meData.id}>
+                  <Button type="link">{meData.name}</Button>
+                  <Avatarx url={meData.avatar_url} name={meData.name} />
+                </Link></div>}
+              </Col>
+            </Row>
           </Header>
-          <Content className="m-x:2 m-t:4 pos:r">
+          <Content className={isSm ? "m-x:0 m-t:0 pos:r" : "m-x:2 m-t:4 pos:r"}>
             <Component {...matchProps} />
           </Content>
           <Footer style={{ textAlign: 'center' }}>1-mu ©2019 Created by emu</Footer>

@@ -231,7 +231,7 @@ function Stage({ history, match, project, onSuccess }) {
       return false
     }
 
-    const path = '/download'
+    const path = '/download/files'
     const params = {
       file_id: file_id.join(',')
     }
@@ -308,7 +308,7 @@ function Stage({ history, match, project, onSuccess }) {
           {phaseArr.map((phase, i) =>
             <TabPane tab={parseDate(phase.upload_date).split(' ')[0]} key={i}>
               <Row gutter={16}>
-                <Col sm={24} md={12} className=''>
+                <Col sm={24} md={12} className='m-b:1'>
                   <Row>
                     <Col><h2 className='fl:l'>提交的文件（{phase.creator.name}）</h2></Col>
                     <Col><Button className='fl:r' type='primary' onClick={() => onBatchDownload(phase)}>批量下载</Button></Col>

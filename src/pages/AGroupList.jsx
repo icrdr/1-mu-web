@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card } from 'antd'
-import {fetchData} from '../utility'
+import { Table, Card, Button, Popconfirm } from 'antd'
+import { fetchData, deleteData } from '../utility'
 import queryString from 'query-string'
-
+import { useMediaQuery } from 'react-responsive'
 export default function GroupList({ location, history, match }) {
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
+  const [update, setUpdate] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const columns = [
     {
       title: 'ID',
       dataIndex: 'id',
-      width: '5%'
+      width: isSm ? 32 : 50,
+      fixed: 'left',
     },
     {
       title: '组名',
       dataIndex: 'name',
-      width: '20%',
+      width: isSm ? 120 : 200,
+      fixed: 'left',
       render: (name, group) => {
         return <Link to={`${match.url}/${group.id}`}>{name}</Link>
       }
@@ -25,10 +29,11 @@ export default function GroupList({ location, history, match }) {
     {
       title: '组长',
       dataIndex: 'admins',
+      width: 150,
       render: (admins, group) => admins.map((admin, index) => (
         <Link className='m-r:.5' key={index} to={"/admin/users/" + admin.id}>{admin.name}</Link>
       )),
-      width: '10%',
+
     },
     {
       title: '组员',
@@ -36,8 +41,26 @@ export default function GroupList({ location, history, match }) {
       render: (users, group) => users.map((user, index) => (
         <Link className='m-r:.5' key={index} to={"/admin/users/" + user.id}>{user.name}</Link>
       )),
-      width: '30%',
     },
+    {
+      title: '删除',
+      key: 'delete',
+      width: 100,
+      render: (key, group) => {
+        if (group.id !== 1) {
+          return <Popconfirm
+            title="确定如此操作么？"
+            onConfirm={() => deleteGroup(group.id)}
+            okText="是"
+            cancelText="否"
+          >
+            <Button size='small'>删除</Button>
+          </Popconfirm>
+        } else {
+          return ''
+        }
+      }
+    }
   ];
   useEffect(() => {
     setLoading(true)
@@ -58,15 +81,22 @@ export default function GroupList({ location, history, match }) {
     fetchData(path, params).then(res => {
       setGroupList(res.data.groups)
       setPagination(prevState => { return { ...prevState, total: res.data.total } })
-      setLoading(false)
     }).catch(err => {
       setGroupList([])
+    }).finally(() => {
       setLoading(false)
     })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]);
+  }, [location, update]);
 
+
+  function deleteGroup(id) {
+    const path = '/groups/' + id
+    deleteData(path).then(res => {
+      setUpdate(!update)
+    })
+  }
   const onChangePage = (pagination) => {
     const values = queryString.parse(location.search)
     const params = queryString.stringify({ ...values, page: pagination.current });
@@ -75,6 +105,7 @@ export default function GroupList({ location, history, match }) {
 
   return (
     <Card>
+      <Button className='m-b:1' type='primary'><Link to='/admin/groups/add'>添加小组</Link></Button>
       <Table
         columns={columns}
         rowKey={group => group.id}
@@ -82,6 +113,7 @@ export default function GroupList({ location, history, match }) {
         loading={isloading}
         pagination={pagination}
         onChange={onChangePage}
+        scroll={{ x: 600 }}
       />
     </Card>
   )
