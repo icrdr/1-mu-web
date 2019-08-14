@@ -147,7 +147,7 @@ export default function Main({ location, history }) {
           loading={isloading}
           pagination={pagination}
           onChange={onChangePage}
-          scroll={{ x: 500 }}
+          scroll={{ x: 800 }}
         />
       </Card>
     </>
