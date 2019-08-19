@@ -61,7 +61,7 @@ export default function Main({ location, history }) {
   }, [isLoading]);
 
   const onSearch = v => {
-    projectList([])
+    setProjectList([])
     setPage(1)
     const values = queryString.parse(location.search)
     const params = queryString.stringify({ ...values, search: v, page: 1 });
