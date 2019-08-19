@@ -365,7 +365,7 @@ export default function Main({ location, history }) {
       const new_tableDate = {}
       for (const filter in allTableDate) {
         if (filter in values) {
-          new_tableDate[filter] = values[filter].split(',').map(date_str => { return moment.utc(date_str, 'YYYY-MM-DD').local() })
+          new_tableDate[filter] = values[filter].split(',').map(date_str => { return moment.utc(date_str, 'YYYY-MM-DD HH:mm:ss').local() })
           params[filter] = values[filter]
         }
       }
@@ -462,9 +462,11 @@ export default function Main({ location, history }) {
       ...values
     }
     if (dates.length === 2) {
+      console.log(dates)
       const dates_str = dates.map(date => {
-        return moment.utc(date).format('YYYY-MM-DD')
+        return moment(date.format('YYYY-MM-DD')).utc().format('YYYY-MM-DD HH:mm:ss')
       }).join(',')
+      console.log(dates_str)
       paramsObject[dataIndex] = dates_str
     } else {
       delete paramsObject[dataIndex]
