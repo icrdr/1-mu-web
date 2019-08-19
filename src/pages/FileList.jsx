@@ -53,10 +53,10 @@ export default function FileList({ location, history }) {
     }
 
     fetchData(path, params).then(res => {
-      setImgList(preState => {
-        return preState.concat(res.data.files)
+      setImgList(prevState => {
+        return prevState.concat(res.data.files)
       })
-      if (res.data.files.length > 0) setPage(preState => { return preState + 1 })
+      if (res.data.files.length > 0) setPage(prevState => { return prevState + 1 })
       setTimeout(() => {
         if (stackGrid) stackGrid.updateLayout()
         setLoading(false)

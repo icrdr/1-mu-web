@@ -307,7 +307,9 @@ export default function Main({ location, history }) {
         }
       }
       setTableFilter(new_tableFilter)
-
+      if (!values.creator_id){
+        params.creator_id = memberList.map((creator) => { return creator.id}).join(',')
+      }
       const new_tableSearch = {}
       if (values.search) {
         new_tableSearch['title'] = values.search

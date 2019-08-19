@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon } from 'antd'
+import { Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon, Progress,message } from 'antd'
 import { parseStatus, getStage, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
 import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
 import { useMediaQuery } from 'react-responsive'
-
+import useInterval from '../hooks/useInterval'
 const { Option } = Select;
 const { TextArea } = Input;
+
 export default function ProjectList({ location, history, match }) {
   const isSm = useMediaQuery({ query: '(max-width: 768px)' })
 
@@ -15,6 +16,7 @@ export default function ProjectList({ location, history, match }) {
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
   const [tableSearch, setTableSearch] = useState({});
+  const [taskId, setTaskId] = useState('');
   const allTableFilter = { status: [], client_id: [] }
 
   const [projectList, setProjectList] = useState([]);
@@ -29,6 +31,9 @@ export default function ProjectList({ location, history, match }) {
 
   const [isBatch, setBatch] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+  const [isZipping, setZipping] = useState(false)
+  const [taskData, setTaskData] = useState()
 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: () => (
@@ -516,17 +521,53 @@ export default function ProjectList({ location, history, match }) {
   }
 
   const handleDownload = () => {
-    const project_id = []
-    for (const project of projectList) {
-      project_id.push(project.id)
-    }
+    setZipping(true)
     const path = '/download/projects'
     const params = {
-      project_id: project_id.join(',')
+      project_id: selectedRowKeys.join(',')
     }
     fetchData(path, params).then(res => {
-      window.location.href = res.data.download_url
+      console.log(res)
+      setTaskId(res.data.task_id)
     })
+  }
+
+  useInterval(() => {
+    const path = '/download/zip/' + taskId
+    fetchData(path).then(res => {
+      setTaskData(res.data)
+      switch (res.data.state) {
+        case 'SUCCESS':
+          setZipping(false)
+          setTaskId()
+          setTaskData()
+          window.location.href = res.data.result.result
+          break
+        case 'FAILURE':
+          setZipping(false)
+          setTaskId()
+          setTaskData()
+          message.error('未知错误')
+          break
+        default:
+          break;
+      }
+
+    }).finally(() => {
+    })
+  }, taskId ? 2000 : null);
+
+  const progressRender = task => {
+    switch (task.state) {
+      case 'PENDING':
+        return <Progress percent={0} format={() => '等待中'} />
+      case 'PROGRESS':
+        return <Progress percent={task.result.current / task.result.total * 100} />
+      case 'SUCCESS':
+        return <Progress percent={100} format={() => '成功'} />
+      default:
+        return ''
+    }
   }
 
   return (
@@ -556,15 +597,18 @@ export default function ProjectList({ location, history, match }) {
       <div className='m-b:1'>
         <Button className='m-r:.5' type={isBatch ? "" : 'link'} onClick={() => setBatch(!isBatch)}>批量操作</Button>
         <Button className='m-r:.5' type='primary'><Link to='/admin/projects/post'>添加企划</Link></Button>
-        <ProjectPostByCsv onSucceed={()=>setUpdate(!update)}/>
+        <ProjectPostByCsv onSucceed={() => setUpdate(!update)} />
       </div>
       {isBatch &&
         <div className='m-b:1'>
-          <Button className='m-r:.5' type="primary" onClick={handleDownload} disabled={selectedRowKeys.length === 0}>批量下载成品</Button>
+          <Button className='m-r:.5' type="primary" onClick={handleDownload} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载成品</Button>
           <Button className='m-r:.5' type="primary" disabled={selectedRowKeys.length === 0}>批量执行A</Button>
           <Button className='m-r:.5' type="primary" disabled={selectedRowKeys.length === 0}>批量执行B</Button>
         </div>
       }
+      {taskId && <div className='m-b:1'>
+        压缩文件中...{taskData && progressRender(taskData)}
+      </div>}
       <Table
         rowSelection={
           isBatch ? {

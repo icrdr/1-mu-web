@@ -50,8 +50,8 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
   }
 
   const imgRender = [...fileArray].reverse().map(item =>
-    <Col span={8}>
-      <Card key={item.id} className='m-t:2'
+    <Col key={item.id} span={8}>
+      <Card className='m-t:2'
         cover={<ImgCard file={item} />}>
         <Icon type="close-circle" theme="twoTone" onClick={() => removeFile(item.id)} /><div className='fl:r'>{item.name}.{item.format}</div>
       </Card>
