@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon, Progress,message,DatePicker  } from 'antd'
+import { Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon, Progress, message, DatePicker, Divider } from 'antd'
 import { parseStatus, getStage, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
 import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
@@ -9,7 +9,7 @@ import { useMediaQuery } from 'react-responsive'
 import useInterval from '../hooks/useInterval'
 const { Option } = Select;
 const { TextArea } = Input;
-const {RangePicker} = DatePicker;
+const { RangePicker } = DatePicker;
 
 export default function ProjectList({ location, history, match }) {
   const isSm = useMediaQuery({ query: '(max-width: 768px)' })
@@ -20,9 +20,9 @@ export default function ProjectList({ location, history, match }) {
   const [tableSearch, setTableSearch] = useState({});
   const [tableDate, setTableDate] = useState({});
   const [taskId, setTaskId] = useState('');
-  const allTableFilter = { status: [], client_id: [], current_stage_index:[] }
-  const allTableSearch = { title: '',tags: '' }
-  const allTableDate = {start_date: []}
+  const allTableFilter = { status: [], client_id: [], current_stage_index: [] }
+  const allTableSearch = { title: '', tags: '' }
+  const allTableDate = { start_date: [] }
   const [projectList, setProjectList] = useState([]);
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
@@ -41,66 +41,72 @@ export default function ProjectList({ location, history, match }) {
 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: () => (
-      <div style={{ padding: 8 }}>
-        <Input
-          placeholder='输入关键词'
-          value={tableSearch[dataIndex]}
-          onChange={e => {
-            e.persist()
-            setTableSearch(prevState => {
-              prevState[dataIndex] = e.target.value ? e.target.value : ''
-              return { ...prevState }
-            })
-          }}
-          onPressEnter={() => handleSearch(dataIndex, tableSearch[dataIndex])}
-          style={{ width: 188, marginBottom: 8, display: 'block' }}
-        />
-        
-        <Button
-          type="primary"
-          onClick={() => handleSearch(dataIndex, tableSearch[dataIndex])}
-          icon="search"
-          size="small"
-          style={{ width: 90, marginRight: 8 }}
-        >
-          Search
+      <div>
+        <div className='p:.8'>
+          <Input
+            placeholder='输入关键词'
+            value={tableSearch[dataIndex]}
+            onChange={e => {
+              e.persist()
+              setTableSearch(prevState => {
+                prevState[dataIndex] = e.target.value ? e.target.value : ''
+                return { ...prevState }
+              })
+            }}
+            onPressEnter={() => handleSearch(dataIndex, tableSearch[dataIndex])}
+            style={{ width: 188, display: 'block' }}
+          />
+        </div>
+        <Divider className='m-y:0' />
+        <div className='p-y:.6 p-x:.1'>
+          <Button
+            type="link"
+            onClick={() => handleSearch(dataIndex, tableSearch[dataIndex])}
+            size="small"
+          >
+            OK
         </Button>
-        <Button onClick={() => handleSearch(dataIndex, '')} size="small" style={{ width: 90 }}>
-          Reset
+          <Button className='fl:r' type="link" onClick={() => handleSearch(dataIndex, '')} size="small">
+            Reset
         </Button>
+        </div>
       </div>
     ),
-    filterIcon: filtered => (
-      <Icon type="search" style={{ color: tableSearch[dataIndex] ? '#1890ff' : undefined }} />
+    filterIcon: () => (
+      <Icon type="edit" theme="filled" style={{ color: tableSearch[dataIndex] ? '#1890ff' : undefined }} />
     )
   })
 
   const getColumnDateProps = dataIndex => ({
     filterDropdown: () => (
-      <div style={{ padding: 8 }}>
-        <RangePicker onChange={dates=>{
-          setTableDate(prevState => {
+      <div>
+        <div className='p:.8'>
+          <RangePicker onChange={dates => {
+            setTableDate(prevState => {
               prevState[dataIndex] = dates
               return { ...prevState }
             })
           }}
-          value={tableDate[dataIndex]}
-          style={{ width: 218, marginBottom: 8, display: 'block' }}/>
-        <Button
-          type="primary"
-          onClick={() => handleDateRange(dataIndex, tableDate[dataIndex])}
-          size="small"
-          style={{ width: 105, marginRight: 8 }}
-        >
-          Confirm
+            value={tableDate[dataIndex]}
+            style={{ width: 218, display: 'block' }} />
+        </div>
+        <Divider className='m-y:0' />
+        <div className='p-y:.6 p-x:.1'>
+          <Button
+            type="link"
+            onClick={() => handleDateRange(dataIndex, tableDate[dataIndex])}
+            size="small"
+          >
+            OK
         </Button>
-        <Button onClick={() => handleDateRange(dataIndex, [])} size="small" style={{ width: 105 }}>
-          Reset
+          <Button className='fl:r' type="link" onClick={() => handleDateRange(dataIndex, [])} size="small">
+            Reset
         </Button>
+        </div>
       </div>
     ),
     filterIcon: filtered => (
-      <Icon type="calendar" style={{ color: tableDate[dataIndex] ? '#1890ff' : undefined }} />
+      <Icon type="calendar" theme="filled" style={{ color: tableDate[dataIndex] ? '#1890ff' : undefined }} />
     )
   })
 
@@ -469,7 +475,7 @@ export default function ProjectList({ location, history, match }) {
       const new_tableDate = {}
       for (const filter in allTableDate) {
         if (filter in values) {
-          new_tableDate[filter] = values[filter].split(',').map(date_str=>{return moment.utc(date_str,'YYYY-MM-DD').local()})
+          new_tableDate[filter] = values[filter].split(',').map(date_str => { return moment.utc(date_str, 'YYYY-MM-DD').local() })
           params[filter] = values[filter]
         }
       }
@@ -548,8 +554,8 @@ export default function ProjectList({ location, history, match }) {
     const paramsObject = {
       ...values
     }
-    if (dates.length===2) {
-      const dates_str = dates.map(date=>{
+    if (dates.length === 2) {
+      const dates_str = dates.map(date => {
         return moment.utc(date).format('YYYY-MM-DD')
       }).join(',')
       paramsObject[dataIndex] = dates_str

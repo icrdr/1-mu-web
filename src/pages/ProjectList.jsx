@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Input, Button, Icon, Select, Radio, DatePicker } from 'antd'
+import { Table, Card, Tag, Row, Col, Input, Button, Icon, Select, Radio, DatePicker, Divider } from 'antd'
 import { parseStatus, getStage, fetchData, parseDate, timeLeft, parseTimeLeft, updateData } from '../utility'
 import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
 import Ganttx from '../components/Ganttx';
 import { useMediaQuery } from 'react-responsive'
-const {RangePicker} = DatePicker;
+const { RangePicker } = DatePicker;
 const { Option } = Select;
 export default function Main({ location, history }) {
   const isSm = useMediaQuery({ query: '(max-width: 768px)' })
@@ -16,14 +16,14 @@ export default function Main({ location, history }) {
   const [tableFilter, setTableFilter] = useState({});
   const [tableSearch, setTableSearch] = useState({});
   const [tableDate, setTableDate] = useState({});
-  const allTableFilter = { status: [], creator_id:[], current_stage_index:[]}
-  const allTableSearch = { title: [],tags: [] }
-  const allTableDate = {start_date: []}
+  const allTableFilter = { status: [], creator_id: [], current_stage_index: [] }
+  const allTableSearch = { title: [], tags: [] }
+  const allTableDate = { start_date: [] }
   const [projectList, setProjectList] = useState([]);
   const [projectList2, setProjectList2] = useState([]);
   const [isloading, setLoading] = useState(false);
   const [isloading2, setLoading2] = useState(false);
-  
+
   const [update, setUpdate] = useState(false);
   const [meFilter, setMefilter] = useState('creator');
   const [memberList, setMemberList] = useState([]);
@@ -33,67 +33,75 @@ export default function Main({ location, history }) {
 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: () => (
-      <div style={{ padding: 8 }}>
-        <Input
-          placeholder='输入关键词'
-          value={tableSearch[dataIndex]}
-          onChange={e => {
-            e.persist()
-            setTableSearch(prevState => {
-              prevState[dataIndex] = e.target.value ? e.target.value : ''
-              return { ...prevState }
-            })
-          }}
-          onPressEnter={() => handleSearch(dataIndex, tableSearch[dataIndex])}
-          style={{ width: 188, marginBottom: 8, display: 'block' }}
-        />
-        <Button
-          type="primary"
-          onClick={() => handleSearch(dataIndex, tableSearch[dataIndex])}
-          icon="search"
-          size="small"
-          style={{ width: 90, marginRight: 8 }}
-        >
-          Search
+      <div>
+        <div className='p:.8'>
+          <Input
+            placeholder='输入关键词'
+            value={tableSearch[dataIndex]}
+            onChange={e => {
+              e.persist()
+              setTableSearch(prevState => {
+                prevState[dataIndex] = e.target.value ? e.target.value : ''
+                return { ...prevState }
+              })
+            }}
+            onPressEnter={() => handleSearch(dataIndex, tableSearch[dataIndex])}
+            style={{ width: 188, display: 'block' }}
+          />
+        </div>
+        <Divider className='m-y:0' />
+        <div className='p-y:.6 p-x:.1'>
+          <Button
+            type="link"
+            onClick={() => handleSearch(dataIndex, tableSearch[dataIndex])}
+            size="small"
+          >
+            OK
         </Button>
-        <Button onClick={() => handleSearch(dataIndex, '')} size="small" style={{ width: 90 }}>
-          Reset
+          <Button className='fl:r' type="link" onClick={() => handleSearch(dataIndex, '')} size="small">
+            Reset
         </Button>
+        </div>
       </div>
     ),
     filterIcon: () => (
-      <Icon type="search" style={{ color: tableSearch[dataIndex] ? '#1890ff' : undefined }} />
+      <Icon type="edit" theme="filled" style={{ color: tableSearch[dataIndex] ? '#1890ff' : undefined }} />
     )
   })
 
   const getColumnDateProps = dataIndex => ({
     filterDropdown: () => (
-      <div style={{ padding: 8 }}>
-        <RangePicker onChange={dates=>{
+      <div>
+        <div className='p:.8'>
+        <RangePicker onChange={dates => {
           setTableDate(prevState => {
-              prevState[dataIndex] = dates
-              return { ...prevState }
-            })
-          }}
+            prevState[dataIndex] = dates
+            return { ...prevState }
+          })
+        }}
           value={tableDate[dataIndex]}
-          style={{ width: 218, marginBottom: 8, display: 'block' }}/>
+          style={{ width: 218, display: 'block' }} />
+        </div>
+        <Divider className='m-y:0' />
+        <div className='p-y:.6 p-x:.1'>
         <Button
-          type="primary"
+          type="link"
           onClick={() => handleDateRange(dataIndex, tableDate[dataIndex])}
           size="small"
-          style={{ width: 105, marginRight: 8 }}
         >
-          Confirm
+          OK
         </Button>
-        <Button onClick={() => handleDateRange(dataIndex, [])} size="small" style={{ width: 105 }}>
+        <Button className='fl:r' type="link" onClick={() => handleDateRange(dataIndex, [])} size="small">
           Reset
         </Button>
+        </div>
       </div>
     ),
     filterIcon: filtered => (
-      <Icon type="calendar" style={{ color: tableDate[dataIndex] ? '#1890ff' : undefined }} />
+      <Icon type="calendar" theme="filled" style={{ color: tableDate[dataIndex] ? '#1890ff' : undefined }} />
     )
   })
+
   const columns = [
     {
       title: '企划名',
@@ -130,7 +138,7 @@ export default function Main({ location, history }) {
         return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)
       }
     },
-    
+
     {
       title: '开始时间',
       dataIndex: 'start_date',
@@ -257,7 +265,7 @@ export default function Main({ location, history }) {
         const creator = project.creator
         if (project.client.id === meData.id) {
           return <Select
-            style={{ width: '100%'}}
+            style={{ width: '100%' }}
             placeholder="选择小组"
             onChange={v => handleChangeCreator(v, project)}
             value={creator.name}
@@ -276,7 +284,7 @@ export default function Main({ location, history }) {
       dataIndex: 'remark',
     }
   ]
-  
+
   useEffect(() => {
     setLoading(true)
     const path = '/groups'
@@ -357,14 +365,14 @@ export default function Main({ location, history }) {
       const new_tableDate = {}
       for (const filter in allTableDate) {
         if (filter in values) {
-          new_tableDate[filter] = values[filter].split(',').map(date_str=>{return moment.utc(date_str,'YYYY-MM-DD').local()})
+          new_tableDate[filter] = values[filter].split(',').map(date_str => { return moment.utc(date_str, 'YYYY-MM-DD').local() })
           params[filter] = values[filter]
         }
       }
       setTableDate(new_tableDate)
-      
-      if (!values.creator_id){
-        params.creator_id = memberList.map((creator) => { return creator.id}).join(',')
+
+      if (!values.creator_id) {
+        params.creator_id = memberList.map((creator) => { return creator.id }).join(',')
       }
 
       fetchData(path, params).then(res => {
@@ -453,8 +461,8 @@ export default function Main({ location, history }) {
     const paramsObject = {
       ...values
     }
-    if (dates.length===2) {
-      const dates_str = dates.map(date=>{
+    if (dates.length === 2) {
+      const dates_str = dates.map(date => {
         return moment.utc(date).format('YYYY-MM-DD')
       }).join(',')
       paramsObject[dataIndex] = dates_str
