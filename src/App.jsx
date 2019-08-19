@@ -21,6 +21,7 @@ import AllList from './pages/AllList'
 import NotFound from './pages/NotFound'
 import SampleList from './pages/SampleList'
 import AGroupAdd from './pages/AGroupAdd'
+import DoneList from './pages/DoneList'
 // layouts
 import Web from './layouts/Web'
 import Dashboard from './layouts/Dashboard'
@@ -45,15 +46,16 @@ function App({ location }) {
       <Web exact path="/" component={Main} />
       <Web path="/me" component={Me} />
       <Web exact path="/samples" component={SampleList} />
+      <Web exact path="/dones" component={DoneList} />
       <Web exact path="/projects" component={ProjectList} />
-      <Web exact path="/all" component={AllList}/>
-      <Web exact path="/files" component={FileList}/>
-      <Web path="/projects/:project_id(\d+)" component={Project}/>
+      <Web exact path="/all" component={AllList} />
+      <Web exact path="/files" component={FileList} />
+      <Web path="/projects/:project_id(\d+)" component={Project} />
       <Web path="/users/:user_id(\d+)" component={User} />
       <Web exact path="/groups" component={GroupList} />
       <Web path="/groups/:group_id(\d+)" component={Group} />
       <Dashboard exact path="/admin/projects" component={AProjectList} />
-      <Dashboard path="/admin/projects/:project_id(\d+)" component={AProject}/>
+      <Dashboard path="/admin/projects/:project_id(\d+)" component={AProject} />
       <Dashboard path="/admin/projects/post" component={AProjectPost} />
       <Dashboard exact path="/admin/users" component={AUserList} />
       <Dashboard path="/admin/users/:user_id(\d+)" component={AUser} />

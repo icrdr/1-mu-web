@@ -55,9 +55,10 @@ function Web({ location, history, component: Component, ...rest }) {
                 >
                   <Menu.Item key="groups">小组列表</Menu.Item>
                   <Menu.Item key="projects">企划列表</Menu.Item>
-                  <Menu.Item key="all">总表</Menu.Item>
-                  <Menu.Item key="files">图库</Menu.Item>
-                  <Menu.Item key="samples">样图</Menu.Item>
+                  <Menu.Item key="all">总列表</Menu.Item>
+                  <Menu.Item key="files">参考资源</Menu.Item>
+                  <Menu.Item key="samples">标准图</Menu.Item>
+                  <Menu.Item key="dones">成品图</Menu.Item>
                 </Menu>
               </Col>
               <Col xs={16} md={4} className='t-a:r'>
