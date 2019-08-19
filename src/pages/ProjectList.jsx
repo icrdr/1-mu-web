@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react'
-
+import moment from 'moment';
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Input, Button, Icon, Select, Radio } from 'antd'
+import { Table, Card, Tag, Row, Col, Input, Button, Icon, Select, Radio, DatePicker } from 'antd'
 import { parseStatus, getStage, fetchData, parseDate, timeLeft, parseTimeLeft, updateData } from '../utility'
 import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
 import Ganttx from '../components/Ganttx';
 import { useMediaQuery } from 'react-responsive'
-
+const {RangePicker} = DatePicker;
 const { Option } = Select;
 export default function Main({ location, history }) {
   const isSm = useMediaQuery({ query: '(max-width: 768px)' })
@@ -15,8 +15,10 @@ export default function Main({ location, history }) {
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
   const [tableSearch, setTableSearch] = useState({});
-  const allTableFilter = { status: [], creator_id:[]}
-
+  const [tableDate, setTableDate] = useState({});
+  const allTableFilter = { status: [], creator_id:[], current_stage_index:[]}
+  const allTableSearch = { title: [],tags: [] }
+  const allTableDate = {start_date: []}
   const [projectList, setProjectList] = useState([]);
   const [projectList2, setProjectList2] = useState([]);
   const [isloading, setLoading] = useState(false);
@@ -42,19 +44,19 @@ export default function Main({ location, history }) {
               return { ...prevState }
             })
           }}
-          onPressEnter={() => handleSearch(tableSearch[dataIndex])}
+          onPressEnter={() => handleSearch(dataIndex, tableSearch[dataIndex])}
           style={{ width: 188, marginBottom: 8, display: 'block' }}
         />
         <Button
           type="primary"
-          onClick={() => handleSearch(tableSearch[dataIndex])}
+          onClick={() => handleSearch(dataIndex, tableSearch[dataIndex])}
           icon="search"
           size="small"
           style={{ width: 90, marginRight: 8 }}
         >
           Search
         </Button>
-        <Button onClick={() => handleSearch('')} size="small" style={{ width: 90 }}>
+        <Button onClick={() => handleSearch(dataIndex, '')} size="small" style={{ width: 90 }}>
           Reset
         </Button>
       </div>
@@ -64,6 +66,34 @@ export default function Main({ location, history }) {
     )
   })
 
+  const getColumnDateProps = dataIndex => ({
+    filterDropdown: () => (
+      <div style={{ padding: 8 }}>
+        <RangePicker onChange={dates=>{
+          setTableDate(prevState => {
+              prevState[dataIndex] = dates
+              return { ...prevState }
+            })
+          }}
+          value={tableDate[dataIndex]}
+          style={{ width: 218, marginBottom: 8, display: 'block' }}/>
+        <Button
+          type="primary"
+          onClick={() => handleDateRange(dataIndex, tableDate[dataIndex])}
+          size="small"
+          style={{ width: 105, marginRight: 8 }}
+        >
+          Confirm
+        </Button>
+        <Button onClick={() => handleDateRange(dataIndex, [])} size="small" style={{ width: 105 }}>
+          Reset
+        </Button>
+      </div>
+    ),
+    filterIcon: filtered => (
+      <Icon type="calendar" style={{ color: tableDate[dataIndex] ? '#1890ff' : undefined }} />
+    )
+  })
   const columns = [
     {
       title: '企划名',
@@ -107,6 +137,7 @@ export default function Main({ location, history }) {
       sorter: true,
       sortOrder: tableSorter['start_date'],
       sortDirections: ['descend', 'ascend'],
+      ...getColumnDateProps('start_date'),
       width: 200,
       render: (start_date) => {
         if (start_date) {
@@ -122,6 +153,12 @@ export default function Main({ location, history }) {
       sorter: true,
       sortOrder: tableSorter['current_stage_index'],
       sortDirections: ['descend', 'ascend'],
+      filters: [
+        { text: '参考-草图', value: 0 },
+        { text: '线稿-铺色', value: 1 },
+        { text: '细化-特效', value: 2 },
+      ],
+      filteredValue: tableFilter['current_stage_index'] || [],
       width: 200,
       render: (index, project) => {
         const status = project.status
@@ -307,15 +344,28 @@ export default function Main({ location, history }) {
         }
       }
       setTableFilter(new_tableFilter)
+
+      const new_tableSearch = {}
+      for (const filter in allTableSearch) {
+        if (filter in values) {
+          new_tableSearch[filter] = values[filter]
+          params[filter] = values[filter]
+        }
+      }
+      setTableSearch(new_tableSearch)
+
+      const new_tableDate = {}
+      for (const filter in allTableDate) {
+        if (filter in values) {
+          new_tableDate[filter] = values[filter].split(',').map(date_str=>{return moment.utc(date_str,'YYYY-MM-DD').local()})
+          params[filter] = values[filter]
+        }
+      }
+      setTableDate(new_tableDate)
+      
       if (!values.creator_id){
         params.creator_id = memberList.map((creator) => { return creator.id}).join(',')
       }
-      const new_tableSearch = {}
-      if (values.search) {
-        new_tableSearch['title'] = values.search
-        params.search = values.search
-      }
-      setTableSearch(new_tableSearch)
 
       fetchData(path, params).then(res => {
         setProjectList(res.data.projects)
@@ -398,16 +448,32 @@ export default function Main({ location, history }) {
       setUpdate(!update)
     })
   }
-
-  const handleSearch = v => {
+  const handleDateRange = (dataIndex, dates) => {
     const values = queryString.parse(location.search)
     const paramsObject = {
       ...values
     }
-    if (v) {
-      paramsObject.search = v
+    if (dates.length===2) {
+      const dates_str = dates.map(date=>{
+        return moment.utc(date).format('YYYY-MM-DD')
+      }).join(',')
+      paramsObject[dataIndex] = dates_str
     } else {
-      delete paramsObject.search
+      delete paramsObject[dataIndex]
+    }
+    const params = queryString.stringify(paramsObject);
+    history.push(`${location.pathname}?${params}`)
+  }
+
+  const handleSearch = (dataIndex, keyWord) => {
+    const values = queryString.parse(location.search)
+    const paramsObject = {
+      ...values
+    }
+    if (keyWord) {
+      paramsObject[dataIndex] = keyWord
+    } else {
+      delete paramsObject[dataIndex]
     }
     const params = queryString.stringify(paramsObject);
     history.push(`${location.pathname}?${params}`)

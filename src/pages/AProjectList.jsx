@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
+import moment from 'moment';
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon, Progress,message } from 'antd'
+import { Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon, Progress,message,DatePicker  } from 'antd'
 import { parseStatus, getStage, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
 import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
@@ -8,6 +9,7 @@ import { useMediaQuery } from 'react-responsive'
 import useInterval from '../hooks/useInterval'
 const { Option } = Select;
 const { TextArea } = Input;
+const {RangePicker} = DatePicker;
 
 export default function ProjectList({ location, history, match }) {
   const isSm = useMediaQuery({ query: '(max-width: 768px)' })
@@ -16,9 +18,11 @@ export default function ProjectList({ location, history, match }) {
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
   const [tableSearch, setTableSearch] = useState({});
+  const [tableDate, setTableDate] = useState({});
   const [taskId, setTaskId] = useState('');
-  const allTableFilter = { status: [], client_id: [] }
-
+  const allTableFilter = { status: [], client_id: [], current_stage_index:[] }
+  const allTableSearch = { title: '',tags: '' }
+  const allTableDate = {start_date: []}
   const [projectList, setProjectList] = useState([]);
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
@@ -48,25 +52,55 @@ export default function ProjectList({ location, history, match }) {
               return { ...prevState }
             })
           }}
-          onPressEnter={() => handleSearch(tableSearch[dataIndex])}
+          onPressEnter={() => handleSearch(dataIndex, tableSearch[dataIndex])}
           style={{ width: 188, marginBottom: 8, display: 'block' }}
         />
+        
         <Button
           type="primary"
-          onClick={() => handleSearch(tableSearch[dataIndex])}
+          onClick={() => handleSearch(dataIndex, tableSearch[dataIndex])}
           icon="search"
           size="small"
           style={{ width: 90, marginRight: 8 }}
         >
           Search
         </Button>
-        <Button onClick={() => handleSearch('')} size="small" style={{ width: 90 }}>
+        <Button onClick={() => handleSearch(dataIndex, '')} size="small" style={{ width: 90 }}>
           Reset
         </Button>
       </div>
     ),
     filterIcon: filtered => (
       <Icon type="search" style={{ color: tableSearch[dataIndex] ? '#1890ff' : undefined }} />
+    )
+  })
+
+  const getColumnDateProps = dataIndex => ({
+    filterDropdown: () => (
+      <div style={{ padding: 8 }}>
+        <RangePicker onChange={dates=>{
+          setTableDate(prevState => {
+              prevState[dataIndex] = dates
+              return { ...prevState }
+            })
+          }}
+          value={tableDate[dataIndex]}
+          style={{ width: 218, marginBottom: 8, display: 'block' }}/>
+        <Button
+          type="primary"
+          onClick={() => handleDateRange(dataIndex, tableDate[dataIndex])}
+          size="small"
+          style={{ width: 105, marginRight: 8 }}
+        >
+          Confirm
+        </Button>
+        <Button onClick={() => handleDateRange(dataIndex, [])} size="small" style={{ width: 105 }}>
+          Reset
+        </Button>
+      </div>
+    ),
+    filterIcon: filtered => (
+      <Icon type="calendar" style={{ color: tableDate[dataIndex] ? '#1890ff' : undefined }} />
     )
   })
 
@@ -112,6 +146,7 @@ export default function ProjectList({ location, history, match }) {
       sorter: true,
       sortOrder: tableSorter['start_date'],
       sortDirections: ['descend', 'ascend'],
+      ...getColumnDateProps('start_date'),
       width: 150,
       render: (start_date) => {
         if (start_date) {
@@ -127,6 +162,12 @@ export default function ProjectList({ location, history, match }) {
       sorter: true,
       sortOrder: tableSorter['current_stage_index'],
       sortDirections: ['descend', 'ascend'],
+      filters: [
+        { text: '参考-草图', value: 0 },
+        { text: '线稿-铺色', value: 1 },
+        { text: '细化-特效', value: 2 },
+      ],
+      filteredValue: tableFilter['current_stage_index'] || [],
       width: 150,
       render: (index, project) => {
         const status = project.status
@@ -416,6 +457,24 @@ export default function ProjectList({ location, history, match }) {
       }
       setTableFilter(new_tableFilter)
 
+      const new_tableSearch = {}
+      for (const filter in allTableSearch) {
+        if (filter in values) {
+          new_tableSearch[filter] = values[filter]
+          params[filter] = values[filter]
+        }
+      }
+      setTableSearch(new_tableSearch)
+
+      const new_tableDate = {}
+      for (const filter in allTableDate) {
+        if (filter in values) {
+          new_tableDate[filter] = values[filter].split(',').map(date_str=>{return moment.utc(date_str,'YYYY-MM-DD').local()})
+          params[filter] = values[filter]
+        }
+      }
+      setTableDate(new_tableDate)
+
       if (values.client_id) {
         const client_ids = []
         for (const group_index of values.client_id.split(',')) {
@@ -428,13 +487,6 @@ export default function ProjectList({ location, history, match }) {
         }
         if (client_ids.length > 0) params.client_id = client_ids.join(',')
       }
-
-      const new_tableSearch = {}
-      if (values.search) {
-        new_tableSearch['title'] = values.search
-        params.search = values.search
-      }
-      setTableSearch(new_tableSearch)
 
       fetchData(path, params).then(res => {
         setProjectList(res.data.projects)
@@ -477,15 +529,32 @@ export default function ProjectList({ location, history, match }) {
     history.push(`${location.pathname}?${params}`)
   }
 
-  const handleSearch = v => {
+  const handleSearch = (dataIndex, keyWord) => {
     const values = queryString.parse(location.search)
     const paramsObject = {
       ...values
     }
-    if (v) {
-      paramsObject.search = v
+    if (keyWord) {
+      paramsObject[dataIndex] = keyWord
     } else {
-      delete paramsObject.search
+      delete paramsObject[dataIndex]
+    }
+    const params = queryString.stringify(paramsObject);
+    history.push(`${location.pathname}?${params}`)
+  }
+
+  const handleDateRange = (dataIndex, dates) => {
+    const values = queryString.parse(location.search)
+    const paramsObject = {
+      ...values
+    }
+    if (dates.length===2) {
+      const dates_str = dates.map(date=>{
+        return moment.utc(date).format('YYYY-MM-DD')
+      }).join(',')
+      paramsObject[dataIndex] = dates_str
+    } else {
+      delete paramsObject[dataIndex]
     }
     const params = queryString.stringify(paramsObject);
     history.push(`${location.pathname}?${params}`)
