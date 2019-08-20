@@ -58,7 +58,7 @@ function Web({ location, history, component: Component, ...rest }) {
                   <Menu.Item key="all">总列表</Menu.Item>
                   <Menu.Item key="files">参考资源</Menu.Item>
                   <Menu.Item key="samples">标准图</Menu.Item>
-                  <Menu.Item key="dones">成品图</Menu.Item>
+                  {/* <Menu.Item key="dones">成品图</Menu.Item> */}
                 </Menu>
               </Col>
               <Col xs={16} md={4} className='t-a:r'>
