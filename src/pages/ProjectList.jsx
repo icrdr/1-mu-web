@@ -462,11 +462,9 @@ export default function Main({ location, history }) {
       ...values
     }
     if (dates.length === 2) {
-      console.log(dates)
       const dates_str = dates.map(date => {
         return moment(date.format('YYYY-MM-DD')).utc().format('YYYY-MM-DD HH:mm:ss')
       }).join(',')
-      console.log(dates_str)
       paramsObject[dataIndex] = dates_str
     } else {
       delete paramsObject[dataIndex]
