@@ -7,7 +7,7 @@ import { useMediaQuery } from 'react-responsive'
 import StackGrid from "react-stack-grid";
 
 const { Search } = Input;
-export default function Main({ location, history }) {
+export default function DoneList({ location, history }) {
   const isSm = useMediaQuery({ query: '(max-width: 768px)' })
   const [stackGrid, setStackGrid] = useState()
   const [update, setUpdate] = useState(false)
