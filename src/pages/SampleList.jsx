@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Card, Input, Modal, Tag, Button,Icon } from 'antd'
+import { Card, Input, Modal, Tag, Button,Icon, message } from 'antd'
 import { fetchData, getPhase, getStage } from '../utility'
 import ImgCard from '../components/ImgCard'
 import queryString from 'query-string'
@@ -15,8 +15,7 @@ export default function SampleList({ location, history }) {
   const [projectList, setProjectList] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [lightBox, setLightBox] = useState()
-  // const [update, setUpdate] = useState(false);
-  // const { meData } = useContext(meContext);
+  const [isZipping, setZipping] = useState(false);
 
   useEffect(() => {
     setLoading(true)
@@ -70,17 +69,21 @@ export default function SampleList({ location, history }) {
   }
 
   const handleDownload = files => {
+    setZipping(true)
     const file_id = []
     for (const file of files) {
       file_id.push(file.id)
     }
-
     const path = '/download/files'
     const params = {
       file_id: file_id.join(',')
     }
+    const hide = message.loading('压缩文件中...', 0);
     fetchData(path, params).then(res => {
+      hide()
       window.location.href = res.data.download_url
+    }).finally(()=>{
+      setZipping(false)
     })
   }
 
@@ -120,7 +123,7 @@ export default function SampleList({ location, history }) {
           {projectList.map((project, index) => {
             const item = getPhase(getStage(project)).upload_files[0]
             return <Card key={index} cover={<div onClick={() => setLightBox(project)}><ImgCard file={item} /></div>}>
-              <Button type='link' size='small' onClick={() => handleDownload(getPhase(getStage(project)).upload_files)}>
+              <Button type='link' size='small' disabled={isZipping} onClick={() => handleDownload(getPhase(getStage(project)).upload_files)}>
                 <Icon type="download" />
                 {project.title}
               </Button>

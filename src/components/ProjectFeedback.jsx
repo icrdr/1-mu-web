@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useState} from 'react'
 import { Card, Typography, Button, Row, Col, Alert } from 'antd';
 import useForm from '../hooks/useForm'
 import BraftEditor from 'braft-editor'
@@ -7,6 +7,8 @@ const { Paragraph } = Typography;
 
 export default function ProjectFeedback({ history, match, feedback, onSuccess }) {
   let submit = ''
+  const [isWating, setWating] = useState(false);
+
   const validation = {
     'feedback': [
       {
@@ -19,6 +21,7 @@ export default function ProjectFeedback({ history, match, feedback, onSuccess })
   const { errors, field, handleSubmit } = useForm(onSubmit, undefined, validation)
 
   function onSubmit(v) {
+    setWating(true)
     const path = `/projects/${match.params.project_id}/modify`
     const data = {
       ...v,
@@ -32,6 +35,8 @@ export default function ProjectFeedback({ history, match, feedback, onSuccess })
         history.push(match.url.split('/').slice(0, -1).join('/'))
       }
       onSuccess()
+    }).finally(()=>{
+      setWating(false)
     })
   }
 
@@ -52,10 +57,10 @@ export default function ProjectFeedback({ history, match, feedback, onSuccess })
           </Card>
           <Row className='m-t:2' gutter={12}>
             <Col span={12}>
-              <Button name='feedback' size='large' block type="primary" onClick={(e) => submit = e.target.name} htmlType="submit">提交</Button>
+              <Button name='feedback' size='large' block type="primary" disabled={isWating} onClick={(e) => submit = e.target.name} htmlType="submit">提交</Button>
             </Col>
             <Col span={12}>
-              <Button name='save' size='large' block onClick={(e) => submit = e.target.name} htmlType="submit">保存</Button>
+              <Button name='save' size='large' block disabled={isWating} onClick={(e) => submit = e.target.name} htmlType="submit">保存</Button>
             </Col>
           </Row>
         </form ></Col>

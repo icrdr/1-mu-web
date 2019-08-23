@@ -11,6 +11,7 @@ const { Dragger } = Upload;
 export default function ProjectUpload({ history, match, upload, file, onSuccess }) {
   let submit = ''
   const [fileArray, setFileArray] = useState(file)
+  const [isWating, setWating] = useState(false);
 
   const validation = {
     'upload': [
@@ -24,6 +25,7 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
   const { errors, field, handleSubmit } = useForm(onSubmit, undefined, validation)
 
   function onSubmit(v) {
+    setWating(true)
     const data = {
       ...v,
       upload: v.upload.toHTML(),
@@ -43,6 +45,8 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
         history.push(match.url.split('/').slice(0, -1).join('/'))
       }
       onSuccess()
+    }).finally(()=>{
+      setWating(false)
     })
   }
   const removeFile = key => {
@@ -102,10 +106,10 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
           </div>
           <Row className='m-t:2' gutter={12}>
             <Col span={12}>
-              <Button name='upload' size='large' block type="primary" onClick={(e) => submit = e.target.name} htmlType="submit">提交</Button>
+              <Button name='upload' size='large' block type="primary" disabled={isWating} onClick={(e) => submit = e.target.name} htmlType="submit">提交</Button>
             </Col>
             <Col span={12}>
-              <Button name='save' size='large' block onClick={(e) => submit = e.target.name} htmlType="submit">保存</Button>
+              <Button name='save' size='large' block disabled={isWating} onClick={(e) => submit = e.target.name} htmlType="submit">保存</Button>
             </Col>
           </Row>
         </form >

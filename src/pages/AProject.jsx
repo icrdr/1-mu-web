@@ -154,11 +154,15 @@ export default function Project({ history, match, location }) {
 }
 
 function Design({ history, match, project, onSuccess }) {
+  const [isWating, setWating] = useState(false);
   const onStart = () => {
+    setWating(true)
     const path = `/projects/${match.params.project_id}/start`
     updateData(path).then(() => {
       history.push(`/admin/projects/${match.params.project_id}/stages/0`)
       onSuccess()
+    }).finally(()=>{
+      setWating(false)
     })
   }
 
@@ -172,7 +176,7 @@ function Design({ history, match, project, onSuccess }) {
             okText="是"
             cancelText="否"
           >
-            <Button size='large' type="primary" block>确认开始企划</Button>
+            <Button size='large' disabled={isWating} type="primary" block>确认开始企划</Button>
           </Popconfirm>
         }
         <h1>初始设计稿</h1>
@@ -193,10 +197,13 @@ function Design({ history, match, project, onSuccess }) {
 }
 
 function Stage({ history, match, project, onSuccess }) {
+  const [isWating, setWating] = useState(false);
+  
   const index = parseInt(match.params.stage_index)
   const stage = project.stages[index]
 
-  const onBatchDownload = phase => {
+  const handleDownload = phase => {
+    setWating(true)
     let file_id = []
     for (let i in phase.upload_files) {
       file_id.push(phase.upload_files[i].id)
@@ -212,12 +219,17 @@ function Stage({ history, match, project, onSuccess }) {
     const params = {
       file_id: file_id.join(',')
     }
+    const hide = message.loading('压缩文件中...', 0);
     fetchData(path, params).then(res => {
+      hide()
       window.location.href = res.data.download_url
+    }).finally(()=>{
+      setWating(false)
     })
   }
 
   const onFinish = () => {
+    setWating(true)
     const path = `/projects/${match.params.project_id}/finish`
     updateData(path).then(() => {
       if (project.stages.length - 1 > index) {
@@ -226,6 +238,8 @@ function Stage({ history, match, project, onSuccess }) {
         history.push(`/admin/projects/${match.params.project_id}/done`)
       }
       onSuccess()
+    }).finally(()=>{
+      setWating(false)
     })
   }
 
@@ -258,7 +272,7 @@ function Stage({ history, match, project, onSuccess }) {
                   okText="是"
                   cancelText="否"
                 >
-                  <Button type="primary" size='large' block >确认通过</Button>
+                  <Button type="primary" disabled={isWating} size='large' block >确认通过</Button>
                 </Popconfirm>
               </Col>
               <Col sm={24} md={12}>
@@ -287,7 +301,7 @@ function Stage({ history, match, project, onSuccess }) {
                 <Col sm={24} md={12} className='m-b:1'>
                   <Row>
                     <Col><h2 className='fl:l'>提交的文件（{phase.creator.name}）</h2></Col>
-                    <Col><Button className='fl:r' type='primary' onClick={() => onBatchDownload(phase)}>批量下载</Button></Col>
+                    <Col><Button className='fl:r' type='primary' disabled={isWating} onClick={() => handleDownload(phase)}>批量下载</Button></Col>
                   </Row>
                   <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
                   {phase.upload_files.map((item, j) =>
