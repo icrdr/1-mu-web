@@ -1,9 +1,9 @@
 import React from 'react'
 import { Card, Typography, Button, Icon, Alert, Upload } from 'antd';
-import useForm from '../hooks/useForm'
+import useForm from '../../hooks/useForm'
 import BraftEditor from 'braft-editor'
 import { ContentUtils } from 'braft-utils'
-import { uploadData, updateData } from '../utility'
+import { uploadData, updateData } from '../../utility'
 const { Paragraph } = Typography;
 
 export default function ProjectDesign({ history, match, design, onSuccess }) {

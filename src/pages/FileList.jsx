@@ -5,7 +5,7 @@ import { fetchData, updateData } from '../utility'
 import StackGrid from "react-stack-grid";
 import queryString from 'query-string'
 import ImgPost from '../components/ImgPost'
-import { meContext } from '../layouts/Web';
+import { globalContext } from '../App';
 import { useMediaQuery } from 'react-responsive'
 const { Search } = Input;
 const { CheckableTag } = Tag;
@@ -20,7 +20,7 @@ export default function FileList({ location, history }) {
   const [selectedTags, setSelectedTags] = useState([])
   const [lightBox, setLightBox] = useState()
   const [newTag, setNewTag] = useState([])
-  const { meData } = useContext(meContext)
+  const { meData } = useContext(globalContext)
   const tagsFromServer = [
     '普通外科', '骨科', '神经外科', '妇产科', '泌尿外科', '胸外科', '眼科', '耳鼻喉科', '整形',
     '心外科', '心内科', '神经内科', '肾内科', '皮肤科', '血液科', '儿科', '内分泌科', '肿瘤科',

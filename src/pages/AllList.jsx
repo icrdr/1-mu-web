@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Table, Card, Tag, Input, Row, Col, Select } from 'antd'
 import { fetchData } from '../utility'
-// import { meContext } from '../layouts/Web';
 import queryString from 'query-string'
 import { useMediaQuery } from 'react-responsive'
 const { Search } = Input;
@@ -13,8 +12,6 @@ export default function Main({ location, history }) {
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
-  // const [update, setUpdate] = useState(false);
-  // const { meData } = useContext(meContext);
 
   const columns = [
     {

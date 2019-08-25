@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom'
 import { Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon, Progress, message, DatePicker, Divider } from 'antd'
-import { parseStatus, getStage, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
+import { parseStatus, getStage, getPhase, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
 import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
 import { useMediaQuery } from 'react-responsive'
@@ -131,7 +131,7 @@ export default function ProjectList({ location, history, match }) {
             link_url = `${match.path}/${project.id}/done`
             break;
           default:
-            link_url = `${match.path}/${project.id}/stages/${project.current_stage_index}`
+            link_url = `${match.path}/${project.id}/stages/${getStage(project).id}/phases/${getPhase(getStage(project)).id}`
             break;
         }
         return <Link to={link_url} className='dont-break-out'>{name}</Link>

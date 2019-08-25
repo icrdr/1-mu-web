@@ -15,7 +15,7 @@ export default function useLogin() {
       }
     }
     if (hasToken) {
-      let path = '/me'
+      const path = '/me'
       fetchData(path).then(res => {
         setMeData(res.data)
         setStatus('ok')

@@ -4,13 +4,13 @@ import { Card, Button, Descriptions, Table, Popconfirm,Breadcrumb } from 'antd'
 import Loading from '../components/Loading'
 import { fetchData, updateData } from '../utility'
 import MemberAdd from '../components/MemberAdd'
-import { meContext } from '../layouts/Web';
+import { globalContext } from '../App';
 
 export default function Group({ match, location }) {
   const [groupData, setGroupData] = useState();
   const [update, setUpdate] = useState(true);
   const [isAdmin, setAdmin] = useState(false);
-  const { meData } = useContext(meContext);
+  const { meData } = useContext(globalContext);
   const columns1 = [
     {
       title: 'ID',

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, withRouter } from 'react-router-dom'
 import { Row, Col, Button, Empty } from 'antd'
 import Gantt from 'react-gantt-antd'
-import { getPhase, toLocalDate } from '../utility'
+import { getPhase, getStage, toLocalDate } from '../utility'
 import Loading from '../components/Loading'
 function Ganttx({ match, loading, projects }) {
   const now = new Date()
@@ -96,7 +96,7 @@ function Ganttx({ match, loading, projects }) {
         }
         s_tracks.push({
           id: stage.id,
-          title: <Link to={`${match.path}/${project.id}/stages/${i}`}>{`${parseInt(i) + 1}.${stage.name}`}</Link>,
+          title: <Link to={`${match.path}/${project.id}/stages/${stage.id}/phases/${getPhase(stage).id}`}>{`${parseInt(i) + 1}.${stage.name}`}</Link>,
           elements: p_elements,
         })
 
@@ -120,7 +120,7 @@ function Ganttx({ match, loading, projects }) {
           link_url = `${match.path}/${project.id}/done`
           break;
         default:
-          link_url = `${match.path}/${project.id}/stages/${project.current_stage_index}`
+          link_url = `${match.path}/${project.id}/stages/${getStage(project).id}/phases/${getPhase(getStage(project)).id}`
           break;
       }
       new_tracks.push({

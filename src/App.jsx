@@ -7,7 +7,6 @@ import Me from './pages/Me'
 import ProjectList from './pages/ProjectList'
 import Project from './pages/Project'
 import AProjectList from './pages/AProjectList'
-import AProject from './pages/AProject'
 import AUserList from './pages/AUserList'
 import AProjectPost from './pages/AProjectPost'
 import AUser from './pages/AUser'
@@ -27,11 +26,19 @@ import Web from './layouts/Web'
 import Dashboard from './layouts/Dashboard'
 import useWxLogin from './hooks/useWxLogin'
 import { withRouter } from "react-router";
+import LoginQrcode from './components/LoginQrcode'
+import useLogin from './hooks/useLogin'
+import Loading from './components/Loading'
+import Maintenance from './components/Maintenance'
+import { useMediaQuery } from 'react-responsive'
 //css
 import './App.css';
-
+export const globalContext = React.createContext();
 function App({ location }) {
+  
   const wxLoginState = useWxLogin(location)
+  const { meData, status } = useLogin()
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
   switch (wxLoginState) {
     case 'pending':
       return <div>loading...</div>;
@@ -41,7 +48,21 @@ function App({ location }) {
       break;
   }
 
+  switch (status) {
+    case 'pending':
+      return <Loading />
+    case 'no':
+      return <LoginQrcode />
+    case 'error':
+      return <Maintenance />
+    default:
+      if (meData.role !== 'Admin') {
+        return <h1>你没有admin权限</h1>
+      }
+  }
+
   return (
+    <globalContext.Provider value={{ meData, isSm }}>
     <Switch>
       <Web exact path="/" component={Main} />
       <Web path="/me" component={Me} />
@@ -55,7 +76,7 @@ function App({ location }) {
       <Web exact path="/groups" component={GroupList} />
       <Web path="/groups/:group_id(\d+)" component={Group} />
       <Dashboard exact path="/admin/projects" component={AProjectList} />
-      <Dashboard path="/admin/projects/:project_id(\d+)" component={AProject} />
+      <Dashboard path="/admin/projects/:project_id(\d+)" component={Project} props={{isAdmin:true}}/>
       <Dashboard path="/admin/projects/post" component={AProjectPost} />
       <Dashboard exact path="/admin/users" component={AUserList} />
       <Dashboard path="/admin/users/:user_id(\d+)" component={AUser} />
@@ -64,6 +85,7 @@ function App({ location }) {
       <Dashboard path="/admin/groups/add" component={AGroupAdd} />
       <Route component={NotFound} />
     </Switch>
+    </globalContext.Provider>
   )
 }
 export default withRouter(App)

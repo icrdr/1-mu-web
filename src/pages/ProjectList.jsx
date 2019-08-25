@@ -2,11 +2,14 @@ import React, { useEffect, useState, useContext } from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom'
 import { Table, Card, Tag, Row, Col, Input, Button, Icon, Select, Radio, DatePicker, Divider } from 'antd'
-import { parseStatus, getStage, fetchData, parseDate, timeLeft, parseTimeLeft, updateData } from '../utility'
-import { meContext } from '../layouts/Web';
+import { getStage, getPhase, fetchData, parseDate, timeLeft, parseTimeLeft, updateData } from '../utility'
+import { globalContext } from '../App';
 import queryString from 'query-string'
 import Ganttx from '../components/Ganttx';
 import { useMediaQuery } from 'react-responsive'
+import StatusTag from '../components/projectPage/StatusTag'
+import StageShow from '../components/projectPage/StageShow'
+
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 export default function Main({ location, history }) {
@@ -29,7 +32,7 @@ export default function Main({ location, history }) {
   const [memberList, setMemberList] = useState([]);
   const [adminIds, setAdminIds] = useState([]);
 
-  const { meData } = useContext(meContext);
+  const { meData } = useContext(globalContext);
 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: () => (
@@ -123,7 +126,7 @@ export default function Main({ location, history }) {
             link_url = `/projects/${project.id}/done`
             break;
           default:
-            link_url = `/projects/${project.id}/stages/${project.current_stage_index}`
+            link_url = `/projects/${project.id}/stages/${getStage(project).id}/phases/${getPhase(getStage(project)).id}`
             break;
         }
         return <Link to={link_url} className='dont-break-out'>{name}</Link>
@@ -168,18 +171,7 @@ export default function Main({ location, history }) {
       ],
       filteredValue: tableFilter['current_stage_index'] || [],
       width: 200,
-      render: (index, project) => {
-        const status = project.status
-        switch (status) {
-          case 'await':
-            return <span>{`0/${project.stages.length}`}</span>
-          case 'finish':
-          case 'discard':
-            return <span>{`${(index + 1).toString()}/${project.stages.length}`}</span>
-          default:
-            return <span>{`${(index + 1).toString()}/${project.stages.length}：` + getStage(project).name}</span>
-        }
-      }
+      render: (index, project) => <StageShow project={project}/>
     },
     {
       title: '死线',
@@ -217,39 +209,7 @@ export default function Main({ location, history }) {
       ],
       filteredValue: tableFilter['status'] || [],
       width: 140,
-      render: (status) => {
-        const str = parseStatus(status)
-        let color = ''
-        switch (status) {
-          case 'await':
-            color = 'orange'
-            break
-          case 'finish':
-            color = 'green'
-            break
-          case 'pending':
-            color = 'cyan'
-            break
-          case 'progress':
-            color = 'blue'
-            break
-          case 'modify':
-            color = 'blue'
-            break
-          case 'discard':
-            color = 'grey'
-            break
-          case 'pause':
-            color = 'cyan'
-            break
-          case 'delay':
-            color = 'red'
-            break
-          default:
-            color = '#ddd'
-        }
-        return <Tag color={color} >{str}</Tag>
-      },
+      render: (status) => <StatusTag status={status}/>
     },
 
     {

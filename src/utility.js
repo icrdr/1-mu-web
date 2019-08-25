@@ -12,7 +12,14 @@ export function isWx() {
     return false;
   }
 }
-
+export function html2excerpt(str)
+{
+  let string = str.replace(/<[^>]+>/g,"")
+  if (string.length>10){
+    string = string.slice(0,20) + '...'
+  }
+  return string
+}
 export function parseStatus(status) {
   switch (status) {
     case 'draft':

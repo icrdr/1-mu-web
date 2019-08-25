@@ -8,7 +8,7 @@ export default function User({ match }) {
   const [userData, setUserData] = useState();
 
   useEffect(() => {
-    let path = '/users'
+    const path = '/users'
     let params = {
       include: match.params.user_id
     }

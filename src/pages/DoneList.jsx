@@ -15,8 +15,6 @@ export default function DoneList({ location, history }) {
   const [projectList, setProjectList] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const [lightBox, setLightBox] = useState()
-  // const [update, setUpdate] = useState(false);
-  // const { meData } = useContext(meContext);
 
   useEffect(() => {
     setLoading(true)

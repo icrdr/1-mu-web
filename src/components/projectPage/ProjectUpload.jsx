@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
+import { withRouter } from 'react-router-dom'
 import { Card, Typography, Button, Row, Col, Upload, Icon, Alert, message } from 'antd';
-import useForm from '../hooks/useForm'
-import ImgCard from './ImgCard'
-import { updateData } from '../utility'
+import useForm from '../../hooks/useForm'
+import ImgCard from '../ImgCard'
+import { updateData } from '../../utility'
 import BraftEditor from 'braft-editor'
 const { Paragraph } = Typography;
 const API_URL = window.API_URL
 const { Dragger } = Upload;
 
-export default function ProjectUpload({ history, match, upload, file, onSuccess }) {
+function ProjectUpload({ history, match, upload, file, onSuccess }) {
   let submit = ''
   const [fileArray, setFileArray] = useState(file)
   const [isWating, setWating] = useState(false);
@@ -40,12 +41,9 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
       data.confirm = 1
     }
     const path = `/projects/${match.params.project_id}/upload`
-    updateData(path, data).then(res => {
-      if (submit === 'upload') {
-        history.push(match.url.split('/').slice(0, -1).join('/'))
-      }
+    updateData(path, data).then(() => {
       onSuccess()
-    }).finally(()=>{
+    }).finally(() => {
       setWating(false)
     })
   }
@@ -54,8 +52,8 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
   }
 
   const imgRender = [...fileArray].reverse().map(item =>
-    <Col key={item.id} span={8}>
-      <Card className='m-t:2'
+    <Col key={item.id} xs={24} md={8} className='m-t:1'>
+      <Card 
         cover={<ImgCard file={item} />}>
         <Icon type="close-circle" theme="twoTone" onClick={() => removeFile(item.id)} /><div className='fl:r'>{item.name}.{item.format}</div>
       </Card>
@@ -80,12 +78,11 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
   };
 
   return (
-    <Row type="flex" justify="space-around" align="middle">
+    <Row type="flex" justify="space-around" align="middle" style={{ height: '100%', overflowY: 'scroll' }}>
       <Col xs={24} md={20} lg={16}>
-        <h1>阶段成品提交</h1>
         <form onSubmit={handleSubmit}>
           <Paragraph>*说明</Paragraph>
-          <Card size='small'
+          <Card className='m-b:2' size='small'
             cover={
               <BraftEditor contentStyle={{ height: '200px' }}
                 {...field('upload', BraftEditor.createEditorState(upload))}
@@ -94,17 +91,17 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
           >
             {errors['upload'] && <Alert message={errors['upload']} type="error" />}
           </Card>
-          <div className='m-t:4'>
+          <div className='m-b:2'>
             <Paragraph>*文件</Paragraph>
-            <Dragger {...uploadArgs}>
+            <Dragger className='m-b:1' {...uploadArgs}>
               <Icon type="inbox" />
               添加文件
             </Dragger>
-            <Row className='m-t:2' gutter={12}>
+            <Row gutter={12}>
               {imgRender}
             </Row>
           </div>
-          <Row className='m-t:2' gutter={12}>
+          <Row gutter={12}>
             <Col span={12}>
               <Button name='upload' size='large' block type="primary" disabled={isWating} onClick={(e) => submit = e.target.name} htmlType="submit">提交</Button>
             </Col>
@@ -117,3 +114,5 @@ export default function ProjectUpload({ history, match, upload, file, onSuccess 
     </Row>
   )
 }
+
+export default withRouter(ProjectUpload)

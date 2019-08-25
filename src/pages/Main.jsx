@@ -1,11 +1,11 @@
 import React, { useEffect, useState,useContext } from 'react'
 import { Result, Icon, Button } from 'antd';
-import { meContext } from '../layouts/Web';
+import { globalContext } from '../App';
 import { fetchData } from '../utility'
 
 export default function Main({history}) {
   const [total, setTotal] = useState()
-  const { meData } = useContext(meContext);
+  const { meData } = useContext(globalContext);
   useEffect(() => {
     const path = '/projects'
     const params = {
