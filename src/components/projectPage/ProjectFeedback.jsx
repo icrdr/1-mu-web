@@ -60,8 +60,8 @@ function ProjectFeedback({ history, match, feedback, onSuccess }) {
   function showModifyConfirm() {
     confirm({
       title: '确认',
-      content: '你确定提交的修改内容么？',
-      okText: '确认修改内容',
+      content: '你确定提交的修改建议么？',
+      okText: '确认建议',
       cancelText: '取消',
       onOk() {
         handleSubmit()
