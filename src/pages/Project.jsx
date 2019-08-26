@@ -99,7 +99,6 @@ export default function Project({ history, match, isAdmin }) {
 
 
   const operation = () => {
-    console.log(match.path)
     switch (projectData.status) {
       case 'await':
         return projectData.client.id === meData.id || isAdmin ?
@@ -121,8 +120,7 @@ export default function Project({ history, match, isAdmin }) {
             placement='bottom'
             onClose={() => setUploadPlane(false)}
             visible={showUploadPlane}
-            height={'655px'}
-            bodyStyle={{ height: '600px' }}
+            height={'auto'}
           >
             <ProjectUpload
               onSuccess={() => {
@@ -144,8 +142,7 @@ export default function Project({ history, match, isAdmin }) {
             placement='bottom'
             onClose={() => setFeedbackPlane(false)}
             visible={showFeedbackPlane}
-            height={'505px'}
-            bodyStyle={{ height: '450px' }}
+            height={'auto'}
           >
             <ProjectFeedback
               onSuccess={() => {

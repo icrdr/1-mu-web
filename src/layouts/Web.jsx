@@ -97,8 +97,8 @@ function Web({ location, history, props, component: Component, ...rest }) {
       <Layout style={{ minHeight: '100vh' }}>
         <Header className="p:0" style={{ background: '#fff' }} >
           <Row >
-            <Col xs={8} md={18} className='t-a:l'>
-              <div className='fl:l m-l:1' style={{ height: '64px' }}>一目 - 企划管理系统</div>
+            <Col xs={12} md={18} className='t-a:l'>
+              { !isSm && <div className='fl:l m-l:1' style={{ height: '64px' }}>一目 - 企划管理系统</div>}
               <Menu
                 mode="horizontal"
                 style={{ lineHeight: '64px' }}
@@ -113,7 +113,7 @@ function Web({ location, history, props, component: Component, ...rest }) {
                 {/* <Menu.Item key="dones">成品图</Menu.Item> */}
               </Menu>
             </Col>
-            <Col xs={16} md={6} className='t-a:r'>
+            <Col xs={12} md={6} className='t-a:r'>
               {meData &&
                 <>
                   <div className="d:i">
