@@ -56,9 +56,7 @@ function App({ location }) {
     case 'error':
       return <Maintenance />
     default:
-      if (meData.role !== 'Admin') {
-        return <h1>你没有admin权限</h1>
-      }
+      break
   }
 
   return (

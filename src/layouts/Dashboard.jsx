@@ -18,6 +18,10 @@ function Dashboard({ location, history, props, component: Component, ...rest }) 
     setMenu([key])
     history.replace('/admin/' + key)
   }
+  
+  if (meData.role !== 'Admin') {
+    return <h1>你没有admin权限</h1>
+  }
 
   return (
     <Route {...rest} render={matchProps => (
