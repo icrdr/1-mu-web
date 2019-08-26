@@ -54,7 +54,14 @@ export default function Stage({ history, match, project }) {
         {phaseArr.map((phase) =>
           <TabPane tab={parseDate(phase.upload_date).split(' ')[0]} key={phase.id}>
             <Row gutter={16}>
-              <Col sm={24} md={12} className='m-b:1'>
+              <Col sm={24} md={8} className='m-b:1'>
+                {phase.feedback_date && <>
+                  <h2>修改的建议（{phase.client.name}）</h2>
+                  {phase.client_feedback ?
+                    <div dangerouslySetInnerHTML={{ __html: phase.client_feedback }} /> : <div>无</div>}
+                </>}
+              </Col>
+              <Col sm={24} md={16} className=''>
                 <Row>
                   <Col><h2 className='fl:l'>提交的文件（{phase.creator.name}）</h2></Col>
                   <Col><Button className='fl:r' type='primary' disabled={isWating} onClick={() => handleDownload(phase)}>批量下载</Button></Col>
@@ -66,13 +73,7 @@ export default function Stage({ history, match, project }) {
                     <a href={item.url} target="_blank" rel="noopener noreferrer"><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
                   </Card>
                 )}
-              </Col>
-              <Col sm={24} md={12} className=''>
-                {phase.feedback_date && <>
-                  <h2>修改意见（{phase.client.name}）</h2>
-                  {phase.client_feedback ?
-                    <div dangerouslySetInnerHTML={{ __html: phase.client_feedback }} /> : <div>无</div>}
-                </>}
+
               </Col>
             </Row>
           </TabPane>)}
