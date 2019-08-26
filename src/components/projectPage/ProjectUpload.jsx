@@ -104,16 +104,6 @@ function ProjectUpload({ history, match, upload, file, onSuccess }) {
   return (
     <Row type="flex" justify="space-around" align="middle" style={{ height: 'auto' }}>
       <Col xs={24} md={20} lg={16}>
-        <Paragraph>*说明</Paragraph>
-        <Card className='m-b:2' size='small'
-          cover={
-            <BraftEditor contentStyle={{ height: '200px' }}
-              {...field('upload', BraftEditor.createEditorState(upload))}
-              controls={['bold', 'headings', 'separator', 'link', 'separator']}
-            />}
-        >
-          {errors['upload'] && <Alert message={errors['upload']} type="error" />}
-        </Card>
         <div className='m-b:2'>
           <Paragraph>*文件</Paragraph>
           <Dragger className='m-b:1' {...uploadArgs}>
@@ -121,10 +111,19 @@ function ProjectUpload({ history, match, upload, file, onSuccess }) {
             添加文件
             </Dragger>
         </div>
-        <Row gutter={12} className='m-b:2' style={{ height: '300px', overflowY: 'scroll' }}>
+        <Row gutter={12} className='m-b:2' style={{ height: '200px', overflowY: 'scroll' }}>
           {imgRender}
         </Row>
-
+        <Paragraph>*说明</Paragraph>
+        <Card className='m-b:2' size='small'
+          cover={
+            <BraftEditor contentStyle={{ height: '100px' }}
+              {...field('upload', BraftEditor.createEditorState(upload))}
+              controls={['bold', 'headings', 'separator', 'link', 'separator']}
+            />}
+        >
+          {errors['upload'] && <Alert message={errors['upload']} type="error" />}
+        </Card>
         <Row gutter={12}>
           <Col span={12}>
             <Button name='upload' size='large' block type="primary" disabled={isWating}
