@@ -24,6 +24,7 @@ export default function DoneList({ location, history }) {
       pre_page: 10,
       page: page,
       status: 'finish',
+      tags: '腾讯医典词条',
     }
 
     const values = queryString.parse(location.search)
