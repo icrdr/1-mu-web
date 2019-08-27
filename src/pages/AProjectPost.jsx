@@ -157,12 +157,12 @@ function PostProjectForm({ history }) {
       </div>
       <Row className='m-t:2'>
         <Col xs={24} md={8} className='m-b:2'>
-          <Paragraph>*发起方</Paragraph>
+          <Paragraph>*审核者</Paragraph>
           <InputNumber {...field('client_id', 1, true)} />
           {errors['client_id'] && <Alert message={errors['client_id']} type="error" showIcon />}
         </Col>
         <Col xs={24} md={16}>
-          <Paragraph>*制作方</Paragraph>
+          <Paragraph>*制作者</Paragraph>
           <InputNumber {...field('creator_id', 1, true)} />
           {errors['creator_id'] && <Alert message={errors['creator_id']} type="error" showIcon />}
         </Col>

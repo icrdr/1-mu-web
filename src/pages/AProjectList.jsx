@@ -281,7 +281,7 @@ export default function ProjectList({ location, history, match }) {
       }
     },
     {
-      title: '小组',
+      title: '审核者',
       dataIndex: 'client_id',
       sorter: true,
       sortOrder: tableSorter['client_id'],
