@@ -113,7 +113,7 @@ function Web({ location, history, props, component: Component, ...rest }) {
                 <Menu.Item key="all">总列表</Menu.Item>
                 <Menu.Item key="files">参考图库</Menu.Item>
                 <Menu.Item key="samples">样图库</Menu.Item>
-                {/* <Menu.Item key="dones">成品图</Menu.Item> */}
+                <Menu.Item key="dones">成品图</Menu.Item>
               </Menu>
             </Col>
             <Col xs={12} md={6} className='t-a:r'>

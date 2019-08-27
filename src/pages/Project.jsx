@@ -162,6 +162,7 @@ export default function Project({ history, match, isAdmin }) {
   return (
     <>
       <PageHeader
+        className='m-b:2'
         title={projectData.title}
         subTitle={<>阶段<StageShow project={projectData} /></>}
         tags={<StatusTag status={projectData.status} />}
@@ -182,8 +183,8 @@ export default function Project({ history, match, isAdmin }) {
           </div>
         </>}
       >
-      </PageHeader>,
-      <Card className='m-b:2 p:0'>
+      </PageHeader>
+      <Card className='m-b:2'>
         <Steps status={stepStatus(projectData)} current={stepCurrent(projectData)}>
           <Step title={
             <Link to={`${match.url}/design`}>

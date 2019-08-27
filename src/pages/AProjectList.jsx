@@ -112,9 +112,18 @@ export default function ProjectList({ location, history, match }) {
 
   const columns = [
     {
+      title: 'ID',
+      dataIndex: 'id',
+      width: 50,
+      sorter: true,
+      sortOrder: tableSorter['id'],
+      sortDirections: ['descend', 'ascend'],
+      fixed: 'left',
+    },
+    {
       title: '企划名',
       dataIndex: 'title',
-      width: isSm ? 150 : 200,
+      width: isSm ? 130 : 180,
       sorter: true,
       sortOrder: tableSorter['title'],
       sortDirections: ['descend', 'ascend'],
@@ -648,8 +657,8 @@ export default function ProjectList({ location, history, match }) {
   }
 
   return (
-    <Card>
-      <Modal
+    <>
+    <Modal
         title="备注"
         visible={showRemarkModel !== undefined}
         onOk={handleRemark}
@@ -671,6 +680,7 @@ export default function ProjectList({ location, history, match }) {
       >
         延期时间  <InputNumber value={postponeDay} onChange={v => setPostponeDay(v)} />
       </Modal>
+    <Card bodyStyle={{padding:isSm?'24px 8px':''}}>
       <div className='m-b:1'>
         <Button className='m-r:.5' type={isBatch ? "" : 'link'} onClick={() => setBatch(!isBatch)}>批量操作</Button>
         <Button className='m-r:.5' type='primary'><Link to='/admin/projects/post'>添加企划</Link></Button>
@@ -702,6 +712,7 @@ export default function ProjectList({ location, history, match }) {
         scroll={{ x: 1600 }}
       />
     </Card>
+    </>
   )
 }
 
