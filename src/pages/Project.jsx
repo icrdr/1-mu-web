@@ -169,11 +169,11 @@ export default function Project({ history, match, isAdmin }) {
         extra={<>
           {!isSm && <>
             <div className='d:i m-r:.5' style={{ lineHeight: '25px' }}>
-              发起方：
+              审核者：
             <Link to={"/users/" + projectData.client.id}>{projectData.client.name}</Link>
             </div>
             <div className='d:i' style={{ lineHeight: '25px' }}>
-              制作方：
+              制作者：
             <Link to={"/users/" + projectData.creator.id}>{projectData.creator.name}</Link>
             </div>
             <Divider type="vertical" />
