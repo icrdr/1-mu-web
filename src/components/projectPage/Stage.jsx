@@ -39,11 +39,12 @@ export default function Stage({ history, match, project }) {
   const phaseArr = [...stage.phases].reverse().filter(x => x.upload_date != null)
 
   return (<>
-    <h1>阶段：{stage.name}</h1>
+    <h1>{stage.name}</h1>
     <Descriptions size="small" className='m-b:1' >
-      <Descriptions.Item label="起始日期">{stage.start_date ? parseDate(stage.start_date) : '未开始'}</Descriptions.Item>
+      <Descriptions.Item label="起始日期">{stage.phases[0].start_date || '未开始'}</Descriptions.Item>
+      <Descriptions.Item label="重启日期">{getPhase(stage).start_date || '未开始'}</Descriptions.Item>
       <Descriptions.Item label="死线">{getPhase(stage).start_date ? parseDate(getPhase(stage).deadline_date) : '未开始'}</Descriptions.Item>
-      <Descriptions.Item label="计划时间（天）">{getPhase(stage).days_need}</Descriptions.Item>
+      <Descriptions.Item label="预计时间（天）">{getPhase(stage).days_need}</Descriptions.Item>
     </Descriptions>
     {phaseArr.length > 0 &&
       <Tabs activeKey={phaseId} type="card" onChange={activeKey => {

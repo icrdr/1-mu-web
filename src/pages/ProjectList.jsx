@@ -419,7 +419,8 @@ export default function Main({ location, history }) {
   const handleDateRange = (dataIndex, dates) => {
     const values = queryString.parse(location.search)
     const paramsObject = {
-      ...values
+      ...values,
+      page:1
     }
     if (dates.length === 2) {
       const dates_str = dates.map(date => {
@@ -436,7 +437,8 @@ export default function Main({ location, history }) {
   const handleSearch = (dataIndex, keyWord) => {
     const values = queryString.parse(location.search)
     const paramsObject = {
-      ...values
+      ...values,
+      page:1
     }
     if (keyWord) {
       paramsObject[dataIndex] = keyWord

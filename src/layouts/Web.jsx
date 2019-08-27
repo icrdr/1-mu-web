@@ -29,7 +29,10 @@ function Web({ location, history, props, component: Component, ...rest }) {
   }
   const onFetchNoice = () => {
     const path = `/users/${meData.id}/project_notices`
-    fetchData(path).then(res => {
+    const params = {
+      pre_page:20,
+    }
+    fetchData(path, params).then(res => {
       setNoticeList(res.data.project_notices)
       setUnread(res.data.unread)
       setNoticeVisible(true)
