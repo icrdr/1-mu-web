@@ -21,6 +21,7 @@ export default function DoneList({ location, history }) {
     const path = '/projects'
     const params = {
       order: 'desc',
+      order_by: 'finish_date',
       pre_page: 10,
       page: page,
       status: 'finish',

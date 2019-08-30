@@ -6,14 +6,12 @@ import { getStage, getPhase, fetchData, parseDate, timeLeft, parseTimeLeft, upda
 import { globalContext } from '../App';
 import queryString from 'query-string'
 import Ganttx from '../components/Ganttx';
-import { useMediaQuery } from 'react-responsive'
 import StatusTag from '../components/projectPage/StatusTag'
 import StageShow from '../components/projectPage/StageShow'
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 export default function Main({ location, history }) {
-  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
@@ -32,7 +30,7 @@ export default function Main({ location, history }) {
   const [memberList, setMemberList] = useState([]);
   const [adminIds, setAdminIds] = useState([]);
 
-  const { meData } = useContext(globalContext);
+  const { meData, isSm } = useContext(globalContext);
 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: () => (
@@ -451,9 +449,9 @@ export default function Main({ location, history }) {
 
   return (
     <>
-      <Card className='m-b:2'>
+      <Card className='m-b:2' bodyStyle={{padding:isSm?'24px 8px':''}}>
         <Row gutter={16} className='m-b:1'>
-          <Col xs={24} md={12} className='t-a:l'>
+          <Col xs={0} md={12} className='t-a:l'>
             <h2>进度可视化</h2>
           </Col>
           <Col xs={24} md={12} className='t-a:r'>
@@ -466,7 +464,7 @@ export default function Main({ location, history }) {
         <Ganttx loading={isloading2} projects={projectList2} />
       </Card>
 
-      <Card >
+      <Card bodyStyle={{padding:isSm?'24px 8px':''}}>
         <Table
           columns={columns}
           rowKey={project => project.id}
