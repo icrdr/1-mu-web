@@ -9138,7 +9138,7 @@ react-error-overlay@^6.0.1:
   resolved "https://registry.npmjs.org/react-error-overlay/-/react-error-overlay-6.0.1.tgz#b8d3cf9bb991c02883225c48044cb3ee20413e0f"
   integrity sha512-V9yoTr6MeZXPPd4nV/05eCBvGH9cGzc52FN8fs0O0TVQ3HYYf1n7EgZVtHbldRq5xU9zEzoXIITjYNIfxDDdUw==
 
-react-gantt-antd@^1.0.1:
+react-gantt-antd@^1.0.4:
   version "1.0.4"
   resolved "https://registry.npmjs.org/react-gantt-antd/-/react-gantt-antd-1.0.4.tgz#263c77079d70fb89e3f776580d12ae1b265871b4"
   integrity sha512-BdXF14PuGYbsMTuGoO/5pJrKUTM+uSoDhcm1WLhy6NTMxLXnrGymBFPgtkG/rjdlxZMiSiyw84S2QdAkM6gElw==
@@ -9299,13 +9299,6 @@ react-stack-grid@^0.7.1:
     react-sizeme "^2.2.0"
     react-transition-group "^1.2.0"
     shallowequal "^1.0.1"
-
-react-timelines@^2.6.1:
-  version "2.6.1"
-  resolved "https://registry.npmjs.org/react-timelines/-/react-timelines-2.6.1.tgz#28c0b2418519fb3967e48f0b862aaf1bca24510b"
-  integrity sha512-z22XOLp1a0iFIAneP6CxX1QasQL3t5BXsCW1LZeln/tQuJPyfYW8uZyCZSPYyRczenhXvUMmyNvHWrXkSI0DRA==
-  dependencies:
-    prop-types "^15.7.2"
 
 react-transition-group@^1.2.0:
   version "1.2.1"
