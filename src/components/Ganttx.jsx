@@ -6,17 +6,17 @@ import { getPhase, getStage, toLocalDate } from '../utility'
 import Loading from '../components/Loading'
 function Ganttx({ match, loading, projects }) {
   const now = new Date()
-  const [zoom, setZoom] = useState(40);
-  const [tracks, setTracks] = useState([])
+  const [zoom, setZoom] = useState(1);
+  const [t_projects, setTprojects] = useState([])
   const [timelineStart, setTimelineStart] = useState(new Date(now.getTime() - 1000))
   const [timelineEnd, setTimelineEnd] = useState(new Date(now.getTime() + 1000))
 
   useEffect(() => {
-    const new_tracks = []
+    const new_t_projects = []
     loop1:
     for (const project of projects) {
-      const s_elements = []
-      const s_tracks = []
+      const s_tasks = []
+      const s_t_projects = []
       let color = ''
       switch (project.status) {
         case 'modify':
@@ -36,7 +36,7 @@ function Ganttx({ match, loading, projects }) {
       for (let i in project.stages) {
         const stage = project.stages[i]
         let start, end
-        const p_elements = []
+        const p_tasks = []
         for (let j in stage.phases) {
           const phase = stage.phases[j]
           if (phase.start_date) {
@@ -48,7 +48,7 @@ function Ganttx({ match, loading, projects }) {
             } else if (prePhase.upload_date) {
               start = now
             } else {
-              start = p_elements[j - 1].end
+              start = p_tasks[j - 1].end
             }
           } else {
             if (i > 0) {
@@ -58,8 +58,8 @@ function Ganttx({ match, loading, projects }) {
               } else if (prePhase.upload_date) {
                 start = now
               } else {
-                const pre_p_elements = s_tracks[i - 1].elements
-                start = pre_p_elements[pre_p_elements.length - 1].end
+                const pre_p_tasks = s_t_projects[i - 1].tasks
+                start = pre_p_tasks[pre_p_tasks.length - 1].end
               }
             } else {
               continue loop1
@@ -85,7 +85,7 @@ function Ganttx({ match, loading, projects }) {
             }
           }
 
-          p_elements.push({
+          p_tasks.push({
             id: phase.id,
             title: `${parseInt(j) + 1}`,
             start: start,
@@ -94,17 +94,17 @@ function Ganttx({ match, loading, projects }) {
             }
           })
         }
-        s_tracks.push({
+        s_t_projects.push({
           id: stage.id,
           title: <Link to={`${match.path}/${project.id}/stages/${stage.id}/phases/${getPhase(stage).id}`}>{`${parseInt(i) + 1}.${stage.name}`}</Link>,
-          elements: p_elements,
+          tasks: p_tasks,
         })
 
-        s_elements.push({
+        s_tasks.push({
           id: stage.id,
           title: stage.name,
-          start: p_elements[0].start,
-          end: p_elements[p_elements.length - 1].end,
+          start: p_tasks[0].start,
+          end: p_tasks[p_tasks.length - 1].end,
           style: {
             backgroundColor: color,
           }
@@ -123,47 +123,34 @@ function Ganttx({ match, loading, projects }) {
           link_url = `${match.path}/${project.id}/stages/${getStage(project).id}/phases/${getPhase(getStage(project)).id}`
           break;
       }
-      new_tracks.push({
+      new_t_projects.push({
         id: project.id,
         title: <Link to={link_url}>{`${project.title}：${project.creator.name}`}</Link>,
-        elements: s_elements,
-        tracks: s_tracks,
+        tasks: s_tasks,
+        projects: s_t_projects,
         isOpen: false,
       })
     }
-    setTracks(new_tracks)
-    if (new_tracks.length > 0) {
-      let m_start = new_tracks[0].elements[0].start
-      let m_end = new_tracks[0].elements[0].end
-      for (const track of new_tracks) {
-        for (const elements of track.elements) {
-          if (m_start > elements.start) m_start = elements.start
-          if (m_end < elements.end) m_end = elements.end
+    setTprojects(new_t_projects)
+    if (new_t_projects.length > 0) {
+      let m_start = new_t_projects[0].tasks[0].start
+      let m_end = new_t_projects[0].tasks[0].end
+      for (const t_project of new_t_projects) {
+        for (const tasks of t_project.tasks) {
+          if (m_start > tasks.start) m_start = tasks.start
+          if (m_end < tasks.end) m_end = tasks.end
         }
       }
-
       setTimelineStart(toLocalDate(new Date(m_start.getTime() - 0.5 * (m_end - m_start))))
       setTimelineEnd(toLocalDate(new Date(m_end.getTime() + 0.5 * (m_end - m_start))))
-
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projects])
 
-  const handleToggleTrackOpen = track => {
-    setTracks(state => {
-      for (const _track of state) {
-        if (_track.id === track.id) {
-          _track.isOpen = !track.isOpen
-        }
-      }
-      return [...state]
-    })
-  }
-
   if (loading) {
     return <Loading />
   } else if (projects.length === 0) {
-    return <Empty description='没有数据'/>
+    return <Empty description='没有数据' />
   }
 
   return (
@@ -175,19 +162,16 @@ function Ganttx({ match, loading, projects }) {
           <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '32px', height: '32px', backgroundColor: '#ff4d4f' }} />超时</div>
         </Col>
         <Col span={8} className='t-a:r'>
-          <Button className='m-b:.5' onClick={() => { if (zoom + 5 < 100) setZoom(zoom + 5) }} disabled={zoom + 5 >= 100} icon="zoom-in" />
-          <Button className='m-l:.5' onClick={() => { if (zoom - 5 > 0) setZoom(zoom - 5) }} disabled={zoom - 5 <= 0} icon="zoom-out" />
+          <Button className='m-b:.5' onClick={() => { if (zoom + 1 < 10) setZoom(zoom + 1) }} disabled={zoom + 1 >= 10} icon="zoom-in" />
+          <Button className='m-l:.5' onClick={() => { if (zoom - 1 > 0) setZoom(zoom - 1) }} disabled={zoom - 1 <= 0} icon="zoom-out" />
         </Col>
       </Row>
       <Gantt
-        scale={{
-          start: timelineStart,
-          end: timelineEnd,
-          zoom: zoom,
-        }}
-        tracks={tracks}
+        start={timelineStart}
+        end={timelineEnd}
+        zoom={zoom}
         now={now}
-        toggleTrackOpen={handleToggleTrackOpen}
+        projects={t_projects}
         enableSticky
         scrollToNow
       />
