@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { Link, withRouter } from 'react-router-dom'
 import { Row, Col, Button, Empty } from 'antd'
 import Gantt from 'react-gantt-antd'
 import { getPhase, getStage, toLocalDate } from '../utility'
 import Loading from '../components/Loading'
+import { globalContext } from '../App';
 function Ganttx({ match, loading, projects }) {
+  const { isSm } = useContext(globalContext);
   const now = new Date()
   const [zoom, setZoom] = useState(1);
   const [t_projects, setTprojects] = useState([])
@@ -125,7 +127,7 @@ function Ganttx({ match, loading, projects }) {
       }
       new_t_projects.push({
         id: project.id,
-        title: <Link to={link_url}>{`${project.title}：${project.creator.name}`}</Link>,
+        title: <Link to={link_url}>{`${project.title}`}</Link>,
         tasks: s_tasks,
         projects: s_t_projects,
         isOpen: false,
@@ -172,6 +174,7 @@ function Ganttx({ match, loading, projects }) {
         zoom={zoom}
         now={now}
         projects={t_projects}
+        sidebarWidth = {isSm?120:200}
         enableSticky
         scrollToNow
       />

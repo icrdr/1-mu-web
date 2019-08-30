@@ -9139,9 +9139,9 @@ react-error-overlay@^6.0.1:
   integrity sha512-V9yoTr6MeZXPPd4nV/05eCBvGH9cGzc52FN8fs0O0TVQ3HYYf1n7EgZVtHbldRq5xU9zEzoXIITjYNIfxDDdUw==
 
 react-gantt-antd@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/react-gantt-antd/-/react-gantt-antd-1.0.4.tgz#263c77079d70fb89e3f776580d12ae1b265871b4"
-  integrity sha512-BdXF14PuGYbsMTuGoO/5pJrKUTM+uSoDhcm1WLhy6NTMxLXnrGymBFPgtkG/rjdlxZMiSiyw84S2QdAkM6gElw==
+  version "1.0.9"
+  resolved "https://registry.npmjs.org/react-gantt-antd/-/react-gantt-antd-1.0.9.tgz#3a4e9f228d03a65a2d486fa021feca3e057d2c4c"
+  integrity sha512-igAwKAmkYoisGrLcCZs4aELVHN9Vtu8RqwLS3jE5imJBQHUw66h/l1mxfaU0ubpwobSkJ+Zhuqt4GeSZ5Hx61Q==
   dependencies:
     prop-types "^15.7.2"
 
