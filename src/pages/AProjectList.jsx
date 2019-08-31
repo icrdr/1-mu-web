@@ -20,7 +20,7 @@ export default function ProjectList({ location, history, match }) {
   const [tableSearch, setTableSearch] = useState({});
   const [tableDate, setTableDate] = useState({});
   const [taskId, setTaskId] = useState('');
-  
+
   const [projectList, setProjectList] = useState([]);
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
@@ -39,7 +39,7 @@ export default function ProjectList({ location, history, match }) {
 
   const allTableFilter = { status: [], client_id: [], current_stage_index: [] }
   const allTableSearch = { title: '', tags: '' }
-  const allTableDate = { start_date: [],finish_date: [] }
+  const allTableDate = { start_date: [], finish_date: [] }
 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: () => (
@@ -367,7 +367,7 @@ export default function ProjectList({ location, history, match }) {
               <Button size='small'>暂停</Button>
             </Popconfirm>
           )}
-          {project.status === 'discard' ? (
+        {project.status === 'discard' ? (
           <Popconfirm
             title="确定如此操作么？"
             onConfirm={() => operateProject(project.id, 'resume')}
@@ -559,7 +559,7 @@ export default function ProjectList({ location, history, match }) {
     const values = queryString.parse(location.search)
     const paramsObject = {
       ...values,
-      page:1
+      page: 1
     }
     if (keyWord) {
       paramsObject[dataIndex] = keyWord
@@ -574,7 +574,7 @@ export default function ProjectList({ location, history, match }) {
     const values = queryString.parse(location.search)
     const paramsObject = {
       ...values,
-      page:1
+      page: 1
     }
     if (dates.length === 2) {
       const dates_str = dates.map(date => {
@@ -683,7 +683,7 @@ export default function ProjectList({ location, history, match }) {
 
   return (
     <>
-    <Modal
+      <Modal
         title="备注"
         visible={showRemarkModel !== undefined}
         onOk={handleRemark}
@@ -705,38 +705,40 @@ export default function ProjectList({ location, history, match }) {
       >
         延期时间  <InputNumber value={postponeDay} onChange={v => setPostponeDay(v)} />
       </Modal>
-    <Card bodyStyle={{padding:isSm?'24px 8px':''}}>
-      <div className='m-b:1'>
-        <Button className='m-r:.5' type={isBatch ? "" : 'link'} onClick={() => setBatch(!isBatch)}>批量操作</Button>
-        <Button className='m-r:.5' type='primary'><Link to='/admin/projects/post'>添加企划</Link></Button>
-        <ProjectPostByCsv onSucceed={() => setUpdate(!update)} />
-      </div>
-      {isBatch &&
+      <Card bodyStyle={{ padding: isSm ? '24px 8px' : '' }}>
         <div className='m-b:1'>
-          <Button className='m-r:.5' type="primary" onClick={handleDownload} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载源文件</Button>
-          <Button className='m-r:.5' type="primary" onClick={handleDownload2} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载预览文件</Button>
-          <Button className='m-r:.5' type="primary" disabled={selectedRowKeys.length === 0}>批量执行B</Button>
+          <Button className='m-r:.5' type={isBatch ? "" : 'link'} onClick={() => setBatch(!isBatch)}>批量操作</Button>
+          <Button className='m-r:.5' type='primary'><Link to='/admin/projects/post'>添加企划</Link></Button>
+          <ProjectPostByCsv onSucceed={() => setUpdate(!update)} />
         </div>
-      }
-      {taskId && <div className='m-b:1'>
-        压缩文件中...{taskData && progressRender(taskData)}
-      </div>}
-      <Table
-        rowSelection={
-          isBatch ? {
-            columnWidth: isSm ? 48 : 60,
-            selectedRowKeys,
-            onChange: onSelectChange
-          } : undefined}
-        columns={columns}
-        rowKey={project => project.id}
-        dataSource={projectList}
-        loading={isloading}
-        pagination={pagination}
-        onChange={handleTableChange}
-        scroll={{ x: 1700 }}
-      />
-    </Card>
+        {isBatch &&
+          <div className='m-b:1'>
+            <span className='m-r:.5'>已选择{selectedRowKeys.length}个项目</span>
+            <Button className='m-r:.5' onClick={()=>setSelectedRowKeys([])} disabled={selectedRowKeys.length === 0}>取消所有</Button>
+            <Button className='m-r:.5' type="primary" onClick={handleDownload} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载源文件</Button>
+            <Button className='m-r:.5' type="primary" onClick={handleDownload2} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载预览文件</Button>
+            <Button className='m-r:.5' type="primary" disabled={selectedRowKeys.length === 0}>批量执行B</Button>
+          </div>
+        }
+        {taskId && <div className='m-b:1'>
+          压缩文件中...{taskData && progressRender(taskData)}
+        </div>}
+        <Table
+          rowSelection={
+            isBatch ? {
+              columnWidth: isSm ? 48 : 60,
+              selectedRowKeys,
+              onChange: onSelectChange
+            } : undefined}
+          columns={columns}
+          rowKey={project => project.id}
+          dataSource={projectList}
+          loading={isloading}
+          pagination={pagination}
+          onChange={handleTableChange}
+          scroll={{ x: 1700 }}
+        />
+      </Card>
     </>
   )
 }
