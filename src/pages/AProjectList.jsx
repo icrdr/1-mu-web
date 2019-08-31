@@ -714,7 +714,7 @@ export default function ProjectList({ location, history, match }) {
         {isBatch &&
           <div className='m-b:1'>
             <span className='m-r:.5'>已选择{selectedRowKeys.length}个项目</span>
-            <Button className='m-r:.5' onClick={()=>setSelectedRowKeys([])} disabled={selectedRowKeys.length === 0}>取消所有</Button>
+            <Button className='m-r:.5' onClick={() => setSelectedRowKeys([])} disabled={selectedRowKeys.length === 0}>取消所有</Button>
             <Button className='m-r:.5' type="primary" onClick={handleDownload} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载源文件</Button>
             <Button className='m-r:.5' type="primary" onClick={handleDownload2} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载预览文件</Button>
             <Button className='m-r:.5' type="primary" disabled={selectedRowKeys.length === 0}>批量执行B</Button>
