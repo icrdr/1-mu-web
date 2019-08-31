@@ -21,9 +21,10 @@ import NotFound from './pages/NotFound'
 import SampleList from './pages/SampleList'
 import AGroupAdd from './pages/AGroupAdd'
 import DoneList from './pages/DoneList'
+import Dashboard from './pages/Dashboard'
 // layouts
 import Web from './layouts/Web'
-import Dashboard from './layouts/Dashboard'
+import Admin from './layouts/Admin'
 import useWxLogin from './hooks/useWxLogin'
 import { withRouter } from "react-router";
 import LoginQrcode from './components/LoginQrcode'
@@ -69,18 +70,19 @@ function App({ location }) {
       <Web exact path="/projects" component={ProjectList} />
       <Web exact path="/all" component={AllList} />
       <Web exact path="/files" component={FileList} />
+      <Web exact path="/dashboard" component={Dashboard} />
       <Web path="/projects/:project_id(\d+)" component={Project} />
       <Web path="/users/:user_id(\d+)" component={User} />
       <Web exact path="/groups" component={GroupList} />
       <Web path="/groups/:group_id(\d+)" component={Group} />
-      <Dashboard exact path="/admin/projects" component={AProjectList} />
-      <Dashboard path="/admin/projects/:project_id(\d+)" component={Project} props={{isAdmin:true}}/>
-      <Dashboard path="/admin/projects/post" component={AProjectPost} />
-      <Dashboard exact path="/admin/users" component={AUserList} />
-      <Dashboard path="/admin/users/:user_id(\d+)" component={AUser} />
-      <Dashboard exact path="/admin/groups" component={AGroupList} />
-      <Dashboard path="/admin/groups/:group_id(\d+)" component={AGroup} />
-      <Dashboard path="/admin/groups/add" component={AGroupAdd} />
+      <Admin exact path="/admin/projects" component={AProjectList} />
+      <Admin path="/admin/projects/:project_id(\d+)" component={Project} props={{isAdmin:true}}/>
+      <Admin path="/admin/projects/post" component={AProjectPost} />
+      <Admin exact path="/admin/users" component={AUserList} />
+      <Admin path="/admin/users/:user_id(\d+)" component={AUser} />
+      <Admin exact path="/admin/groups" component={AGroupList} />
+      <Admin path="/admin/groups/:group_id(\d+)" component={AGroup} />
+      <Admin path="/admin/groups/add" component={AGroupAdd} />
       <Route component={NotFound} />
     </Switch>
     </globalContext.Provider>
