@@ -157,7 +157,7 @@ function Ganttx({ match, loading, projects }) {
 
   return (
     <div>
-      <Row gutter={16} className='m-b:1'>
+      <Row gutter={16} className='m-b:.5'>
         <Col span={16} className='t-a:l'>
           <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '32px', height: '32px', backgroundColor: '#1890ff' }} />进行中</div>
           <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '32px', height: '32px', backgroundColor: '#13c2c2' }} />等待中</div>

@@ -122,7 +122,7 @@ function Web({ location, history, props, component: Component, ...rest }) {
                   <div className="d:i">
                     <Badge count={unread}><Button type="link" onClick={onFetchNoice}>消息</Button></Badge>
                   </div>
-                  <Link to={'/users/' + meData.id}>
+                  <Link to={'/dashboard'}>
                     <div className="d:i m-r:1">
                       <Button type="link">{meData.name}</Button>
                       <Avatarx url={meData.avatar_url} name={meData.name} />

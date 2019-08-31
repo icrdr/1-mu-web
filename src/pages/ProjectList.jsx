@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Row, Col, Input, Button, Icon, Select, Radio, DatePicker, Divider } from 'antd'
+import { Table, Card, Tag, Input, Button, Icon, Select, DatePicker, Divider } from 'antd'
 import { getStage, getPhase, fetchData, parseDate, timeLeft, parseTimeLeft, updateData } from '../utility'
 import { globalContext } from '../App';
 import queryString from 'query-string'
-import Ganttx from '../components/Ganttx';
 import StatusTag from '../components/projectPage/StatusTag'
 import StageShow from '../components/projectPage/StageShow'
 
@@ -21,12 +20,9 @@ export default function Main({ location, history }) {
   const allTableSearch = { title: [], tags: [] }
   const allTableDate = { start_date: [] }
   const [projectList, setProjectList] = useState([]);
-  const [projectList2, setProjectList2] = useState([]);
   const [isloading, setLoading] = useState(false);
-  const [isloading2, setLoading2] = useState(false);
 
   const [update, setUpdate] = useState(false);
-  const [meFilter, setMefilter] = useState('creator');
   const [memberList, setMemberList] = useState([]);
   const [adminIds, setAdminIds] = useState([]);
 
@@ -98,7 +94,7 @@ export default function Main({ location, history }) {
         </div>
       </div>
     ),
-    filterIcon: filtered => (
+    filterIcon: () => (
       <Icon type="calendar" theme="filled" style={{ color: tableDate[dataIndex] ? '#1890ff' : undefined }} />
     )
   })
@@ -345,36 +341,6 @@ export default function Main({ location, history }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, update]);
 
-  useEffect(() => {
-    setLoading2(true)
-    setProjectList2([])
-    const path = '/projects'
-    const params = {
-      order: 'desc',
-      pre_page: 20,
-      status: 'progress,modify,delay,pending',
-      order_by: 'status',
-    }
-    switch (meFilter) {
-      case 'client':
-        params.client_id = meData.id
-        break;
-      case 'creator':
-        params.creator_id = meData.id
-        break;
-      default:
-    }
-    fetchData(path, params).then(res => {
-      setProjectList2(res.data.projects)
-    }).catch(() => {
-      setProjectList2([])
-    }).finally(() => {
-      setLoading2(false)
-    })
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [meFilter]);
-
   const handleTableChange = (pagination, filters, sorter) => {
     const values = queryString.parse(location.search)
 
@@ -449,21 +415,6 @@ export default function Main({ location, history }) {
 
   return (
     <>
-      <Card className='m-b:2' bodyStyle={{padding:isSm?'24px 8px':''}}>
-        <Row gutter={16} className='m-b:1'>
-          <Col xs={0} md={12} className='t-a:l'>
-            <h2>进度可视化</h2>
-          </Col>
-          <Col xs={24} md={12} className='t-a:r'>
-            <Radio.Group value={meFilter} onChange={e => setMefilter(e.target.value)}>
-              <Radio value='client'>我作为发起方</Radio>
-              <Radio value='creator'>我作为制作方</Radio>
-            </Radio.Group>
-          </Col>
-        </Row>
-        <Ganttx loading={isloading2} projects={projectList2} />
-      </Card>
-
       <Card bodyStyle={{padding:isSm?'24px 8px':''}}>
         <Table
           columns={columns}

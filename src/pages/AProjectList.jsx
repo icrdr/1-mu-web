@@ -20,9 +20,7 @@ export default function ProjectList({ location, history, match }) {
   const [tableSearch, setTableSearch] = useState({});
   const [tableDate, setTableDate] = useState({});
   const [taskId, setTaskId] = useState('');
-  const allTableFilter = { status: [], client_id: [], current_stage_index: [] }
-  const allTableSearch = { title: '', tags: '' }
-  const allTableDate = { start_date: [] }
+  
   const [projectList, setProjectList] = useState([]);
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
@@ -38,6 +36,10 @@ export default function ProjectList({ location, history, match }) {
 
   const [isZipping, setZipping] = useState(false)
   const [taskData, setTaskData] = useState()
+
+  const allTableFilter = { status: [], client_id: [], current_stage_index: [] }
+  const allTableSearch = { title: '', tags: '' }
+  const allTableDate = { start_date: [],finish_date: [] }
 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: () => (
@@ -172,6 +174,22 @@ export default function ProjectList({ location, history, match }) {
       },
     },
     {
+      title: '结束时间',
+      dataIndex: 'finish_date',
+      sorter: true,
+      sortOrder: tableSorter['finish_date'],
+      sortDirections: ['descend', 'ascend'],
+      ...getColumnDateProps('finish_date'),
+      width: 150,
+      render: (finish_date) => {
+        if (finish_date) {
+          return parseDate(finish_date)
+        } else {
+          return '未结束'
+        }
+      },
+    },
+    {
       title: '目前阶段',
       dataIndex: 'current_stage_index',
       sorter: true,
@@ -288,7 +306,7 @@ export default function ProjectList({ location, history, match }) {
       sortDirections: ['descend', 'ascend'],
       filters: groupList.map((group, index) => { return { text: group.name, value: index } }),
       filteredValue: tableFilter['client_id'] || [],
-      width: 200,
+      width: 160,
       render: (client_id, project) =>
         <Select
           style={{ width: '100%', maxWidth: '120px' }}
@@ -307,7 +325,7 @@ export default function ProjectList({ location, history, match }) {
       sorter: true,
       sortOrder: tableSorter['creator_id'],
       sortDirections: ['descend', 'ascend'],
-      width: 200,
+      width: 160,
       render: (creator_id, project) => {
         const creator = project.creator
         const the_group = groupList.filter(group => {
@@ -326,9 +344,9 @@ export default function ProjectList({ location, history, match }) {
       }
     },
     {
-      title: '暂停',
-      key: 'pause',
-      width: 80,
+      title: '操作',
+      key: 'operation',
+      width: 130,
       render: (key, project) => (<>
         {project.status === 'pause' ? (
           <Popconfirm
@@ -349,15 +367,7 @@ export default function ProjectList({ location, history, match }) {
               <Button size='small'>暂停</Button>
             </Popconfirm>
           )}
-      </>),
-
-    },
-    {
-      title: '删除',
-      key: 'discard',
-      width: 50,
-      render: (key, project) => (<>
-        {project.status === 'discard' ? (
+          {project.status === 'discard' ? (
           <Popconfirm
             title="确定如此操作么？"
             onConfirm={() => operateProject(project.id, 'resume')}
@@ -377,6 +387,7 @@ export default function ProjectList({ location, history, match }) {
             </Popconfirm>
           )}
       </>),
+
     },
     {
       title: '备注',
@@ -610,7 +621,21 @@ export default function ProjectList({ location, history, match }) {
     setZipping(true)
     const path = '/download/projects'
     const params = {
-      project_id: selectedRowKeys.join(',')
+      project_id: selectedRowKeys.join(','),
+      mode: 'source'
+    }
+    fetchData(path, params).then(res => {
+      console.log(res)
+      setTaskId(res.data.task_id)
+    })
+  }
+
+  const handleDownload2 = () => {
+    setZipping(true)
+    const path = '/download/projects'
+    const params = {
+      project_id: selectedRowKeys.join(','),
+      mode: 'compress'
     }
     fetchData(path, params).then(res => {
       console.log(res)
@@ -688,8 +713,8 @@ export default function ProjectList({ location, history, match }) {
       </div>
       {isBatch &&
         <div className='m-b:1'>
-          <Button className='m-r:.5' type="primary" onClick={handleDownload} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载成品</Button>
-          <Button className='m-r:.5' type="primary" disabled={selectedRowKeys.length === 0}>批量执行A</Button>
+          <Button className='m-r:.5' type="primary" onClick={handleDownload} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载源文件</Button>
+          <Button className='m-r:.5' type="primary" onClick={handleDownload2} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载预览文件</Button>
           <Button className='m-r:.5' type="primary" disabled={selectedRowKeys.length === 0}>批量执行B</Button>
         </div>
       }
@@ -709,7 +734,7 @@ export default function ProjectList({ location, history, match }) {
         loading={isloading}
         pagination={pagination}
         onChange={handleTableChange}
-        scroll={{ x: 1600 }}
+        scroll={{ x: 1700 }}
       />
     </Card>
     </>

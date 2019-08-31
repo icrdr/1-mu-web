@@ -7,7 +7,7 @@ import { Layout, Button, Menu, Row, Col } from 'antd';
 
 const { Header, Content, Footer } = Layout;
 
-function Dashboard({ location, history, props, component: Component, ...rest }) {
+function Admin({ location, history, props, component: Component, ...rest }) {
   const { meData, isSm } = useContext(globalContext);
   const [menu, setMenu] = useState(['']);
 
@@ -63,4 +63,4 @@ function Dashboard({ location, history, props, component: Component, ...rest }) 
   )
 }
 
-export default withRouter(Dashboard)
+export default withRouter(Admin)
