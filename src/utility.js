@@ -1,6 +1,7 @@
 
 import axios from 'axios'
 import { message } from 'antd'
+import moment from 'moment';
 const API_URL = window.API_URL
 axios.defaults.baseURL = API_URL
 
@@ -12,11 +13,10 @@ export function isWx() {
     return false;
   }
 }
-export function html2excerpt(str)
-{
-  let string = str.replace(/<[^>]+>/g,"")
-  if (string.length>10){
-    string = string.slice(0,20) + '...'
+export function html2excerpt(str) {
+  let string = str.replace(/<[^>]+>/g, "")
+  if (string.length > 10) {
+    string = string.slice(0, 20) + '...'
   }
   return string
 }
@@ -70,6 +70,25 @@ export function timeLeft(stage) {
   let difference = start_date - current_date;
   difference += 1000 * 60 * 60 * 24 * (getPhase(stage).days_need)
   return difference / (1000 * 60 * 60 * 24)
+}
+
+export function getMonthRange(current) {
+  const month = current.getMonth()
+  const year = current.getFullYear()
+  const count = new Date(year, month, 0).getDate()
+  const startDate = moment(new Date(year, month, 1)).utc().format('YYYY-MM-DD HH:mm:ss')
+  const endDate = moment(new Date(year, month, count)).utc().format('YYYY-MM-DD HH:mm:ss')
+  return [startDate, endDate]
+}
+
+export function getWeekRange(current) {
+  const day = current.getDay()
+  const startDateStr = moment(current.setDate(current.getDate()+1-day)).format('YYYY-MM-DD')
+  const endDateStr = moment(current.setDate(current.getDate()+7)).format('YYYY-MM-DD')
+
+  const startDate = moment(startDateStr).utc().format('YYYY-MM-DD HH:mm:ss')
+  const endDate = moment(endDateStr).utc().format('YYYY-MM-DD HH:mm:ss')
+  return [startDate, endDate]
 }
 
 export function parseTimeLeft(timeleft) {
@@ -203,7 +222,7 @@ export function uploadData(path, formData, showMsg = true) {
 
 export function isUserExist(v) {
   return new Promise(resolve => {
-    const path = '/users/'+v
+    const path = '/users/' + v
     fetchData(path, null, false).then(res => {
       resolve(true)
     }).catch(err => {

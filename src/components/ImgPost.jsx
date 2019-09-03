@@ -90,7 +90,6 @@ export default function ImgPost({ onSucceed }) {
         >
           <h2><Icon type="upload" />选择文件（可多选）</h2>
           <p>图片要求：jpg或者png格式，尺寸小于4mb</p>
-          <p>（部分图片虽然以jpg结尾，但本质不是，导致无法解析，请确保图片文件正常）</p>
         </Dragger>
       </div>
       <Row gutter={16}>

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import { Card, Input, Modal, Tag } from 'antd'
+import React, { useEffect, useState, useCallback } from 'react'
+import { Card, Input, Modal, Tag, Button } from 'antd'
 import { fetchData, getPhase, getStage } from '../utility'
 import ImgCard from '../components/ImgCard'
 import queryString from 'query-string'
 import { useMediaQuery } from 'react-responsive'
 import StackGrid from "react-stack-grid";
-
+import useEvent from '../hooks/useEvent'
 const { Search } = Input;
 export default function DoneList({ location, history }) {
   const isSm = useMediaQuery({ query: '(max-width: 768px)' })
@@ -14,6 +14,7 @@ export default function DoneList({ location, history }) {
   const [page, setPage] = useState(1)
   const [projectList, setProjectList] = useState([]);
   const [isLoading, setLoading] = useState(false);
+  const [isEnd, setEnd] = useState(false);
   const [lightBox, setLightBox] = useState()
 
   useEffect(() => {
@@ -38,7 +39,11 @@ export default function DoneList({ location, history }) {
       setProjectList(prevState => {
         return prevState.concat(res.data.projects)
       })
-      if (res.data.projects.length > 0) setPage(prevState => { return prevState + 1 })
+      if (res.data.projects.length > 0) {
+        setPage(prevState => { return prevState + 1 })
+      } else {
+        setEnd(true)
+      }
       setTimeout(() => {
         if (stackGrid) stackGrid.updateLayout()
         setLoading(false)
@@ -48,17 +53,15 @@ export default function DoneList({ location, history }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update, location]);
 
-  useEffect(() => {
-    function handleScroll() {
-      if (document.documentElement.offsetHeight + document.documentElement.scrollTop < document.documentElement.scrollHeight - 100) return
-      if (!isLoading) {
-        setUpdate(!update)
-      }
+  const handleScroll = useCallback(() => {
+    if (document.documentElement.offsetHeight + document.documentElement.scrollTop < document.documentElement.scrollHeight - 100) return
+    if (!isLoading && !isEnd) {
+      setUpdate(!update)
     }
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+    // eslint-disable-next-line
+  }, [isLoading])
+
+  useEvent('scroll', handleScroll)
 
   const onSearch = v => {
     setProjectList([])
@@ -94,7 +97,8 @@ export default function DoneList({ location, history }) {
           <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
         </div>
         <StackGrid
-          columnWidth={isSm?'100%':'33.33%'}
+          className='m-b:1'
+          columnWidth={isSm ? '100%' : '33.33%'}
           monitorImagesLoaded={true}
           gridRef={grid => setStackGrid(grid)}
           duration={180}
@@ -108,6 +112,11 @@ export default function DoneList({ location, history }) {
             </Card>
           })}
         </StackGrid>
+        {!isEnd ? (
+          <Button type="primary" loading={isLoading} disabled={isEnd} onClick={() => setUpdate(!update)} block>
+            {isLoading ? '加载中' : '点击加载'}
+          </Button>
+        ) : (<div className='t-a:c'>没有更多内容啦...</div>)}
       </Card>
     </>
   )

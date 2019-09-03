@@ -24,7 +24,6 @@ export default function Project({ history, match, isAdmin }) {
   const [showFeedbackPlane, setFeedbackPlane] = useState(false);
   const [isAffixed, setAffixed] = useState(true);
 
-
   useEffect(() => {
     setLoading(true)
     const path = '/projects/' + match.params.project_id

@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon, Progress, message, DatePicker, Divider } from 'antd'
+import { Transfer, Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon, Progress, message, DatePicker, Divider, Menu, Dropdown } from 'antd'
 import { parseStatus, getStage, getPhase, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
 import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
-import { useMediaQuery } from 'react-responsive'
+import { globalContext } from '../App';
 import useInterval from '../hooks/useInterval'
 const { Option } = Select;
 const { TextArea } = Input;
+const { confirm } = Modal;
 const { RangePicker } = DatePicker;
 
 export default function ProjectList({ location, history, match }) {
-  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
+  const { isSm } = useContext(globalContext);
 
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [tableSorter, setTableSorter] = useState({});
@@ -29,14 +30,16 @@ export default function ProjectList({ location, history, match }) {
   const [showPostponeModel, setPostponeModel] = useState();
   const [postponeDay, setPostponeDay] = useState(3);
   const [showRemarkModel, setRemarkModel] = useState();
+  const [showTableModel, setTableModel] = useState(false);
   const [remark, setRemark] = useState('');
 
   const [isBatch, setBatch] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  const [isZipping, setZipping] = useState(false)
+  const [isZipping, setZipping] = useState(0)
   const [taskData, setTaskData] = useState()
 
+  const [transferTargetKeys, setTransferTargetKeys] = useState([])
   const allTableFilter = { status: [], client_id: [], current_stage_index: [] }
   const allTableSearch = { title: '', tags: '' }
   const allTableDate = { start_date: [], finish_date: [] }
@@ -346,47 +349,13 @@ export default function ProjectList({ location, history, match }) {
     {
       title: '操作',
       key: 'operation',
-      width: 130,
-      render: (key, project) => (<>
-        {project.status === 'pause' ? (
-          <Popconfirm
-            title="确定如此操作么？"
-            onConfirm={() => operateProject(project.id, 'resume')}
-            okText="是"
-            cancelText="否"
-          >
-            <Button type='primary' size='small'>恢复</Button>
-          </Popconfirm>
-        ) : (
-            <Popconfirm
-              title="确定如此操作么？"
-              onConfirm={() => operateProject(project.id, 'pause')}
-              okText="是"
-              cancelText="否"
-            >
-              <Button size='small'>暂停</Button>
-            </Popconfirm>
-          )}
-        {project.status === 'discard' ? (
-          <Popconfirm
-            title="确定如此操作么？"
-            onConfirm={() => operateProject(project.id, 'resume')}
-            okText="是"
-            cancelText="否"
-          >
-            <Button type='primary' size='small'>撤销</Button>
-          </Popconfirm>
-        ) : (
-            <Popconfirm
-              title="确定如此操作么？"
-              onConfirm={() => operateProject(project.id, 'discard')}
-              okText="是"
-              cancelText="否"
-            >
-              <Button size='small'>删除</Button>
-            </Popconfirm>
-          )}
-      </>),
+      width: 120,
+      render: (key, project) => (
+        <Dropdown overlay={menu(project)}>
+          <Button>
+            操作 <Icon type="down" />
+          </Button>
+        </Dropdown>),
 
     },
     {
@@ -403,6 +372,62 @@ export default function ProjectList({ location, history, match }) {
       }
     },
   ];
+  const menu = project => (
+    <Menu>
+      {project.status === 'pause' ? (
+        <Menu.Item onClick={() => resumeConfirm(project.id)}>继续</Menu.Item>
+      ) : (
+          <Menu.Item onClick={() => pauseConfirm(project.id)}>暂停</Menu.Item>
+        )}
+      {project.status === 'discard' ? (
+        <Menu.Item onClick={() => resumeConfirm(project.id)}>撤销删除</Menu.Item>
+      ) : (
+          <Menu.Item onClick={() => discardConfirm(project.id)}>删除</Menu.Item>
+        )}
+    </Menu>
+  )
+
+  function pauseConfirm(id) {
+    confirm({
+      title: '确认',
+      content: '您确定暂停该企划？',
+      okText: '确认',
+      cancelText: '取消',
+      onOk() {
+        operateProject(id, 'pause')
+      },
+      onCancel() {
+      },
+    });
+  }
+
+  function resumeConfirm(id) {
+    confirm({
+      title: '确认',
+      content: '您确定继续该企划？',
+      okText: '确认',
+      cancelText: '取消',
+      onOk() {
+        operateProject(id, 'resume')
+      },
+      onCancel() {
+      },
+    });
+  }
+
+  function discardConfirm(id) {
+    confirm({
+      title: '确认',
+      content: '您确定删除该企划？',
+      okText: '确认',
+      cancelText: '取消',
+      onOk() {
+        operateProject(id, 'discard')
+      },
+      onCancel() {
+      },
+    });
+  }
 
   const handleChangeGroup = (v, project) => {
     const the_group = groupList.filter(group => group.id === parseInt(v))[0]
@@ -618,44 +643,68 @@ export default function ProjectList({ location, history, match }) {
   }
 
   const handleDownload = () => {
-    setZipping(true)
+    setZipping(1)
     const path = '/download/projects'
     const params = {
       project_id: selectedRowKeys.join(','),
       mode: 'source'
     }
     fetchData(path, params).then(res => {
-      console.log(res)
       setTaskId(res.data.task_id)
+      checkTask(res.data.task_id)
     })
   }
 
   const handleDownload2 = () => {
-    setZipping(true)
+    setZipping(2)
     const path = '/download/projects'
     const params = {
       project_id: selectedRowKeys.join(','),
       mode: 'compress'
     }
+
     fetchData(path, params).then(res => {
-      console.log(res)
       setTaskId(res.data.task_id)
+      checkTask(res.data.task_id)
     })
   }
 
-  useInterval(() => {
-    const path = '/download/zip/' + taskId
+  const handleExportTable = () => {
+    setTableModel(false)
+    setZipping(3)
+    const path = '/download/projects/csv'
+    const params = {
+      project_id: selectedRowKeys.join(','),
+      keys: transferTargetKeys.join(',')
+    }
+
+    const values = queryString.parse(location.search)
+    if (values.order) {
+      params.order = values.order
+      params.order_by = values.order_by
+    } else {
+      params.order = 'desc'
+      params.order_by = 'status'
+    }
+    
+    fetchData(path, params).then(res => {
+      setTaskId(res.data.task_id)
+      checkTask(res.data.task_id)
+    })
+  }
+  const checkTask =(id)=>{
+    const path = '/tasks/' + id
     fetchData(path).then(res => {
       setTaskData(res.data)
       switch (res.data.state) {
         case 'SUCCESS':
-          setZipping(false)
+          setZipping(0)
           setTaskId()
           setTaskData()
           window.location.href = res.data.result.result
           break
         case 'FAILURE':
-          setZipping(false)
+          setZipping(0)
           setTaskId()
           setTaskData()
           message.error('未知错误')
@@ -663,26 +712,94 @@ export default function ProjectList({ location, history, match }) {
         default:
           break;
       }
-
-    }).finally(() => {
     })
-  }, taskId ? 2000 : null);
+  }
+  useInterval(() => {
+    checkTask(taskId)
+  }, taskId ? 1000 : null);
 
   const progressRender = task => {
     switch (task.state) {
       case 'PENDING':
         return <Progress percent={0} format={() => '等待中'} />
       case 'PROGRESS':
-        return <Progress percent={task.result.current / task.result.total * 100} />
+        return <Progress percent={parseFloat(Number(task.result.current / task.result.total * 100).toFixed(1))} />
       case 'SUCCESS':
         return <Progress percent={100} format={() => '成功'} />
       default:
         return ''
     }
   }
-
+  const handleTransferChange = (nextTargetKeys, direction, moveKeys) => {
+    if (direction === 'right') {
+      setTransferTargetKeys(prevState => prevState.concat(moveKeys))
+    } else {
+      setTransferTargetKeys(nextTargetKeys)
+    }
+  };
+  const headerData = [
+    {
+      key: 'id',
+      title: 'ID',
+    },
+    {
+      key: 'title',
+      title: '企划名',
+    },
+    {
+      key: 'tags',
+      title: '标签',
+    },
+    {
+      key: 'start_date',
+      title: '开始时间',
+    },
+    {
+      key: 'finish_date',
+      title: '结束时间',
+    },
+    {
+      key: 'deadline_date',
+      title: '死线日期',
+    },
+    {
+      key: 'current_stage',
+      title: '目前阶段',
+    },
+    {
+      key: 'status',
+      title: '状态',
+    },
+    {
+      key: 'progress',
+      title: '进度',
+    },
+    {
+      key: 'client',
+      title: '审核者',
+    },
+    {
+      key: 'creator',
+      title: '制作者',
+    }
+  ]
   return (
     <>
+      <Modal
+        title="生成表格"
+        visible={showTableModel}
+        onOk={handleExportTable}
+        onCancel={() => setTableModel(false)}
+      >
+        <Transfer
+          dataSource={headerData}
+          titles={['可选数据', '目标数据']}
+          targetKeys={transferTargetKeys}
+          onChange={handleTransferChange}
+          render={item => item.title}
+          locale={{ itemUnit: '项', itemsUnit: '项' }}
+        />
+      </Modal>
       <Modal
         title="备注"
         visible={showRemarkModel !== undefined}
@@ -715,9 +832,9 @@ export default function ProjectList({ location, history, match }) {
           <div className='m-b:1'>
             <span className='m-r:.5'>已选择{selectedRowKeys.length}个项目</span>
             <Button className='m-r:.5' onClick={() => setSelectedRowKeys([])} disabled={selectedRowKeys.length === 0}>取消所有</Button>
-            <Button className='m-r:.5' type="primary" onClick={handleDownload} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载源文件</Button>
-            <Button className='m-r:.5' type="primary" onClick={handleDownload2} disabled={selectedRowKeys.length === 0 || isZipping}>批量下载预览文件</Button>
-            <Button className='m-r:.5' type="primary" disabled={selectedRowKeys.length === 0}>批量执行B</Button>
+            <Button className='m-r:.5' type="primary" onClick={handleDownload} loading={isZipping === 1} disabled={selectedRowKeys.length === 0 || (isZipping !== 1 && isZipping)}>批量下载源文件</Button>
+            <Button className='m-r:.5' type="primary" onClick={handleDownload2} loading={isZipping === 2} disabled={selectedRowKeys.length === 0 || (isZipping !== 2 && isZipping)}>批量下载预览文件</Button>
+            <Button className='m-r:.5' type="primary" onClick={()=>setTableModel(true)} loading={isZipping === 3} disabled={selectedRowKeys.length === 0 || (isZipping !== 3 && isZipping)}>导出为表格</Button>
           </div>
         }
         {taskId && <div className='m-b:1'>

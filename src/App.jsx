@@ -69,7 +69,7 @@ function App({ location }) {
       <Web exact path="/dones" component={DoneList} />
       <Web exact path="/projects" component={ProjectList} />
       <Web exact path="/all" component={AllList} />
-      <Web exact path="/files" component={FileList} />
+      <Web exact path="/resources" component={FileList} />
       <Web exact path="/dashboard" component={Dashboard} />
       <Web path="/projects/:project_id(\d+)" component={Project} />
       <Web path="/users/:user_id(\d+)" component={User} />

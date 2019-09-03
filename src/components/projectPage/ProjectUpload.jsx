@@ -91,7 +91,7 @@ function ProjectUpload({ history, match, upload, file, onSuccess }) {
   function showConfirm() {
     confirm({
       title: '确认',
-      content: '你确定提交内容（提交后无法再改）？',
+      content: '您确定提交内容（提交后无法再改）？',
       okText: '确认',
       cancelText: '取消',
       onOk() {

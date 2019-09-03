@@ -6,9 +6,12 @@ import { getPhase, parseDate, fetchData } from '../../utility'
 const { TabPane } = Tabs;
 
 export default function Stage({ history, match, project }) {
-  const stage = project.stages.filter(stage => stage.id === parseInt(match.params.stage_id))[0]
-  const phaseId = match.params.phase_id || getPhase(stage).id.toString()
   const [isWating, setWating] = useState(false);
+  
+  const stage = project.stages.filter(stage => stage.id === parseInt(match.params.stage_id))[0]
+  if (!stage) return ''
+  const phaseId = match.params.phase_id || getPhase(stage).id.toString()
+  const phaseArr = [...stage.phases].reverse().filter(x => x.upload_date != null)
 
   const handleDownload = phase => {
     setWating(true)
@@ -36,8 +39,8 @@ export default function Stage({ history, match, project }) {
     })
   }
 
-  const phaseArr = [...stage.phases].reverse().filter(x => x.upload_date != null)
-
+  
+  
   return (<>
     <h1>{stage.name}</h1>
     <Descriptions size="small" className='m-b:1' >

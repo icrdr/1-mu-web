@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Link, withRouter } from 'react-router-dom'
-import { Row, Col, Button, Empty } from 'antd'
+import { Row, Col, Button, Empty, Badge } from 'antd'
 import Gantt from 'react-gantt-antd'
 import { getPhase, getStage, toLocalDate } from '../utility'
 import Loading from '../components/Loading'
@@ -143,8 +143,8 @@ function Ganttx({ match, loading, projects }) {
           if (m_end < tasks.end) m_end = tasks.end
         }
       }
-      setTimelineStart(toLocalDate(new Date(m_start.getTime() - 0.5 * (m_end - m_start))))
-      setTimelineEnd(toLocalDate(new Date(m_end.getTime() + 0.5 * (m_end - m_start))))
+      setTimelineStart(toLocalDate(new Date(m_start.getTime() - 0.25 * (m_end - m_start))))
+      setTimelineEnd(toLocalDate(new Date(m_end.getTime() + 0.25 * (m_end - m_start))))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projects])
@@ -158,14 +158,14 @@ function Ganttx({ match, loading, projects }) {
   return (
     <div>
       <Row gutter={16} className='m-b:.5'>
-        <Col span={16} className='t-a:l'>
-          <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '32px', height: '32px', backgroundColor: '#1890ff' }} />进行中</div>
-          <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '32px', height: '32px', backgroundColor: '#13c2c2' }} />等待中</div>
-          <div className='m-r:1 fl:l'><div className='m-r:.5 fl:l' style={{ width: '32px', height: '32px', backgroundColor: '#ff4d4f' }} />超时</div>
+        <Col span={16} className='t-a:l' style={{ lineHeight: '32px' }}>
+          <Badge className='m-r:1' color="#1890ff" text="进行中" />
+          <Badge className='m-r:1' color="#13c2c2" text="等待中" />
+          <Badge color="#ff4d4f" text="超时" />
         </Col>
         <Col span={8} className='t-a:r'>
-          <Button className='m-b:.5' onClick={() => { if (zoom + 1 < 10) setZoom(zoom + 1) }} disabled={zoom + 1 >= 10} icon="zoom-in" />
-          <Button className='m-l:.5' onClick={() => { if (zoom - 1 > 0) setZoom(zoom - 1) }} disabled={zoom - 1 <= 0} icon="zoom-out" />
+          <Button className='m-r:.5' onClick={() => { if (zoom + 1 < 10) setZoom(zoom + 1) }} disabled={zoom + 1 >= 10} icon="zoom-in" />
+          <Button  onClick={() => { if (zoom - 1 > 0) setZoom(zoom - 1) }} disabled={zoom - 1 <= 0} icon="zoom-out" />
         </Col>
       </Row>
       <Gantt
@@ -174,7 +174,7 @@ function Ganttx({ match, loading, projects }) {
         zoom={zoom}
         now={now}
         projects={t_projects}
-        sidebarWidth = {isSm?120:200}
+        sidebarWidth={isSm ? 120 : 200}
         enableSticky
         scrollToNow
       />
