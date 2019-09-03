@@ -139,13 +139,13 @@ export default function ProjectList({ location, history, match }) {
         switch (project.status) {
           case 'draft':
           case 'await':
-            link_url = `${match.path}/${project.id}/design`
+            link_url = `/admin/projects/${project.id}/design`
             break;
           case 'finish':
-            link_url = `${match.path}/${project.id}/done`
+            link_url = `/admin/projects/${project.id}/done`
             break;
           default:
-            link_url = `${match.path}/${project.id}/stages/${getStage(project).id}/phases/${getPhase(getStage(project)).id}`
+            link_url = `/admin/projects/${project.id}/stages/${getStage(project).id}/phases/${getPhase(getStage(project)).id}`
             break;
         }
         return <Link to={link_url} className='dont-break-out'>{name}</Link>
