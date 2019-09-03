@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Link, withRouter } from 'react-router-dom'
 import { Table, Tag, Input, Button, Icon, Divider } from 'antd'
-import { fetchData } from '../utility'
+import { fetchData, getStage, getPhase } from '../utility'
 import { globalContext } from '../App';
 import queryString from 'query-string'
 import StatusTag from '../components/projectPage/StatusTag'
 
 
-function Main({ location, history}) {
+function Main({ location, history }) {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
@@ -66,7 +66,23 @@ function Main({ location, history}) {
       sortOrder: tableSorter['title'],
       sortDirections: ['descend', 'ascend'],
       ...getColumnSearchProps('title'),
-      fixed: 'left'
+      fixed: 'left',
+      render: (name, project) => {
+        let link_url = ''
+        switch (project.status) {
+          case 'draft':
+          case 'await':
+            link_url = `/projects/${project.id}/design`
+            break;
+          case 'finish':
+            link_url = `/projects/${project.id}/done`
+            break;
+          default:
+            link_url = `/projects/${project.id}/stages/${getStage(project).id}/phases/${getPhase(getStage(project)).id}`
+            break;
+        }
+        return <Link to={link_url} className='dont-break-out'>{name}</Link>
+      }
     },
     {
       title: '标签',
@@ -125,7 +141,7 @@ function Main({ location, history}) {
     const path = '/projects'
     const params = {
       pre_page: pagination.pageSize,
-      participant_id:meData.id
+      participant_id: meData.id
     }
 
     const values = queryString.parse(location.search)
