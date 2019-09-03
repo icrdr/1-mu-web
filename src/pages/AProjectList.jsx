@@ -553,7 +553,6 @@ export default function ProjectList({ location, history, match }) {
   }, [location, update]);
 
   const handleTableChange = (pagination, filters, sorter) => {
-    setSelectedRowKeys([])
     const values = queryString.parse(location.search)
 
     const paramsObject = {
@@ -562,8 +561,16 @@ export default function ProjectList({ location, history, match }) {
     }
 
     if (Object.keys(sorter).length !== 0) {
-      paramsObject.order = sorter.order === "descend" ? 'desc' : 'asc'
-      paramsObject.order_by = sorter.field
+      const order = sorter.order === "descend" ? 'desc' : 'asc'
+      if(paramsObject.order !== order){
+        setSelectedRowKeys([])
+        paramsObject.order = order
+      }
+      if(paramsObject.order_by !== sorter.field){
+        setSelectedRowKeys([])
+        paramsObject.order_by = sorter.field
+      }
+      
     } else {
       delete paramsObject.order
       delete paramsObject.order_by
@@ -571,7 +578,10 @@ export default function ProjectList({ location, history, match }) {
 
     for (const filter in filters) {
       if (filters[filter].length !== 0) {
-        paramsObject[filter] = filters[filter].join(',')
+        if(paramsObject[filter] !== filters[filter].join(',')){
+          setSelectedRowKeys([])
+          paramsObject[filter] = filters[filter].join(',')
+        }
       } else {
         delete paramsObject[filter]
       }
