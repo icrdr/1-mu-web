@@ -4,6 +4,7 @@ import moment from 'moment';
 import { fetchData, getMonthRange, getWeekRange } from '../utility'
 import { globalContext } from '../App';
 import Ganttx from '../components/Ganttx';
+import DoneProject from '../components/DoneProject'
 const { RangePicker } = DatePicker;
 
 export default function Main() {
@@ -109,6 +110,9 @@ export default function Main() {
         </Radio.Group>
       } className='m-b:1' bordered={false} bodyStyle={{ padding: isSm ? '24px 8px' : '' }}>
         <Ganttx loading={isloading} projects={projectList} />
+      </Card>
+      <Card title="参与过的企划" bordered={false} bodyStyle={{ padding: isSm ? '24px 8px' : '' }}>
+        <DoneProject />
       </Card>
     </>
   )

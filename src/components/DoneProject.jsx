@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { Link } from 'react-router-dom'
-import { Table, Card, Tag, Input, Button, Icon, Divider } from 'antd'
+import { Link, withRouter } from 'react-router-dom'
+import { Table, Tag, Input, Button, Icon, Divider } from 'antd'
 import { fetchData } from '../utility'
 import { globalContext } from '../App';
 import queryString from 'query-string'
 import StatusTag from '../components/projectPage/StatusTag'
 
 
-export default function Main({ location, history }) {
+function Main({ location, history}) {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
@@ -17,7 +17,7 @@ export default function Main({ location, history }) {
   const [projectList, setProjectList] = useState([]);
   const [isloading, setLoading] = useState(false);
 
-  const { isSm } = useContext(globalContext);
+  const { isSm, meData } = useContext(globalContext);
 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: () => (
@@ -125,6 +125,7 @@ export default function Main({ location, history }) {
     const path = '/projects'
     const params = {
       pre_page: pagination.pageSize,
+      participant_id:meData.id
     }
 
     const values = queryString.parse(location.search)
@@ -220,17 +221,16 @@ export default function Main({ location, history }) {
   }
 
   return (
-    <Card bodyStyle={{ padding: isSm ? '24px 8px' : '' }}>
-      <Table
-        columns={columns}
-        rowKey={project => project.id}
-        dataSource={projectList}
-        loading={isloading}
-        pagination={pagination}
-        onChange={handleTableChange}
-        scroll={{ x: 1200 }}
-      />
-    </Card>
+    <Table
+      columns={columns}
+      rowKey={project => project.id}
+      dataSource={projectList}
+      loading={isloading}
+      pagination={pagination}
+      onChange={handleTableChange}
+      scroll={{ x: 1200 }}
+    />
   )
 }
 
+export default withRouter(Main)
