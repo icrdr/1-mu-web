@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { Card, Input, Modal, Tag, Button, Icon, message } from 'antd'
+import { Card, Input, Modal, Tag, Button, Icon, message, BackTop } from 'antd'
 import { fetchData, getPhase, getStage } from '../utility'
 import ImgCard from '../components/ImgCard'
 import queryString from 'query-string'
@@ -41,7 +41,7 @@ export default function SampleList({ location, history }) {
       })
       if (res.data.projects.length > 0) {
         setPage(prevState => { return prevState + 1 })
-      }else{
+      } else {
         setEnd(true)
       }
       setTimeout(() => {
@@ -110,7 +110,7 @@ export default function SampleList({ location, history }) {
           </div>
         </Modal>
       }
-
+      <BackTop />
       <Card>
         <div className='m-b:1' >
           <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { Card, Input, Modal, Tag, Button } from 'antd'
+import { Card, Input, Modal, Tag, Button, BackTop } from 'antd'
 import { fetchData, getPhase, getStage } from '../utility'
 import ImgCard from '../components/ImgCard'
 import queryString from 'query-string'
@@ -91,7 +91,7 @@ export default function DoneList({ location, history }) {
           </div>
         </Modal>
       }
-
+      <BackTop />
       <Card>
         <div className='m-b:1' >
           <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />

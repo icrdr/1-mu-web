@@ -553,6 +553,7 @@ export default function ProjectList({ location, history, match }) {
   }, [location, update]);
 
   const handleTableChange = (pagination, filters, sorter) => {
+    setSelectedRowKeys([])
     const values = queryString.parse(location.search)
 
     const paramsObject = {
@@ -581,6 +582,7 @@ export default function ProjectList({ location, history, match }) {
   }
 
   const handleSearch = (dataIndex, keyWord) => {
+    setSelectedRowKeys([])
     const values = queryString.parse(location.search)
     const paramsObject = {
       ...values,
@@ -596,6 +598,7 @@ export default function ProjectList({ location, history, match }) {
   }
 
   const handleDateRange = (dataIndex, dates) => {
+    setSelectedRowKeys([])
     const values = queryString.parse(location.search)
     const paramsObject = {
       ...values,
