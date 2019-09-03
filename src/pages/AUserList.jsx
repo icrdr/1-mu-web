@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { Table, Card, Popconfirm, Button } from 'antd'
 import { fetchData, deleteData } from '../utility'
 import queryString from 'query-string'
 import Avatarx from '../components/Avatarx'
-
+import { globalContext } from '../App';
 export default function UserList({ location, history }) {
-
+  const { isSm } = useContext(globalContext);
   const [userList, setUserList] = useState([]);
   const [isloading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
@@ -16,33 +16,35 @@ export default function UserList({ location, history }) {
     {
       title: 'ID',
       dataIndex: 'id',
-      width: '5%'
-    },
-    {
-      title: '头像',
-      key: 'key',
-      width: '5%',
-      render: (user) => {
-        return <Avatarx url={user.avatar_url} name={user.name} />
-      }
+      width: isSm ? 32 : 50,
+      fixed: 'left',
     },
     {
       title: '昵称',
       dataIndex: 'name',
-      width: '20%',
+      width: isSm ? 80: 120,
+      fixed: 'left',
       render: (name, user) => {
         return <Link to={"/users/" + user.id}>{name}</Link>
       }
     },
     {
+      title: '头像',
+      key: 'key',
+      width: 80,
+      render: (user) => {
+        return <Avatarx url={user.avatar_url} name={user.name} />
+      }
+    },
+    {
       title: '邮箱',
       dataIndex: 'email',
-      width: '20%',
+      width: isSm ? 120: 200,
     },
     {
       title: '手机',
       dataIndex: 'phone',
-      width: '20%',
+      width: isSm ? 120: 200,
     },
     {
       title: '删除',
@@ -61,7 +63,6 @@ export default function UserList({ location, history }) {
           return ''
         }
       },
-      width: '5%',
     }
   ]
 
@@ -107,7 +108,7 @@ export default function UserList({ location, history }) {
   }
 
   return (
-    <Card>
+    <Card bodyStyle={{ padding: isSm ? '24px 8px' : '' }}>
       <Table
         columns={columns}
         rowKey={user => user.id}
@@ -115,6 +116,7 @@ export default function UserList({ location, history }) {
         loading={isloading}
         pagination={pagination}
         onChange={onChangePage}
+        scroll={{ x: 600 }}
       />
     </Card>
   )

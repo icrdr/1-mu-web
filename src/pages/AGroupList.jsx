@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { Table, Card, Button, Popconfirm } from 'antd'
 import { fetchData, deleteData } from '../utility'
 import queryString from 'query-string'
-import { useMediaQuery } from 'react-responsive'
+
+import { globalContext } from '../App';
 export default function GroupList({ location, history, match }) {
-  const isSm = useMediaQuery({ query: '(max-width: 768px)' })
+  const { isSm } = useContext(globalContext);
   const [groupList, setGroupList] = useState([]);
   const [isloading, setLoading] = useState(false);
   const [update, setUpdate] = useState(false);
@@ -104,7 +105,7 @@ export default function GroupList({ location, history, match }) {
   }
 
   return (
-    <Card>
+    <Card bodyStyle={{ padding: isSm ? '24px 8px' : '' }}>
       <Button className='m-b:1' type='primary'><Link to='/admin/groups/add'>添加小组</Link></Button>
       <Table
         columns={columns}

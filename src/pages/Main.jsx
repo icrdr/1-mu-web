@@ -27,7 +27,7 @@ export default function Main({history}) {
     <Result
     icon={<Icon type="bell" theme="twoTone" />}
     title={total?`目前您有${total}个企划正在进行`:"嘿嘿嘿，您可以歇一歇了，没活儿"}
-    extra={<Button type="primary" onClick={()=>{history.push('/projects')}}>查看进度</Button>}
+    extra={<Button type="primary" onClick={()=>{history.push('/dashboard')}}>查看进度</Button>}
   />
   )
 }

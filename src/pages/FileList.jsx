@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react'
-import { Row, Col, Card, message, Input, BackTop, Radio, Tag, Modal, Select } from 'antd';
-
+import React, { useState, useEffect, useContext, useCallback } from 'react'
+import { Row, Col, Card, message, Input, BackTop, Radio, Tag, Modal, Select, Button } from 'antd';
 import { fetchData, updateData } from '../utility'
 import StackGrid from "react-stack-grid";
 import queryString from 'query-string'
 import ImgPost from '../components/ImgPost'
+import useEvent from '../hooks/useEvent'
 import { globalContext } from '../App';
 import { useMediaQuery } from 'react-responsive'
 const { Search } = Input;
@@ -21,6 +21,8 @@ export default function FileList({ location, history }) {
   const [lightBox, setLightBox] = useState()
   const [newTag, setNewTag] = useState([])
   const { meData } = useContext(globalContext)
+  const [isEnd, setEnd] = useState(false);
+
   const tagsFromServer = [
     '普通外科', '骨科', '神经外科', '妇产科', '泌尿外科', '胸外科', '眼科', '耳鼻喉科', '整形',
     '心外科', '心内科', '神经内科', '肾内科', '皮肤科', '血液科', '儿科', '内分泌科', '肿瘤科',
@@ -46,9 +48,6 @@ export default function FileList({ location, history }) {
       case 'me':
         params.user_id = meData.id
         break;
-      case 'group':
-        params.group_id = meData.groups[0].id
-        break;
       default:
     }
 
@@ -56,7 +55,11 @@ export default function FileList({ location, history }) {
       setImgList(prevState => {
         return prevState.concat(res.data.files)
       })
-      if (res.data.files.length > 0) setPage(prevState => { return prevState + 1 })
+      if (res.data.files.length > 0) {
+        setPage(prevState => { return prevState + 1 })
+      } else {
+        setEnd(true)
+      }
       setTimeout(() => {
         if (stackGrid) stackGrid.updateLayout()
         setLoading(false)
@@ -65,17 +68,15 @@ export default function FileList({ location, history }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update, meFilter, location]);
 
-  useEffect(() => {
-    function handleScroll() {
-      if (document.documentElement.offsetHeight + document.documentElement.scrollTop < document.documentElement.scrollHeight - 100) return
-      if (!isLoading) {
-        setUpdate(!update)
-      }
+  const handleScroll = useCallback(() => {
+    if (document.documentElement.offsetHeight + document.documentElement.scrollTop < document.documentElement.scrollHeight - 100) return
+    if (!isLoading && !isEnd) {
+      setUpdate(!update)
     }
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+    // eslint-disable-next-line
+  }, [isLoading])
+
+  useEvent('scroll', handleScroll)
 
   const onSearch = v => {
     setImgList([])
@@ -101,13 +102,13 @@ export default function FileList({ location, history }) {
     history.push(`${location.pathname}?${params}`)
     setSelectedTags(newSelectedTags)
   }
-  const handleSubmitTag = (lightBox,v)=>{
+  const handleSubmitTag = (lightBox, v) => {
     setNewTag([])
     const tags_name = []
-    for (const tag of lightBox.tags){
+    for (const tag of lightBox.tags) {
       tags_name.push(tag.name)
     }
-    if (tags_name.indexOf(v[0]) >= 0){
+    if (tags_name.indexOf(v[0]) >= 0) {
       message.error('重复的标签')
       return false
     }
@@ -115,10 +116,10 @@ export default function FileList({ location, history }) {
     const data = {
       tags: v
     }
-    updateData(path,data).then(res=>{
-      for ( const img of imgList){
-        if (img === lightBox){
-          img.tags.push({name:v})
+    updateData(path, data).then(res => {
+      for (const img of imgList) {
+        if (img === lightBox) {
+          img.tags.push({ name: v })
         }
       }
       setImgList([...imgList])
@@ -135,7 +136,7 @@ export default function FileList({ location, history }) {
             onCancel={() => setLightBox()}
             okButtonProps={{ className: 'd:n' }}
             cancelButtonProps={{ className: 'd:n' }}
-            width={isSm?'100%':'60%'}
+            width={isSm ? '100%' : '60%'}
             bodyStyle={{
               padding: 0
             }}
@@ -149,8 +150,8 @@ export default function FileList({ location, history }) {
               <Select mode="tags"
                 style={{ width: '100%' }}
                 placeholder='新标签，回车确认'
-                value = {newTag}
-                onChange={v => handleSubmitTag(lightBox,v)}
+                value={newTag}
+                onChange={v => handleSubmitTag(lightBox, v)}
               />
             </div>
           </Modal>
@@ -178,7 +179,6 @@ export default function FileList({ location, history }) {
           <Col xs={24} md={8} className='m-b:1'>
             <Radio.Group value={meFilter} onChange={onChangeMeFilter}>
               <Radio value='all'>全部</Radio>
-              <Radio value='group'>小组上传</Radio>
               <Radio value='me'>我上传</Radio>
             </Radio.Group>
           </Col>
@@ -187,7 +187,8 @@ export default function FileList({ location, history }) {
           </Col>
         </Row>
         <StackGrid
-          columnWidth={isSm?'100%':'33.33%'}
+          className='m-b:1'
+          columnWidth={isSm ? '100%' : '33.33%'}
           monitorImagesLoaded={true}
           gridRef={grid => setStackGrid(grid)}
           duration={180}
@@ -199,11 +200,16 @@ export default function FileList({ location, history }) {
               {img.previews.length > 0 ? (
                 <img width='100%' alt='图片' src={img.previews[0].url} />
               ) : (
-                  <div style={{textAlign:'center', width: '100%', lineHeight:'100px', height: '100px', backgroundColor:'#eee'}}>{img.name}.{img.format} 预览错误</div>
+                  <div style={{ textAlign: 'center', width: '100%', lineHeight: '100px', height: '100px', backgroundColor: '#eee' }}>{img.name}.{img.format} 预览错误</div>
                 )}
             </div>
           )}
         </StackGrid>
+        {!isEnd ? (
+          <Button type="primary" loading={isLoading} disabled={isEnd} onClick={() => setUpdate(!update)} block>
+            {isLoading ? '加载中' : '点击加载'}
+          </Button>
+        ) : (<div className='t-a:c'>没有更多内容啦...</div>)}
       </Card>
     </div>
   )
