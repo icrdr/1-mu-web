@@ -37,7 +37,7 @@ export default function Project({ history, match, isAdmin, location }) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectData])
+  }, [projectData, location])
 
   useEffect(() => {
     setLoading(true)

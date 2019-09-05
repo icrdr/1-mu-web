@@ -23,7 +23,7 @@ function Stage({ location, stageData }) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stageData])
+  }, [stageData, location])
 
   if (!stageData) return ''
 
@@ -68,7 +68,6 @@ function Stage({ location, stageData }) {
         activeKey={phaseIndex}
         type="card"
         onChange={activeKey => {
-          console.log(activeKey)
           setPhaseIndex(activeKey)
         }}
         tabPosition='top'>

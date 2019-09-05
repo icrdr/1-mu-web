@@ -77,7 +77,7 @@ function Ganttx({ match, loading, projects }) {
             if (phase.deadline_date) {
               ddl = toLocalDate(phase.deadline_date)
             } else {
-              ddl = new Date(start.getTime() + 1000 * 60 * 60 * 24 * (phase.days_need))
+              ddl = new Date(start.getTime() + 1000 * 60 * 60 * 24 * (stage.days_need))
             }
 
             if (ddl > now) {
@@ -92,6 +92,18 @@ function Ganttx({ match, loading, projects }) {
             title: `${parseInt(j) + 1}`,
             start: start,
             end: end,
+            style: {
+            }
+          })
+        }
+        if(stage.phases.length===0){
+          const pre_p_tasks = s_t_projects[i - 1].tasks
+          start = pre_p_tasks[pre_p_tasks.length - 1].end
+          p_tasks.push({
+            id: stage.id,
+            title: '1',
+            start: start,
+            end: new Date(start.getTime() + 1000 * 60 * 60 * 24 * (stage.days_need)),
             style: {
             }
           })
