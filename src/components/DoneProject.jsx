@@ -78,7 +78,7 @@ function Main({ location, history }) {
             link_url = `/projects/${project.id}/done`
             break;
           default:
-            link_url = `/projects/${project.id}/stages/${getStage(project).id}/phases/${getPhase(getStage(project)).id}`
+            link_url = `/projects/${project.id}/stages/${getStage(project).id}`
             break;
         }
         return <Link to={link_url} className='dont-break-out'>{name}</Link>

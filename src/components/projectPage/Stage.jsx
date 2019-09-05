@@ -39,22 +39,24 @@ export default function Stage({ history, match, project }) {
     })
   }
 
-  
-  
   return (<>
     <h1>{stage.name}</h1>
     <Descriptions size="small" className='m-b:1' >
       <Descriptions.Item label="起始日期">{stage.phases[0].start_date? parseDate(stage.phases[0].start_date): '未开始'}</Descriptions.Item>
       <Descriptions.Item label="重启日期">{getPhase(stage).start_date? parseDate(getPhase(stage).start_date): '未开始'}</Descriptions.Item>
       <Descriptions.Item label="死线日期">{getPhase(stage).start_date ? parseDate(getPhase(stage).deadline_date) : '未开始'}</Descriptions.Item>
-      <Descriptions.Item label="预计时间（天）">{getPhase(stage).days_need}</Descriptions.Item>
+      <Descriptions.Item label="预计时间（天）">{stage.days_need}</Descriptions.Item>
     </Descriptions>
     {phaseArr.length > 0 &&
-      <Tabs activeKey={phaseId} type="card" onChange={activeKey => {
-        const url = match.url.split('/')
-        url[url.length - 1] = activeKey
-        history.push(url.join('/'))
-      }} tabPosition='top'>
+      <Tabs 
+      // activeKey={phaseId} 
+      type="card" 
+      // onChange={activeKey => {
+      //   const url = match.url.split('/')
+      //   url[url.length - 1] = activeKey
+      //   history.push(url.join('/'))
+      // }} 
+      tabPosition='top'>
         {phaseArr.map((phase) =>
           <TabPane tab={parseDate(phase.upload_date).split(' ')[0]} key={phase.id}>
             <Row gutter={16}>
@@ -77,7 +79,6 @@ export default function Stage({ history, match, project }) {
                     <a href={item.url} target="_blank" rel="noopener noreferrer"><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
                   </Card>
                 )}
-
               </Col>
             </Row>
           </TabPane>)}
