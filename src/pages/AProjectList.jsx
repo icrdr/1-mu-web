@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom'
 import { Transfer, Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon, Progress, message, DatePicker, Divider, Menu, Dropdown } from 'antd'
-import { parseStatus, getStage, getPhase, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
+import { parseStatus, getStage, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
 import ProjectPostByCsv from '../components/ProjectPostByCsv'
 import queryString from 'query-string'
 import { globalContext } from '../App';
@@ -135,20 +135,7 @@ export default function ProjectList({ location, history, match }) {
       ...getColumnSearchProps('title'),
       fixed: 'left',
       render: (name, project) => {
-        let link_url = ''
-        switch (project.status) {
-          case 'draft':
-          case 'await':
-            link_url = `/admin/projects/${project.id}/design`
-            break;
-          case 'finish':
-            link_url = `/admin/projects/${project.id}/done`
-            break;
-          default:
-            link_url = `/admin/projects/${project.id}/stages/${getStage(project).id}`
-            break;
-        }
-        return <Link to={link_url} className='dont-break-out'>{name}</Link>
+        return <Link to={`/admin/projects/${project.id}`} className='dont-break-out'>{name}</Link>
       }
     },
     {

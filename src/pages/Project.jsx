@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { Route, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Card, Steps, Button, Icon, PageHeader, Divider, Affix, Popconfirm, Drawer } from 'antd'
 import ProjectUpload from '../components/projectPage/ProjectUpload'
 import ProjectFeedback from '../components/projectPage/ProjectFeedback'
@@ -11,10 +11,11 @@ import { parseStatus, getPhase, getStage, timeLeft, parseTimeLeft, fetchData, up
 import { globalContext } from '../App';
 import StatusTag from '../components/projectPage/StatusTag'
 import StageShow from '../components/projectPage/StageShow'
+import queryString from 'query-string'
 
 const { Step } = Steps;
 
-export default function Project({ history, match, isAdmin }) {
+export default function Project({ history, match, isAdmin, location }) {
   const [projectData, setProjectData] = useState();
   const [isloading, setLoading] = useState(false);
   const [update, setUpdate] = useState(true);
@@ -23,6 +24,20 @@ export default function Project({ history, match, isAdmin }) {
   const [showUploadPlane, setUploadPlane] = useState(false);
   const [showFeedbackPlane, setFeedbackPlane] = useState(false);
   const [isAffixed, setAffixed] = useState(true);
+  const [stageIndex, setStageIndex] = useState(0)
+
+  useEffect(() => {
+    if (projectData) {
+      const values = queryString.parse(location.search)
+
+      if (values.stage_index) {
+        setStageIndex(parseInt(values.stage_index))
+      } else {
+        setStageIndex(projectData.current_stage_index)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectData])
 
   useEffect(() => {
     setLoading(true)
@@ -50,6 +65,8 @@ export default function Project({ history, match, isAdmin }) {
         return 'wait'
       case 'finish':
         return 'finish'
+      case 'pause':
+        return 'error'
       default:
         const x_days = timeLeft(getStage(project))
         if (x_days >= 0) {
@@ -88,14 +105,12 @@ export default function Project({ history, match, isAdmin }) {
     setWating(true)
     const path = `/projects/${match.params.project_id}/start`
     updateData(path).then(() => {
-      const current_stage = getStage(projectData)
-      history.push(`${match.url}/stages/${current_stage.id}`)
+      setStageIndex(projectData.current_stage_index)
       setUpdate(!update)
     }).finally(() => {
       setWating(false)
     })
   }
-
 
   const operation = () => {
     switch (projectData.status) {
@@ -123,8 +138,7 @@ export default function Project({ history, match, isAdmin }) {
           >
             <ProjectUpload
               onSuccess={() => {
-                const current_stage = getStage(projectData)
-                history.push(`${match.url}/stages/${current_stage.id}`)
+                setStageIndex(projectData.current_stage_index)
                 setUploadPlane(false)
                 setUpdate(!update)
               }}
@@ -145,8 +159,7 @@ export default function Project({ history, match, isAdmin }) {
           >
             <ProjectFeedback
               onSuccess={() => {
-                const current_stage = getStage(projectData)
-                history.push(`${match.url}/stages/${current_stage.id}`)
+                setStageIndex(projectData.current_stage_index)
                 setFeedbackPlane(false)
                 setUpdate(!update)
               }}
@@ -158,6 +171,27 @@ export default function Project({ history, match, isAdmin }) {
         break;
     }
   }
+
+  const stageRender = () => {
+    if (stageIndex === -1) {
+      return <Design onSuccess={() => setUpdate(!update)} project={projectData} />
+    } else if (stageIndex === projectData.stages.length) {
+      const phase = getPhase(getStage(projectData))
+      return <>
+        <h1>最终成品</h1>
+        <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
+        {phase.upload_files.map((item, j) =>
+          <Card key={j} className='m-t:2'
+            cover={<ImgCard file={item} />}>
+            <a href={item.url}><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
+          </Card>
+        )}
+      </>
+    } else {
+      return <Stage stageData={projectData.stages[stageIndex]} />
+    }
+  }
+
   return (
     <>
       <PageHeader
@@ -186,44 +220,21 @@ export default function Project({ history, match, isAdmin }) {
       <Card className='m-b:2'>
         <Steps status={stepStatus(projectData)} current={stepCurrent(projectData)}>
           <Step title={
-            <Link to={`${match.url}/design`}>
-              <Button type="link" >设计初稿</Button>
-            </Link>
+            <Button type="link" onClick={() => setStageIndex(-1)}>设计初稿</Button>
           } description={projectData.status === 'await' ? '未确认' : '确认'} />
           {projectData.stages.map((stage, index) =>
             <Step key={stage.id} title={
-              <Link to={`${match.url}/stages/${stage.id}`}>
-                <Button type="link" >{stage.name}</Button>
-              </Link>
+              <Button type="link" onClick={() => setStageIndex(index)}>{stage.name}</Button>
             } description={setDescription(stage, index)} />
           )}
           <Step title={projectData.status === 'finish' ?
-            <Link to={`${match.url}/done`}>
-              <Button type="link" >完成</Button>
-            </Link> : '完成'
+            <Button type="link" onClick={() => setStageIndex(projectData.stages.length)}>完成</Button>
+            : '完成'
           } description='' />
         </Steps>
       </Card>
       <Card className='m-b:2'>
-        <Route path={`${match.path}/design`} render={props =>
-          <Design {...props} onSuccess={() => setUpdate(!update)} project={projectData} />
-        } />
-        <Route path={`${match.path}/done`} render={() => {
-          const phase = getPhase(getStage(projectData))
-          return <>
-            <h1>最终成品</h1>
-            <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
-            {phase.upload_files.map((item, j) =>
-              <Card key={j} className='m-t:2'
-                cover={<ImgCard file={item} />}>
-                <a href={item.url}><Icon type="download" /><div className="fl:r">{item.name}.{item.format}</div></a>
-              </Card>
-            )}
-          </>
-        }} />
-        <Route path={`${match.path}/stages/:stage_id(\\d+)`} render={props =>
-          <Stage {...props} onSuccess={() => setUpdate(!update)} project={projectData} />
-        } />
+        {stageRender()}
       </Card>
       <Affix offsetBottom={0} onChange={affixed => setAffixed(affixed)}>
         {operation()}

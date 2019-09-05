@@ -79,7 +79,8 @@ function Basic({ location, history, menutheme, menuItems, children }) {
                   setNoticeList(prevState => {
                     return prevState.filter(n => notice.id !== n.id)
                   })
-                  history.push(`/projects/${notice.parent_project.id}/stages/${notice.parent_stage.id}/phases/${notice.parent_phase.id}`)
+                  
+                  history.push(`/projects/${notice.parent_project.id}?stage_index=${notice.stage_index}&phase_index=${notice.phase_index}`)
                   setNoticeVisible(false)
                 }} className={`hover ${notice.read ? 'disable' : ''}`} style={{ padding: '12px 24px' }}>
                   <List.Item.Meta

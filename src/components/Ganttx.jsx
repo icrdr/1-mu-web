@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react'
 import { Link, withRouter } from 'react-router-dom'
 import { Row, Col, Button, Empty, Badge } from 'antd'
 import Gantt from 'react-gantt-antd'
-import { getPhase, getStage, toLocalDate } from '../utility'
+import { getPhase, toLocalDate } from '../utility'
 import Loading from '../components/Loading'
 import { globalContext } from '../App';
 function Ganttx({ match, loading, projects }) {
@@ -98,7 +98,7 @@ function Ganttx({ match, loading, projects }) {
         }
         s_t_projects.push({
           id: stage.id,
-          title: <Link to={`${match.path}/${project.id}/stages/${stage.id}`}>{`${parseInt(i) + 1}.${stage.name}`}</Link>,
+          title: <Link to={`${match.path}/${project.id}`}>{`${parseInt(i) + 1}.${stage.name}`}</Link>,
           tasks: p_tasks,
         })
 
@@ -112,22 +112,9 @@ function Ganttx({ match, loading, projects }) {
           }
         })
       }
-      let link_url = ''
-      switch (project.status) {
-        case 'draft':
-        case 'await':
-          link_url = `/projects/${project.id}/design`
-          break;
-        case 'finish':
-          link_url = `/projects/${project.id}/done`
-          break;
-        default:
-          link_url = `/projects/${project.id}/stages/${getStage(project).id}`
-          break;
-      }
       new_t_projects.push({
         id: project.id,
-        title: <Link to={link_url}>{`${project.title}`}</Link>,
+        title: <Link to={`/projects/${project.id}`}>{`${project.title}`}</Link>,
         tasks: s_tasks,
         projects: s_t_projects,
         isOpen: false,

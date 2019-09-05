@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Link, withRouter } from 'react-router-dom'
 import { Table, Tag, Input, Button, Icon, Divider } from 'antd'
-import { fetchData, getStage, getPhase } from '../utility'
+import { fetchData} from '../utility'
 import { globalContext } from '../App';
 import queryString from 'query-string'
 import StatusTag from '../components/projectPage/StatusTag'
@@ -68,20 +68,7 @@ function Main({ location, history }) {
       ...getColumnSearchProps('title'),
       fixed: 'left',
       render: (name, project) => {
-        let link_url = ''
-        switch (project.status) {
-          case 'draft':
-          case 'await':
-            link_url = `/projects/${project.id}/design`
-            break;
-          case 'finish':
-            link_url = `/projects/${project.id}/done`
-            break;
-          default:
-            link_url = `/projects/${project.id}/stages/${getStage(project).id}`
-            break;
-        }
-        return <Link to={link_url} className='dont-break-out'>{name}</Link>
+        return <Link to={`/projects/${project.id}`} className='dont-break-out'>{name}</Link>
       }
     },
     {
