@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react'
 import { Link, withRouter } from 'react-router-dom'
 import { Row, Col, Button, Empty, Badge } from 'antd'
 import Gantt from 'react-gantt-antd'
-import { getPhase, getStage, toLocalDate } from '../utility'
+import { getPhase, toLocalDate } from '../utility'
 import Loading from '../components/Loading'
 import { globalContext } from '../App';
 function Ganttx({ match, loading, projects }) {
@@ -77,7 +77,7 @@ function Ganttx({ match, loading, projects }) {
             if (phase.deadline_date) {
               ddl = toLocalDate(phase.deadline_date)
             } else {
-              ddl = new Date(start.getTime() + 1000 * 60 * 60 * 24 * (phase.days_need))
+              ddl = new Date(start.getTime() + 1000 * 60 * 60 * 24 * (stage.days_need))
             }
 
             if (ddl > now) {
@@ -96,9 +96,21 @@ function Ganttx({ match, loading, projects }) {
             }
           })
         }
+        if(stage.phases.length===0){
+          const pre_p_tasks = s_t_projects[i - 1].tasks
+          start = pre_p_tasks[pre_p_tasks.length - 1].end
+          p_tasks.push({
+            id: stage.id,
+            title: '1',
+            start: start,
+            end: new Date(start.getTime() + 1000 * 60 * 60 * 24 * (stage.days_need)),
+            style: {
+            }
+          })
+        }
         s_t_projects.push({
           id: stage.id,
-          title: <Link to={`${match.path}/${project.id}/stages/${stage.id}`}>{`${parseInt(i) + 1}.${stage.name}`}</Link>,
+          title: <Link to={`${match.path}/${project.id}`}>{`${parseInt(i) + 1}.${stage.name}`}</Link>,
           tasks: p_tasks,
         })
 
@@ -112,22 +124,9 @@ function Ganttx({ match, loading, projects }) {
           }
         })
       }
-      let link_url = ''
-      switch (project.status) {
-        case 'draft':
-        case 'await':
-          link_url = `/projects/${project.id}/design`
-          break;
-        case 'finish':
-          link_url = `/projects/${project.id}/done`
-          break;
-        default:
-          link_url = `/projects/${project.id}/stages/${getStage(project).id}`
-          break;
-      }
       new_t_projects.push({
         id: project.id,
-        title: <Link to={link_url}>{`${project.title}`}</Link>,
+        title: <Link to={`/projects/${project.id}`}>{`${project.title}`}</Link>,
         tasks: s_tasks,
         projects: s_t_projects,
         isOpen: false,
