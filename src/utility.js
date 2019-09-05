@@ -65,10 +65,9 @@ export function toLocalDate(date_str) {
   return utc_date
 }
 export function timeLeft(stage) {
-  const start_date = toLocalDate(getPhase(stage).start_date)
+  const ddl_date = toLocalDate(getPhase(stage).deadline_date)
   const current_date = new Date()
-  let difference = start_date - current_date;
-  difference += 1000 * 60 * 60 * 24 * (getPhase(stage).days_need)
+  let difference = ddl_date - current_date;
   return difference / (1000 * 60 * 60 * 24)
 }
 

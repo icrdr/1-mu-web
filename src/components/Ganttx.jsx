@@ -98,7 +98,7 @@ function Ganttx({ match, loading, projects }) {
         }
         s_t_projects.push({
           id: stage.id,
-          title: <Link to={`${match.path}/${project.id}/stages/${stage.id}/phases/${getPhase(stage).id}`}>{`${parseInt(i) + 1}.${stage.name}`}</Link>,
+          title: <Link to={`${match.path}/${project.id}/stages/${stage.id}`}>{`${parseInt(i) + 1}.${stage.name}`}</Link>,
           tasks: p_tasks,
         })
 
@@ -122,7 +122,7 @@ function Ganttx({ match, loading, projects }) {
           link_url = `/projects/${project.id}/done`
           break;
         default:
-          link_url = `/projects/${project.id}/stages/${getStage(project).id}/phases/${getPhase(getStage(project)).id}`
+          link_url = `/projects/${project.id}/stages/${getStage(project).id}`
           break;
       }
       new_t_projects.push({

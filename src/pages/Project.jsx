@@ -89,7 +89,7 @@ export default function Project({ history, match, isAdmin }) {
     const path = `/projects/${match.params.project_id}/start`
     updateData(path).then(() => {
       const current_stage = getStage(projectData)
-      history.push(`${match.url}/stages/${current_stage.id}/phases/${getPhase(current_stage).id}`)
+      history.push(`${match.url}/stages/${current_stage.id}`)
       setUpdate(!update)
     }).finally(() => {
       setWating(false)
@@ -124,7 +124,7 @@ export default function Project({ history, match, isAdmin }) {
             <ProjectUpload
               onSuccess={() => {
                 const current_stage = getStage(projectData)
-                history.push(`${match.url}/stages/${current_stage.id}/phases/${getPhase(current_stage).id}`)
+                history.push(`${match.url}/stages/${current_stage.id}`)
                 setUploadPlane(false)
                 setUpdate(!update)
               }}
@@ -146,7 +146,7 @@ export default function Project({ history, match, isAdmin }) {
             <ProjectFeedback
               onSuccess={() => {
                 const current_stage = getStage(projectData)
-                history.push(`${match.url}/stages/${current_stage.id}/phases/${getPhase(current_stage).id}`)
+                history.push(`${match.url}/stages/${current_stage.id}`)
                 setFeedbackPlane(false)
                 setUpdate(!update)
               }}
@@ -192,7 +192,7 @@ export default function Project({ history, match, isAdmin }) {
           } description={projectData.status === 'await' ? '未确认' : '确认'} />
           {projectData.stages.map((stage, index) =>
             <Step key={stage.id} title={
-              <Link to={`${match.url}/stages/${stage.id}/phases/${getPhase(stage).id}`}>
+              <Link to={`${match.url}/stages/${stage.id}`}>
                 <Button type="link" >{stage.name}</Button>
               </Link>
             } description={setDescription(stage, index)} />
@@ -221,7 +221,7 @@ export default function Project({ history, match, isAdmin }) {
             )}
           </>
         }} />
-        <Route path={`${match.path}/stages/:stage_id(\\d+)/phases/:phase_id(\\d+)`} render={props =>
+        <Route path={`${match.path}/stages/:stage_id(\\d+)`} render={props =>
           <Stage {...props} onSuccess={() => setUpdate(!update)} project={projectData} />
         } />
       </Card>
