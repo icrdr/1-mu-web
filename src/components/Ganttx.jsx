@@ -28,13 +28,10 @@ function Ganttx({ match, loading, projects }) {
         case 'pending':
           color = '#13c2c2'
           break;
-        case 'delay':
-          color = '#ff4d4f'
-          break;
         default:
           break;
       }
-
+      if(project.delay)color = '#ff4d4f'
       for (let i in project.stages) {
         const stage = project.stages[i]
         let start, end
@@ -77,7 +74,7 @@ function Ganttx({ match, loading, projects }) {
             if (phase.deadline_date) {
               ddl = toLocalDate(phase.deadline_date)
             } else {
-              ddl = new Date(start.getTime() + 1000 * 60 * 60 * 24 * (stage.days_need))
+              ddl = new Date(start.getTime() + 1000 * 60 * 60 * 24 * (stage.days_planned))
             }
 
             if (ddl > now) {
@@ -103,7 +100,7 @@ function Ganttx({ match, loading, projects }) {
             id: stage.id,
             title: '1',
             start: start,
-            end: new Date(start.getTime() + 1000 * 60 * 60 * 24 * (stage.days_need)),
+            end: new Date(start.getTime() + 1000 * 60 * 60 * 24 * (stage.days_planned)),
             style: {
             }
           })

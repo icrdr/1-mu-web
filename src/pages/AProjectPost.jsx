@@ -82,7 +82,7 @@ function PostProjectForm({ history }) {
         validate: v => va.isRequired(v)
       }
     ]
-    validation[`stages[${k}].days_need`] = [
+    validation[`stages[${k}].days_planned`] = [
       {
         error: '不能大于56天，不能少于2天',
         validate: v => va.inRange(v, 2, 56)
@@ -98,8 +98,8 @@ function PostProjectForm({ history }) {
           </Col>
           <Col span={12}>
             <Paragraph>*计划天数</Paragraph>
-            <InputNumber {...field(`stages[${k}].days_need`, 7)} defaultValue={3} min={1} max={56} />
-            {errors[`stages[${k}].days_need`] && <Alert message={errors[`stages[${k}].days_need`]} type="error" showIcon />}
+            <InputNumber {...field(`stages[${k}].days_planned`, 7)} defaultValue={3} min={1} max={56} />
+            {errors[`stages[${k}].days_planned`] && <Alert message={errors[`stages[${k}].days_planned`]} type="error" showIcon />}
           </Col>
           {i === 0 ? null :
             (<Icon className='pos:a' style={{ top: '0', right: '0' }} theme="twoTone" type="close-circle" onClick={() => removeStage(k)} />)

@@ -12,7 +12,7 @@ export default function Main({ location, history }) {
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
   const [tableSearch, setTableSearch] = useState({});
-  const allTableFilter = { status: [], creator_id: [], current_stage_index: [] }
+  const allTableFilter = { status: [], creator_id: []}
   const allTableSearch = { title: [], tags: [] }
   const [projectList, setProjectList] = useState([]);
   const [isloading, setLoading] = useState(false);
@@ -77,25 +77,23 @@ export default function Main({ location, history }) {
       }
     },
     {
-      title: '状态',
+      title: '阶段进度',
       dataIndex: 'status',
       sorter: true,
       sortOrder: tableSorter['status'],
       sortDirections: ['descend', 'ascend'],
       filters: [
-        { text: '草稿', value: 'draft' },
         { text: '未开始', value: 'await' },
         { text: '进行中', value: 'progress' },
         { text: '修改中', value: 'modify' },
-        { text: '逾期中', value: 'delay' },
         { text: '待确认', value: 'pending' },
         { text: '已完成', value: 'finish' },
-        { text: '暂停', value: 'pause' },
-        { text: '废弃', value: 'discard' },
+        { text: '逾期（状态）', value: 'delay' },
+        { text: '暂停（状态）', value: 'pause' },
       ],
       filteredValue: tableFilter['status'] || [],
       width: 200,
-      render: (status) => <StatusTag status={status} />
+      render: (status, project) => <StatusTag project={project} />
     },
     {
       title: '审核者',

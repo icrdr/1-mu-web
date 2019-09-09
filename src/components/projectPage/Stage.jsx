@@ -61,7 +61,7 @@ function Stage({ location, stageData }) {
       <Descriptions.Item label="起始日期">{stageData.phases.length>0 ? parseDate(stageData.phases[0].start_date) : '未开始'}</Descriptions.Item>
       <Descriptions.Item label="重启日期">{stageData.phases.length>0 ? parseDate(getPhase(stageData).start_date) : '未开始'}</Descriptions.Item>
       <Descriptions.Item label="死线日期">{stageData.phases.length>0 ? parseDate(getPhase(stageData).deadline_date) : '未开始'}</Descriptions.Item>
-      <Descriptions.Item label="预计时间（天）">{stageData.days_need}</Descriptions.Item>
+      <Descriptions.Item label="预计时间（天）">{stageData.days_planned}</Descriptions.Item>
     </Descriptions>
     {phaseArr.length > 0 &&
       <Tabs

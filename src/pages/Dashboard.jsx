@@ -27,7 +27,7 @@ export default function Main() {
     const params = {
       order: 'desc',
       pre_page: 20,
-      status: 'progress,modify,delay,pending',
+      status: 'progress,modify,pending',
       order_by: 'status',
     }
     switch (meFilter) {

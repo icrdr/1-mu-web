@@ -11,7 +11,7 @@ export default function Main({history}) {
     const params = {
       order: 'desc',
       pre_page: 20,
-      status: 'progress,modify,delay,pending',
+      status: 'progress,modify,pending',
       order_by: 'status',
       creator_id: meData.id
     }
