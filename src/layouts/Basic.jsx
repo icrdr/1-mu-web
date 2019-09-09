@@ -95,11 +95,8 @@ function Basic({ location, history, menutheme, menuItems, children }) {
       <Divider className='m:0' />
       <div style={{ lineHeight: '46px' }}>
         <Button type='link' style={{ width: '50%', borderRight: '1px solid #e8e8e8' }} onClick={() => {
-          const path = `/project_notices`
-          const params = {
-            user_id: meData.id,
-          }
-          updateData(path, params)
+          const path = `/users/${meData.id}/project_notices`
+          updateData(path)
           setNoticeList([])
           setUnread(0)
         }}>清空 通知</Button>
