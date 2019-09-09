@@ -196,7 +196,7 @@ export default function ProjectList({ location, history }) {
         if (deadline_date) {
           return <>
             <span style={{ color: project.delay ? 'red' : '' }}>{parseDate(deadline_date)}</span>
-            <Button type="link" size='small' onClick={() => setPostponeModel(project)}>延期</Button>
+            <Button type="link" size='small' onClick={() => setPostponeModel(project)}>修改</Button>
           </>
         } else {
           return '未进行'
@@ -204,7 +204,7 @@ export default function ProjectList({ location, history }) {
       }
     },
     {
-      title: '目前阶段',
+      title: '企划进度',
       dataIndex: 'progress',
       sorter: true,
       sortOrder: tableSorter['progress'],
@@ -230,7 +230,7 @@ export default function ProjectList({ location, history }) {
       }
     },
     {
-      title: '进度',
+      title: '阶段状态',
       dataIndex: 'status',
       sorter: true,
       sortOrder: tableSorter['status'],
@@ -573,7 +573,10 @@ export default function ProjectList({ location, history }) {
 
   const handlePostpone = () => {
     const path = `/projects/${showPostponeModel.id}/change_ddl`
-
+    if (!ddlDay || !ddlTime){
+      message.warn('未输入时间')
+      return false
+    }
     const ddl = ddlTime.clone()
     ddl.year(ddlDay.year()).month(ddlDay.month()).date(ddlDay.date())
 
@@ -654,6 +657,7 @@ export default function ProjectList({ location, history }) {
       checkTask(res.data.task_id)
     })
   }
+
   const checkTask = (id) => {
     const path = '/tasks/' + id
     fetchData(path).then(res => {
@@ -725,16 +729,16 @@ export default function ProjectList({ location, history }) {
       title: '死线日期',
     },
     {
-      key: 'current_stage',
-      title: '目前阶段',
+      key: 'progress',
+      title: '企划进度',
     },
     {
       key: 'status',
-      title: '状态',
+      title: '阶段状态',
     },
     {
-      key: 'progress',
-      title: '进度',
+      key: 'finish',
+      title: '企划状态',
     },
     {
       key: 'client',

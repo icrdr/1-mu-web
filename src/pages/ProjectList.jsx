@@ -77,7 +77,7 @@ export default function Main({ location, history }) {
       }
     },
     {
-      title: '阶段进度',
+      title: '阶段状态',
       dataIndex: 'status',
       sorter: true,
       sortOrder: tableSorter['status'],

@@ -80,7 +80,7 @@ function Main({ location, history }) {
       }
     },
     {
-      title: '状态',
+      title: '阶段状态',
       dataIndex: 'status',
       sorter: true,
       sortOrder: tableSorter['status'],
