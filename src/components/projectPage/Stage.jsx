@@ -3,27 +3,20 @@ import { withRouter } from 'react-router-dom'
 import { Card, Row, Col, Descriptions, Button, Tabs, message, Icon } from 'antd'
 import ImgCard from '../ImgCard'
 import { getPhase, parseDate, fetchData } from '../../utility'
-import queryString from 'query-string'
 
 const { TabPane } = Tabs;
 
-function Stage({ location, stageData }) {
+function Stage({ stageData, defaultPhase }) {
 
   const [isWating, setWating] = useState(false);
-  const [phaseIndex, setPhaseIndex] = useState('')
+  const [phaseID, setPhaseID] = useState(defaultPhase || '')
 
   useEffect(() => {
-    if (stageData) {
-      const values = queryString.parse(location.search)
-
-      if (values.phase_index) {
-        setPhaseIndex(values.phase_index)
-      } else {
-        setPhaseIndex((stageData.phases.length - 1).toString())
-      }
+    if (stageData){
+      setPhaseID(getPhase(stageData) ? getPhase(stageData).id.toString() : '')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stageData, location])
+  }, [stageData])
 
   if (!stageData) return ''
 
@@ -58,22 +51,22 @@ function Stage({ location, stageData }) {
   return (<>
     <h1>{stageData.name}</h1>
     <Descriptions size="small" className='m-b:1' >
-      <Descriptions.Item label="起始日期">{stageData.phases.length>0 ? parseDate(stageData.phases[0].start_date) : '未开始'}</Descriptions.Item>
-      <Descriptions.Item label="重启日期">{stageData.phases.length>0 ? parseDate(getPhase(stageData).start_date) : '未开始'}</Descriptions.Item>
-      <Descriptions.Item label="死线日期">{stageData.phases.length>0 ? parseDate(getPhase(stageData).deadline_date) : '未开始'}</Descriptions.Item>
+      <Descriptions.Item label="起始日期">{stageData.phases.length > 0 ? parseDate(stageData.phases[0].start_date) : '未开始'}</Descriptions.Item>
+      <Descriptions.Item label="重启日期">{stageData.phases.length > 0 ? parseDate(getPhase(stageData).start_date) : '未开始'}</Descriptions.Item>
+      <Descriptions.Item label="死线日期">{stageData.phases.length > 0 ? parseDate(getPhase(stageData).deadline_date) : '未开始'}</Descriptions.Item>
       <Descriptions.Item label="预计时间（天）">{stageData.days_planned}</Descriptions.Item>
     </Descriptions>
     {phaseArr.length > 0 &&
       <Tabs
-        activeKey={phaseIndex}
+        activeKey={phaseID}
         type="card"
         onChange={activeKey => {
-          setPhaseIndex(activeKey)
+          setPhaseID(activeKey)
         }}
         tabPosition='top'>
         {phaseArr.map((phase, index) =>
-          <TabPane tab={phase.upload_date ? parseDate(phase.upload_date).split(' ')[0] : '有待上传'} key={phaseArr.length - 1 - index}>
-            {phase.upload_date?
+          <TabPane tab={phase.upload_date ? parseDate(phase.upload_date).split(' ')[0] : '有待上传'} key={phase.id}>
+            {phase.upload_date ?
               <Row gutter={16}>
                 <Col sm={24} md={8} className='m-b:1'>
                   {phase.feedback_date && <>
@@ -96,7 +89,7 @@ function Stage({ location, stageData }) {
                   )}
                 </Col>
               </Row>
-            :<h2>内容有待上传</h2>}
+              : <h2>内容有待上传</h2>}
           </TabPane>)}
       </Tabs>
     }

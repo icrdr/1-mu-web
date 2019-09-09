@@ -35,9 +35,8 @@ function Basic({ location, history, menutheme, menuItems, children }) {
   useEffect(() => {
     if (noticeVisible) {
       setLoading(true)
-      const path = `/project_notices`
+      const path = `/users/${meData.id}/project_notices`
       const params = {
-        user_id: meData.id,
         pre_page: 5,
       }
       fetchData(path, params).then(res => {
@@ -58,15 +57,15 @@ function Basic({ location, history, menutheme, menuItems, children }) {
             dataSource={noticeList}
             renderItem={notice => {
               let title
-              switch (notice.notice_type) {
+              switch (notice.log.log_type) {
                 case 'upload':
-                  title = `${notice.parent_project.title} 有新的提交`
+                  title = `${notice.log.project.title} 有新的提交`
                   break
                 case 'modify':
-                  title = `${notice.from_user.name} 回复了修改建议`
+                  title = `${notice.log.operator.name} 提出修改建议`
                   break
                 case 'pass':
-                  title = `${notice.parent_project.title} 提交审核通过`
+                  title = `${notice.log.project.title} 提交审核通过`
                   break
                 default:
                   break
@@ -80,13 +79,13 @@ function Basic({ location, history, menutheme, menuItems, children }) {
                     return prevState.filter(n => notice.id !== n.id)
                   })
                   
-                  history.push(`/projects/${notice.parent_project.id}?stage_index=${notice.stage_index}&phase_index=${notice.phase_index}`)
+                  history.push(`/projects/${notice.log.project.id}?phase_id=${notice.log.phase.id}`)
                   setNoticeVisible(false)
                 }} className={`hover ${notice.read ? 'disable' : ''}`} style={{ padding: '12px 24px' }}>
                   <List.Item.Meta
-                    avatar={<Avatarx url={notice.from_user.avatar_url} name={notice.from_user.name} />}
+                    avatar={<Avatarx url={notice.log.operator.avatar_url} name={notice.log.operator.name} />}
                     title={title}
-                    description={moment(toLocalDate(notice.send_date)).fromNow()}
+                    description={moment(toLocalDate(notice.log.log_date)).fromNow()}
                   />
                 </List.Item>
               )

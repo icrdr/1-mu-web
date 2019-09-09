@@ -15,7 +15,7 @@ import queryString from 'query-string'
 
 const { Step } = Steps;
 
-export default function Project({ history, match, isAdmin, location }) {
+export default function Project({ match, isAdmin, location }) {
   const [projectData, setProjectData] = useState();
   const [isloading, setLoading] = useState(false);
   const [update, setUpdate] = useState(true);
@@ -25,15 +25,25 @@ export default function Project({ history, match, isAdmin, location }) {
   const [showFeedbackPlane, setFeedbackPlane] = useState(false);
   const [isAffixed, setAffixed] = useState(true);
   const [progressIndex, setProgressIndex] = useState(0)
+  const [phaseID, setPhaseID] = useState('')
 
   useEffect(() => {
     if (projectData) {
       const values = queryString.parse(location.search)
-
-      if (values.progress_index) {
-        setProgressIndex(parseInt(values.progress_index))
+      let progress_index = 0
+      if (values.phase_id) {
+        for (const i in projectData.stages) {
+          for (const phase of projectData.stages[i].phases) {
+            if (phase.id === parseInt(values.phase_id)) {
+              progress_index = parseInt(i) + 1
+            }
+          }
+        }
+        setProgressIndex(progress_index)
+        setPhaseID(values.phase_id)
       } else {
         setProgressIndex(projectData.progress)
+        setPhaseID()
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,7 +87,7 @@ export default function Project({ history, match, isAdmin, location }) {
   const stepCurrent = (project) => {
     switch (project.status) {
       case 'finish':
-        return project.stages.length+1
+        return project.stages.length + 1
       default:
         return project.progress
     }
@@ -85,7 +95,7 @@ export default function Project({ history, match, isAdmin, location }) {
 
   const setDescription = (stage, index) => {
     const status = projectData.status
-    const step = stepCurrent(projectData)-1
+    const step = stepCurrent(projectData) - 1
     if (index < step) {
       return parseStatus('finish')
     } else if (index > step) {
@@ -171,7 +181,7 @@ export default function Project({ history, match, isAdmin, location }) {
     if (progressIndex === 0) {
       return <Design onSuccess={() => setUpdate(!update)} project={projectData} />
     } else if (progressIndex === -1) {
-      const phase = getPhase(projectData.stages[projectData.stages.length-1])
+      const phase = getPhase(projectData.stages[projectData.stages.length - 1])
       return <>
         <h1>最终成品</h1>
         <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
@@ -183,7 +193,7 @@ export default function Project({ history, match, isAdmin, location }) {
         )}
       </>
     } else {
-      return <Stage stageData={projectData.stages[progressIndex-1]} />
+      return <Stage stageData={projectData.stages[progressIndex - 1]} defaultPhase={phaseID} />
     }
   }
 
@@ -219,7 +229,7 @@ export default function Project({ history, match, isAdmin, location }) {
           } description={projectData.status === 'await' ? '未确认' : '确认'} />
           {projectData.stages.map((stage, index) =>
             <Step key={stage.id} title={
-              <Button type="link" onClick={() => setProgressIndex(index+1)}>{stage.name}</Button>
+              <Button type="link" onClick={() => setProgressIndex(index + 1)}>{stage.name}</Button>
             } description={setDescription(stage, index)} />
           )}
           <Step title={projectData.status === 'finish' ?
