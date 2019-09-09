@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Card, Input, Modal, Tag, Button, Icon, message, BackTop } from 'antd'
-import { fetchData, getPhase, getStage } from '../utility'
+import { fetchData, getPhase} from '../utility'
 import ImgCard from '../components/ImgCard'
 import queryString from 'query-string'
 import { useMediaQuery } from 'react-responsive'
@@ -104,7 +104,7 @@ export default function SampleList({ location, history }) {
           bodyStyle={{
             padding: 0
           }}
-        >{getPhase(getStage(lightBox)).upload_files.map((file, index) => { return <ImgCard key={index} file={file} /> })}
+        >{getPhase(lightBox.stages[lightBox.stages.length-1]).upload_files.map((file, index) => { return <ImgCard key={index} file={file} /> })}
           <div className='p:2'>
             {lightBox.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
           </div>
@@ -125,9 +125,9 @@ export default function SampleList({ location, history }) {
           gutterHeight={12}
         >
           {projectList.map((project, index) => {
-            const item = getPhase(getStage(project)).upload_files[0]
+            const item = getPhase(project.stages[project.stages.length-1]).upload_files[0]
             return <Card key={index} cover={<div onClick={() => setLightBox(project)}><ImgCard file={item} /></div>}>
-              <Button type='link' size='small' disabled={isZipping} onClick={() => handleDownload(getPhase(getStage(project)).upload_files)}>
+              <Button type='link' size='small' disabled={isZipping} onClick={() => handleDownload(getPhase(project.stages[project.stages.length-1]).upload_files)}>
                 <Icon type="download" />
                 {project.title}
               </Button>

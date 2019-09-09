@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Card, Input, Modal, Tag, Button, BackTop } from 'antd'
-import { fetchData, getPhase, getStage } from '../utility'
+import { fetchData, getPhase} from '../utility'
 import ImgCard from '../components/ImgCard'
 import queryString from 'query-string'
 import { useMediaQuery } from 'react-responsive'
@@ -85,7 +85,7 @@ export default function DoneList({ location, history }) {
           bodyStyle={{
             padding: 0
           }}
-        ><ImgCard file={getPhase(getStage(lightBox)).upload_files[0]} />
+        >{getPhase(lightBox.stages[lightBox.stages.length-1]).upload_files.map((file, index) => { return <ImgCard key={index} file={file} /> })}
           <div className='p:2'>
             {lightBox.tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>)}
           </div>
@@ -106,7 +106,7 @@ export default function DoneList({ location, history }) {
           gutterHeight={12}
         >
           {projectList.map((project, index) => {
-            const item = getPhase(getStage(project)).upload_files[0]
+            const item = getPhase(project.stages[project.stages.length-1]).upload_files[0]
             return <Card key={index} onClick={() => setLightBox(project)} cover={<ImgCard file={item} />}>
               {project.title}
             </Card>
