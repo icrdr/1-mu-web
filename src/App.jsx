@@ -21,6 +21,7 @@ import SampleList from './pages/SampleList'
 import AGroupAdd from './pages/AGroupAdd'
 import DoneList from './pages/DoneList'
 import Dashboard from './pages/Dashboard'
+import DraftList from './pages/DraftList'
 // layouts
 import Web from './layouts/Web'
 import Admin from './layouts/Admin'
@@ -68,6 +69,7 @@ function App({ location }) {
       <Web exact path="/dones" component={DoneList} />
       <Web exact path="/projects" component={ProjectList} />
       <Web exact path="/resources" component={FileList} />
+      <Web exact path="/drafts" component={DraftList} />
       <Web exact path="/dashboard" component={Dashboard} />
       <Web path="/projects/:project_id(\d+)" component={Project} />
       <Web path="/users/:user_id(\d+)" component={User} />

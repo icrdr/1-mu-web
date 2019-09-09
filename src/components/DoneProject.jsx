@@ -1,19 +1,23 @@
 import React, { useEffect, useState, useContext } from 'react'
+import moment from 'moment';
 import { Link, withRouter } from 'react-router-dom'
-import { Table, Tag, Input, Button, Icon, Divider } from 'antd'
-import { fetchData } from '../utility'
-import { globalContext } from '../App';
-import queryString from 'query-string'
+import { Table, Tag, Button, Input, Icon, DatePicker, Divider } from 'antd'
+import { fetchData, parseDate } from '../utility'
 import StatusTag from '../components/projectPage/StatusTag'
-
+import queryString from 'query-string'
+import { globalContext } from '../App';
+import StageShow from '../components/projectPage/StageShow'
+const { RangePicker } = DatePicker;
 
 function Main({ location, history }) {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
   const [tableSearch, setTableSearch] = useState({});
-  const allTableFilter = { status: [], creator_id: [] }
-  const allTableSearch = { title: [], tags: [] }
+  const [tableDate, setTableDate] = useState({});
+  const allTableFilter = { status: [], creator_id: [], progress: [] }
+  const allTableSearch = { title: '', tags: '' }
+  const allTableDate = { start_date: [], finish_date: [], deadline_date: [] }
   const [projectList, setProjectList] = useState([]);
   const [isloading, setLoading] = useState(false);
 
@@ -57,11 +61,44 @@ function Main({ location, history }) {
     )
   })
 
+  const getColumnDateProps = dataIndex => ({
+    filterDropdown: () => (
+      <div>
+        <div className='p:.8'>
+          <RangePicker onChange={dates => {
+            setTableDate(prevState => {
+              prevState[dataIndex] = dates
+              return { ...prevState }
+            })
+          }}
+            value={tableDate[dataIndex]}
+            style={{ width: 218, display: 'block' }} />
+        </div>
+        <Divider className='m-y:0' />
+        <div className='p-y:.6 p-x:.1'>
+          <Button
+            type="link"
+            onClick={() => handleDateRange(dataIndex, tableDate[dataIndex])}
+            size="small"
+          >
+            OK
+        </Button>
+          <Button className='fl:r' type="link" onClick={() => handleDateRange(dataIndex, [])} size="small">
+            Reset
+        </Button>
+        </div>
+      </div>
+    ),
+    filterIcon: () => (
+      <Icon type="calendar" theme="filled" style={{ color: tableDate[dataIndex] ? '#1890ff' : undefined }} />
+    )
+  })
+
   const columns = [
     {
       title: '企划名',
       dataIndex: 'title',
-      width: isSm ? 150 : 300,
+      width: isSm ? 150 : 200,
       sorter: true,
       sortOrder: tableSorter['title'],
       sortDirections: ['descend', 'ascend'],
@@ -80,6 +117,72 @@ function Main({ location, history }) {
       }
     },
     {
+      title: '开始时间',
+      dataIndex: 'start_date',
+      sorter: true,
+      sortOrder: tableSorter['start_date'],
+      sortDirections: ['descend', 'ascend'],
+      ...getColumnDateProps('start_date'),
+      width: 150,
+      render: (start_date) => {
+        if (start_date) {
+          return parseDate(start_date)
+        } else {
+          return '未开始'
+        }
+      },
+    },
+    {
+      title: '结束时间',
+      dataIndex: 'finish_date',
+      sorter: true,
+      sortOrder: tableSorter['finish_date'],
+      sortDirections: ['descend', 'ascend'],
+      ...getColumnDateProps('finish_date'),
+      width: 150,
+      render: (finish_date) => {
+        if (finish_date) {
+          return parseDate(finish_date)
+        } else {
+          return '未结束'
+        }
+      },
+    },
+    {
+      title: '死线日期',
+      dataIndex: 'deadline_date',
+      sorter: true,
+      sortOrder: tableSorter['deadline_date'],
+      sortDirections: ['descend', 'ascend'],
+      ...getColumnDateProps('deadline_date'),
+      width: 150,
+      render: (deadline_date, project) => {
+        if (deadline_date) {
+          return <span style={{ color: project.delay ? 'red' : '' }}>{parseDate(deadline_date)}</span>
+        } else {
+          return '未进行'
+        }
+      }
+    },
+    {
+      title: '企划进度',
+      dataIndex: 'progress',
+      sorter: true,
+      sortOrder: tableSorter['progress'],
+      sortDirections: ['descend', 'ascend'],
+      filters: [
+        { text: '未开始', value: 0 },
+        { text: '草图', value: 1 },
+        { text: '成图', value: 2 },
+        { text: '已完成', value: -1 },
+      ],
+      filteredValue: tableFilter['progress'] || [],
+      width: 150,
+      render: (progress, project) => {
+        return <StageShow project={project} />
+      }
+    },
+    {
       title: '阶段状态',
       dataIndex: 'status',
       sorter: true,
@@ -95,7 +198,7 @@ function Main({ location, history }) {
         { text: '暂停（状态）', value: 'pause' },
       ],
       filteredValue: tableFilter['status'] || [],
-      width: 200,
+      width: 150,
       render: (status, project) => <StatusTag project={project} />
     },
     {
@@ -104,7 +207,7 @@ function Main({ location, history }) {
       sorter: true,
       sortOrder: tableSorter['client_id'],
       sortDirections: ['descend', 'ascend'],
-      width: 250,
+      width: 150,
       render: (client_id, project) => {
         return <Link to={"/users/" + project.client.id}>{project.client.name}</Link>
       },
@@ -115,7 +218,7 @@ function Main({ location, history }) {
       sorter: true,
       sortOrder: tableSorter['creator_id'],
       sortDirections: ['descend', 'ascend'],
-      width: 250,
+      width: 150,
       render: (creator_id, project) => {
         return <Link to={"/users/" + project.creator.id}>{project.creator.name}</Link>
       },
@@ -166,6 +269,15 @@ function Main({ location, history }) {
     }
     setTableSearch(new_tableSearch)
 
+    const new_tableDate = {}
+    for (const filter in allTableDate) {
+      if (filter in values) {
+        new_tableDate[filter] = values[filter].split(',').map(date_str => { return moment.utc(date_str, 'YYYY-MM-DD HH:mm:ss').local() })
+        params[filter] = values[filter]
+      }
+    }
+    setTableDate(new_tableDate)
+
     fetchData(path, params).then(res => {
       setProjectList(res.data.projects)
       setPagination(prevState => { return { ...prevState, total: res.data.total } })
@@ -206,6 +318,24 @@ function Main({ location, history }) {
     history.push(`${location.pathname}?${params}`)
   }
 
+  const handleDateRange = (dataIndex, dates) => {
+    const values = queryString.parse(location.search)
+    const paramsObject = {
+      ...values,
+      page: 1
+    }
+    if (dates.length === 2) {
+      const dates_str = dates.map(date => {
+        return moment(date.format('YYYY-MM-DD')).utc().format('YYYY-MM-DD HH:mm:ss')
+      }).join(',')
+      paramsObject[dataIndex] = dates_str
+    } else {
+      delete paramsObject[dataIndex]
+    }
+    const params = queryString.stringify(paramsObject);
+    history.push(`${location.pathname}?${params}`)
+  }
+
   const handleSearch = (dataIndex, keyWord) => {
     const values = queryString.parse(location.search)
     const paramsObject = {
@@ -229,7 +359,7 @@ function Main({ location, history }) {
       loading={isloading}
       pagination={pagination}
       onChange={handleTableChange}
-      scroll={{ x: 1200 }}
+      scroll={{ x: 1400 }}
     />
   )
 }
