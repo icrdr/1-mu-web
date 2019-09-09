@@ -23,17 +23,15 @@ function ProjectFeedback({ history, match, feedback, onSuccess }) {
 
   function onSubmit(v) {
     setWating(true)
-    let path
+    const path = `/projects/${match.params.project_id}/feedback`
     const data = {
       ...v,
       feedback: v.feedback.toHTML(),
+      confirm: 1
     }
 
-    if (submit === 'modify') {
-      data.confirm = 1
-      path = `/projects/${match.params.project_id}/modify`
-    } else {
-      path = `/projects/${match.params.project_id}/finish`
+    if (submit === 'pass') {
+      data.is_pass = 1
     }
 
     updateData(path, data).then(res => {

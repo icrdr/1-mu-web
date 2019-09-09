@@ -3,14 +3,14 @@ import {getStage} from '../../utility'
 
 export default function StageShow({project}) {
   const status = project.status
-  const index = project.current_stage_index
+  const index = project.progress
+  const all = project.stages.length
   switch (status) {
     case 'await':
-      return <span>{`0/${project.stages.length}`}</span>
+      return <span>{`未开始`}</span>
     case 'finish':
-    case 'discard':
-      return <span>{`${(index + 1).toString()}/${project.stages.length}`}</span>
+      return <span>{`已完成`}</span>
     default:
-      return <span>{`${(index + 1).toString()}/${project.stages.length}：` + getStage(project).name}</span>
+      return <span>{`${index}/${all}：` + getStage(project).name}</span>
   }
 }

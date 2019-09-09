@@ -45,15 +45,15 @@ export default function ProjectPostByCsv({onSucceed}) {
             stages: [
               {
                 stage_name: '参考-草图',
-                days_need: 7
+                days_planned: 7
               },
               {
                 stage_name: '线稿-铺色',
-                days_need: 7
+                days_planned: 7
               },
               {
                 stage_name: '细化-特效',
-                days_need: 7
+                days_planned: 7
               }],
             tags: tags,
             confirm: 1

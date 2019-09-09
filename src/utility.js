@@ -22,8 +22,6 @@ export function html2excerpt(str) {
 }
 export function parseStatus(status) {
   switch (status) {
-    case 'draft':
-      return '草稿'
     case 'await':
       return '未开始'
     case 'finish':
@@ -34,14 +32,6 @@ export function parseStatus(status) {
       return '进行中'
     case 'modify':
       return '修改中'
-    case 'discard':
-      return '已废弃'
-    case 'pause':
-      return '暂停'
-    case 'abnormal':
-      return '异常？'
-    case 'delay':
-      return '逾期中'
     default:
       return '未知'
   }
@@ -51,7 +41,7 @@ export function getPhase(stage) {
 }
 
 export function getStage(project) {
-  return project.stages[project.current_stage_index]
+  return project.stages[project.progress-1]
 }
 
 export function parseDate(date_str) {

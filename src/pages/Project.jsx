@@ -24,16 +24,16 @@ export default function Project({ history, match, isAdmin, location }) {
   const [showUploadPlane, setUploadPlane] = useState(false);
   const [showFeedbackPlane, setFeedbackPlane] = useState(false);
   const [isAffixed, setAffixed] = useState(true);
-  const [stageIndex, setStageIndex] = useState(0)
+  const [progressIndex, setProgressIndex] = useState(0)
 
   useEffect(() => {
     if (projectData) {
       const values = queryString.parse(location.search)
 
-      if (values.stage_index) {
-        setStageIndex(parseInt(values.stage_index))
+      if (values.progress_index) {
+        setProgressIndex(parseInt(values.progress_index))
       } else {
-        setStageIndex(projectData.current_stage_index)
+        setProgressIndex(projectData.progress)
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -60,13 +60,10 @@ export default function Project({ history, match, isAdmin, location }) {
     switch (project.status) {
       case 'pending':
         return 'process'
-      case 'draft':
       case 'await':
         return 'wait'
       case 'finish':
         return 'finish'
-      case 'pause':
-        return 'error'
       default:
         const x_days = timeLeft(getStage(project))
         if (x_days >= 0) {
@@ -79,23 +76,21 @@ export default function Project({ history, match, isAdmin, location }) {
 
   const stepCurrent = (project) => {
     switch (project.status) {
-      case 'draft':
-      case 'await':
-        return project.current_stage_index
       case 'finish':
-        return project.current_stage_index + 2
+        return project.stages.length+1
       default:
-        return project.current_stage_index + 1
+        return project.progress
     }
   }
 
   const setDescription = (stage, index) => {
     const status = projectData.status
-    if (index < projectData.current_stage_index) {
+    const step = stepCurrent(projectData)-1
+    if (index < step) {
       return parseStatus('finish')
-    } else if (index > projectData.current_stage_index) {
+    } else if (index > step) {
       return parseStatus('await')
-    } else if (status === 'modify' || status === 'progress' || status === 'delay') {
+    } else if (status === 'modify' || status === 'progress') {
       return parseStatus(status) + ' ' + parseTimeLeft(timeLeft(stage))
     } else {
       return parseStatus(status)
@@ -105,7 +100,7 @@ export default function Project({ history, match, isAdmin, location }) {
     setWating(true)
     const path = `/projects/${match.params.project_id}/start`
     updateData(path).then(() => {
-      setStageIndex(projectData.current_stage_index)
+      setProgressIndex(projectData.progress)
       setUpdate(!update)
     }).finally(() => {
       setWating(false)
@@ -138,7 +133,7 @@ export default function Project({ history, match, isAdmin, location }) {
           >
             <ProjectUpload
               onSuccess={() => {
-                setStageIndex(projectData.current_stage_index)
+                setProgressIndex(projectData.progress)
                 setUploadPlane(false)
                 setUpdate(!update)
               }}
@@ -159,7 +154,7 @@ export default function Project({ history, match, isAdmin, location }) {
           >
             <ProjectFeedback
               onSuccess={() => {
-                setStageIndex(projectData.current_stage_index)
+                setProgressIndex(projectData.progress)
                 setFeedbackPlane(false)
                 setUpdate(!update)
               }}
@@ -173,10 +168,10 @@ export default function Project({ history, match, isAdmin, location }) {
   }
 
   const stageRender = () => {
-    if (stageIndex === -1) {
+    if (progressIndex === 0) {
       return <Design onSuccess={() => setUpdate(!update)} project={projectData} />
-    } else if (stageIndex === projectData.stages.length) {
-      const phase = getPhase(getStage(projectData))
+    } else if (progressIndex === -1) {
+      const phase = getPhase(projectData.stages[projectData.stages.length-1])
       return <>
         <h1>最终成品</h1>
         <div dangerouslySetInnerHTML={{ __html: phase.creator_upload }} />
@@ -188,7 +183,7 @@ export default function Project({ history, match, isAdmin, location }) {
         )}
       </>
     } else {
-      return <Stage stageData={projectData.stages[stageIndex]} />
+      return <Stage stageData={projectData.stages[progressIndex-1]} />
     }
   }
 
@@ -198,7 +193,7 @@ export default function Project({ history, match, isAdmin, location }) {
         className='m-b:2'
         title={projectData.title}
         subTitle={<>阶段<StageShow project={projectData} /></>}
-        tags={<StatusTag status={projectData.status} />}
+        tags={<StatusTag project={projectData} />}
         extra={<>
           {!isSm && <>
             <div className='d:i m-r:.5' style={{ lineHeight: '25px' }}>
@@ -220,15 +215,15 @@ export default function Project({ history, match, isAdmin, location }) {
       <Card className='m-b:2'>
         <Steps status={stepStatus(projectData)} current={stepCurrent(projectData)}>
           <Step title={
-            <Button type="link" onClick={() => setStageIndex(-1)}>设计初稿</Button>
+            <Button type="link" onClick={() => setProgressIndex(0)}>设计初稿</Button>
           } description={projectData.status === 'await' ? '未确认' : '确认'} />
           {projectData.stages.map((stage, index) =>
             <Step key={stage.id} title={
-              <Button type="link" onClick={() => setStageIndex(index)}>{stage.name}</Button>
+              <Button type="link" onClick={() => setProgressIndex(index+1)}>{stage.name}</Button>
             } description={setDescription(stage, index)} />
           )}
           <Step title={projectData.status === 'finish' ?
-            <Button type="link" onClick={() => setStageIndex(projectData.stages.length)}>完成</Button>
+            <Button type="link" onClick={() => setProgressIndex(-1)}>完成</Button>
             : '完成'
           } description='' />
         </Steps>

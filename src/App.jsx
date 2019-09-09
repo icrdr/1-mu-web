@@ -16,7 +16,6 @@ import GroupList from './pages/GroupList'
 import Group from './pages/Group'
 import User from './pages/User'
 import FileList from './pages/FileList'
-import AllList from './pages/AllList'
 import NotFound from './pages/NotFound'
 import SampleList from './pages/SampleList'
 import AGroupAdd from './pages/AGroupAdd'
@@ -68,7 +67,6 @@ function App({ location }) {
       <Web exact path="/samples" component={SampleList} />
       <Web exact path="/dones" component={DoneList} />
       <Web exact path="/projects" component={ProjectList} />
-      <Web exact path="/all" component={AllList} />
       <Web exact path="/resources" component={FileList} />
       <Web exact path="/dashboard" component={Dashboard} />
       <Web path="/projects/:project_id(\d+)" component={Project} />

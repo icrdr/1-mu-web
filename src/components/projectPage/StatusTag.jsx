@@ -2,10 +2,10 @@ import React from 'react'
 import {Tag} from 'antd'
 import {parseStatus} from '../../utility'
 
-export default function StatusTag({ status }) {
-  const str = parseStatus(status)
+export default function StatusTag({ project }) {
+  const str = parseStatus(project.status)
   let color = ''
-  switch (status) {
+  switch (project.status) {
     case 'await':
       color = 'orange'
       break
@@ -21,19 +21,24 @@ export default function StatusTag({ status }) {
     case 'modify':
       color = 'blue'
       break
-    case 'discard':
-      color = 'grey'
-      break
-    case 'pause':
-      color = 'cyan'
-      break
-    case 'delay':
-      color = 'red'
-      break
     default:
       color = '#ddd'
   }
+  let ex_str = ''
+  if (project.pause){
+    color = 'cyan'
+    if (project.delay){
+      ex_str = '（暂停、逾期）'
+    }else{
+      ex_str = '（暂停）'
+    }
+  }
+  else if (project.delay){
+    color = 'red'
+    ex_str = '（逾期）'
+  }
+
   return (
-    <Tag color={color} >{str}</Tag>
+    <Tag color={color} >{str}{ex_str||''}</Tag>
   )
 }

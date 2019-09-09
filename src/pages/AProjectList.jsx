@@ -1,18 +1,21 @@
 import React, { useEffect, useState, useContext } from 'react'
 import moment from 'moment';
 import { Link } from 'react-router-dom'
-import { Transfer, Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, InputNumber, Icon, Progress, message, DatePicker, Divider, Menu, Dropdown } from 'antd'
-import { parseStatus, getStage, fetchData, updateData, parseDate, timeLeft, parseTimeLeft } from '../utility'
+import { Transfer, Table, Card, Tag, Button, Popconfirm, Input, Select, Modal, TimePicker, Icon, Progress, message, DatePicker, Divider, Menu, Dropdown } from 'antd'
+import { fetchData, updateData, parseDate } from '../utility'
 import ProjectPostByCsv from '../components/ProjectPostByCsv'
+import StatusTag from '../components/projectPage/StatusTag'
 import queryString from 'query-string'
 import { globalContext } from '../App';
 import useInterval from '../hooks/useInterval'
+import StageShow from '../components/projectPage/StageShow'
+
 const { Option } = Select;
 const { TextArea } = Input;
 const { confirm } = Modal;
 const { RangePicker } = DatePicker;
 
-export default function ProjectList({ location, history, match }) {
+export default function ProjectList({ location, history }) {
   const { isSm } = useContext(globalContext);
 
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
@@ -28,7 +31,9 @@ export default function ProjectList({ location, history, match }) {
 
   const [update, setUpdate] = useState(false);
   const [showPostponeModel, setPostponeModel] = useState();
-  const [postponeDay, setPostponeDay] = useState(3);
+  const [ddlDay, setDdlDay] = useState(moment(new Date()));
+  const [ddlTime, setDdlTime] = useState(moment('00:00:00', 'HH:mm:ss'));
+  
   const [showRemarkModel, setRemarkModel] = useState();
   const [showTableModel, setTableModel] = useState(false);
   const [remark, setRemark] = useState('');
@@ -40,9 +45,9 @@ export default function ProjectList({ location, history, match }) {
   const [taskData, setTaskData] = useState()
 
   const [transferTargetKeys, setTransferTargetKeys] = useState([])
-  const allTableFilter = { status: [], client_id: [], current_stage_index: [] }
+  const allTableFilter = { status: [], client_id: [], progress: [] }
   const allTableSearch = { title: '', tags: '' }
-  const allTableDate = { start_date: [], finish_date: [] }
+  const allTableDate = { start_date: [], finish_date: [], deadline_date: [] }
 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: () => (
@@ -110,7 +115,7 @@ export default function ProjectList({ location, history, match }) {
         </div>
       </div>
     ),
-    filterIcon: filtered => (
+    filterIcon: () => (
       <Icon type="calendar" theme="filled" style={{ color: tableDate[dataIndex] ? '#1890ff' : undefined }} />
     )
   })
@@ -180,20 +185,39 @@ export default function ProjectList({ location, history, match }) {
       },
     },
     {
-      title: '目前阶段',
-      dataIndex: 'current_stage_index',
+      title: '死线日期',
+      dataIndex: 'deadline_date',
       sorter: true,
-      sortOrder: tableSorter['current_stage_index'],
+      sortOrder: tableSorter['deadline_date'],
+      sortDirections: ['descend', 'ascend'],
+      ...getColumnDateProps('deadline_date'),
+      width: 150,
+      render: (deadline_date, project) => {
+        if (deadline_date) {
+          return <>
+            <span style={{ color: project.delay ? 'red' : '' }}>{parseDate(deadline_date)}</span>
+            <Button type="link" size='small' onClick={() => setPostponeModel(project)}>延期</Button>
+          </>
+        } else {
+          return '未进行'
+        }
+      }
+    },
+    {
+      title: '目前阶段',
+      dataIndex: 'progress',
+      sorter: true,
+      sortOrder: tableSorter['progress'],
       sortDirections: ['descend', 'ascend'],
       filters: [
-        { text: '参考-草图', value: 0 },
-        { text: '线稿-铺色', value: 1 },
-        { text: '细化-特效', value: 2 },
+        { text: '未开始', value: 0 },
+        { text: '草图', value: 1 },
+        { text: '成图', value: 2 },
+        { text: '已完成', value: -1 },
       ],
-      filteredValue: tableFilter['current_stage_index'] || [],
+      filteredValue: tableFilter['progress'] || [],
       width: 150,
-      render: (index, project) => {
-        const status = project.status
+      render: (progress, project) => {
         const goBack = <Popconfirm
           title="确定如此操作么？"
           onConfirm={() => operateProject(project.id, 'back')}
@@ -202,90 +226,28 @@ export default function ProjectList({ location, history, match }) {
         >
           <Button type="link" size='small'>回溯</Button>
         </Popconfirm>
-        switch (status) {
-          case 'await':
-            return <span>{`0/${project.stages.length}`}</span>
-          case 'finish':
-          case 'discard':
-            return <span>{`${(index + 1).toString()}/${project.stages.length}`}{goBack}</span>
-          default:
-            return <span>{`${(index + 1).toString()}/${project.stages.length}：` + getStage(project).name}{goBack}</span>
-        }
+        return <><StageShow project={project} />{progress!==0 && goBack}</>
       }
     },
     {
-      title: '死线',
-      key: 'ddl',
-      width: 120,
-      render: (project) => {
-        const status = project.status
-        switch (status) {
-          case 'delay':
-          case 'progress':
-          case 'modify':
-            const time_left = timeLeft(getStage(project))
-            return <span style={{ color: time_left >= 0 ? '' : 'red' }}>{parseTimeLeft(time_left)}
-              <Button type="link" size='small' onClick={() => setPostponeModel(project)}>延期</Button>
-            </span>
-          default:
-            return ''
-        }
-      }
-    },
-    {
-      title: '状态',
+      title: '进度',
       dataIndex: 'status',
       sorter: true,
       sortOrder: tableSorter['status'],
       sortDirections: ['descend', 'ascend'],
       filters: [
-        { text: '草稿', value: 'draft' },
         { text: '未开始', value: 'await' },
         { text: '进行中', value: 'progress' },
         { text: '修改中', value: 'modify' },
-        { text: '逾期中', value: 'delay' },
         { text: '待确认', value: 'pending' },
         { text: '已完成', value: 'finish' },
-        { text: '暂停', value: 'pause' },
-        { text: '废弃', value: 'discard' },
+        { text: '逾期（状态）', value: 'delay' },
+        { text: '暂停（状态）', value: 'pause' },
       ],
       filteredValue: tableFilter['status'] || [],
       width: 100,
-      render: (status) => {
-        const str = parseStatus(status)
-        let color = ''
-        switch (status) {
-          case 'await':
-            color = 'orange'
-            break
-          case 'finish':
-            color = 'green'
-            break
-          case 'pending':
-            color = 'cyan'
-            break
-          case 'progress':
-            color = 'blue'
-            break
-          case 'modify':
-            color = 'blue'
-            break
-          case 'discard':
-            color = 'grey'
-            break
-          case 'abnormal':
-            color = 'purple'
-            break
-          case 'delay':
-            color = 'red'
-            break
-          case 'pause':
-            color = 'cyan'
-            break
-          default:
-            color = '#ddd'
-        }
-        return <Tag color={color} >{str}</Tag>
+      render: (status, project) => {
+        return <StatusTag project={project}></StatusTag>
       }
     },
     {
@@ -361,16 +323,12 @@ export default function ProjectList({ location, history, match }) {
   ];
   const menu = project => (
     <Menu>
-      {project.status === 'pause' ? (
+      {project.pause ? (
         <Menu.Item onClick={() => resumeConfirm(project.id)}>继续</Menu.Item>
       ) : (
           <Menu.Item onClick={() => pauseConfirm(project.id)}>暂停</Menu.Item>
         )}
-      {project.status === 'discard' ? (
-        <Menu.Item onClick={() => resumeConfirm(project.id)}>撤销删除</Menu.Item>
-      ) : (
-          <Menu.Item onClick={() => discardConfirm(project.id)}>删除</Menu.Item>
-        )}
+      <Menu.Item onClick={() => discardConfirm(project.id)}>删除</Menu.Item>
     </Menu>
   )
 
@@ -549,15 +507,15 @@ export default function ProjectList({ location, history, match }) {
 
     if (Object.keys(sorter).length !== 0) {
       const order = sorter.order === "descend" ? 'desc' : 'asc'
-      if(paramsObject.order !== order){
+      if (paramsObject.order !== order) {
         setSelectedRowKeys([])
         paramsObject.order = order
       }
-      if(paramsObject.order_by !== sorter.field){
+      if (paramsObject.order_by !== sorter.field) {
         setSelectedRowKeys([])
         paramsObject.order_by = sorter.field
       }
-      
+
     } else {
       delete paramsObject.order
       delete paramsObject.order_by
@@ -565,7 +523,7 @@ export default function ProjectList({ location, history, match }) {
 
     for (const filter in filters) {
       if (filters[filter].length !== 0) {
-        if(paramsObject[filter] !== filters[filter].join(',')){
+        if (paramsObject[filter] !== filters[filter].join(',')) {
           setSelectedRowKeys([])
           paramsObject[filter] = filters[filter].join(',')
         }
@@ -614,15 +572,19 @@ export default function ProjectList({ location, history, match }) {
   }
 
   const handlePostpone = () => {
-    const path = `/projects/${showPostponeModel.id}/postpone`
-    const data = {
-      days: postponeDay
-    }
+    const path = `/projects/${showPostponeModel.id}/change_ddl`
 
+    const ddl = ddlTime.clone()
+    ddl.year(ddlDay.year()).month(ddlDay.month()).date(ddlDay.date())
+
+    const data={
+      'ddl':ddl.utc().format('YYYY-MM-DD HH:mm:ss')
+    }
+    
     updateData(path, data).then(() => {
       setUpdate(!update)
+    }).finally(()=>{
       setPostponeModel()
-      setPostponeDay(3)
     })
   }
 
@@ -686,13 +648,13 @@ export default function ProjectList({ location, history, match }) {
       params.order = 'desc'
       params.order_by = 'status'
     }
-    
+
     fetchData(path, params).then(res => {
       setTaskId(res.data.task_id)
       checkTask(res.data.task_id)
     })
   }
-  const checkTask =(id)=>{
+  const checkTask = (id) => {
     const path = '/tasks/' + id
     fetchData(path).then(res => {
       setTaskData(res.data)
@@ -820,7 +782,9 @@ export default function ProjectList({ location, history, match }) {
         onOk={handlePostpone}
         onCancel={() => setPostponeModel()}
       >
-        延期时间  <InputNumber value={postponeDay} onChange={v => setPostponeDay(v)} />
+        <span className='m-r:.5'>死线日期</span>
+        <DatePicker className='m-r:.5' value={ddlDay} onChange={v => setDdlDay(v)} style={{width:'128px'}}/>
+        <TimePicker value={ddlTime} onChange={v => setDdlTime(v)} />
       </Modal>
       <Card bodyStyle={{ padding: isSm ? '24px 8px' : '' }}>
         <div className='m-b:1'>
@@ -834,7 +798,7 @@ export default function ProjectList({ location, history, match }) {
             <Button className='m-r:.5' onClick={() => setSelectedRowKeys([])} disabled={selectedRowKeys.length === 0}>取消所有</Button>
             <Button className='m-r:.5' type="primary" onClick={handleDownload} loading={isZipping === 1} disabled={selectedRowKeys.length === 0 || (isZipping !== 1 && isZipping)}>批量下载源文件</Button>
             <Button className='m-r:.5' type="primary" onClick={handleDownload2} loading={isZipping === 2} disabled={selectedRowKeys.length === 0 || (isZipping !== 2 && isZipping)}>批量下载预览文件</Button>
-            <Button className='m-r:.5' type="primary" onClick={()=>setTableModel(true)} loading={isZipping === 3} disabled={selectedRowKeys.length === 0 || (isZipping !== 3 && isZipping)}>导出为表格</Button>
+            <Button className='m-r:.5' type="primary" onClick={() => setTableModel(true)} loading={isZipping === 3} disabled={selectedRowKeys.length === 0 || (isZipping !== 3 && isZipping)}>导出为表格</Button>
           </div>
         }
         {taskId && <div className='m-b:1'>
