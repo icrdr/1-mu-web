@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
 import { withRouter } from 'react-router-dom'
-import { Card, Typography, Button, Row, Col, Alert, Modal } from 'antd';
+import { Card, Button, Row, Col, Alert, Modal, Switch } from 'antd';
 import useForm from '../../hooks/useForm'
 import BraftEditor from 'braft-editor'
 import { updateData } from '../../utility'
-const { Paragraph } = Typography;
 const { confirm } = Modal;
 function ProjectFeedback({ history, match, feedback, onSuccess }) {
   let submit = ''
   const [isWating, setWating] = useState(false);
+  const [isPause, setPause] = useState(false);
 
   const validation = {
     'feedback': [
@@ -28,6 +28,10 @@ function ProjectFeedback({ history, match, feedback, onSuccess }) {
       ...v,
       feedback: v.feedback.toHTML(),
       confirm: 1
+    }
+
+    if (isPause) {
+      data.is_pause = 1
     }
 
     if (submit === 'pass') {
@@ -54,7 +58,7 @@ function ProjectFeedback({ history, match, feedback, onSuccess }) {
       },
     });
   }
-  
+
   function showModifyConfirm() {
     confirm({
       title: '确认',
@@ -72,7 +76,10 @@ function ProjectFeedback({ history, match, feedback, onSuccess }) {
   return (
     <Row type="flex" justify="space-around" align="middle">
       <Col xs={24} md={20} lg={16}>
-        <Paragraph>*修改意见</Paragraph>
+        <div className='m-b:1'>
+          <span className='m-r:.5'>是否公开</span>
+          <Switch checked={isPause} onChange={(checked) => setPause(checked)} />
+        </div>
         <Card size='small'
           cover={
             <BraftEditor contentStyle={{ height: '200px' }}

@@ -23,7 +23,7 @@ export default function DoneList({ location, history }) {
     const params = {
       order: 'desc',
       order_by: 'finish_date',
-      pre_page: 10,
+      pre_page: 12,
       page: page,
       status: 'finish',
       tags: '腾讯医典词条',

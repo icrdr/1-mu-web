@@ -23,7 +23,7 @@ export default function SampleList({ location, history }) {
     const path = '/projects'
     const params = {
       order: 'desc',
-      pre_page: 7,
+      pre_page: 12,
       page: page,
       status: 'finish',
       tags: '样图'

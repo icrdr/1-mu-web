@@ -35,7 +35,7 @@ export default function FileList({ location, history }) {
     const path = '/files'
     const params = {
       order: 'desc',
-      pre_page: 10,
+      pre_page: 12,
       page: page,
       public: 1
     }

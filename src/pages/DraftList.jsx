@@ -24,9 +24,9 @@ export default function DoneList({ location, history }) {
       order: 'asc',
       pre_page: 12,
       page: page,
+      creator_id: 1,
       progress: 2,
       status: 'progress, pause',
-      tags: '腾讯医典词条',
     }
 
     const values = queryString.parse(location.search)
@@ -99,7 +99,7 @@ export default function DoneList({ location, history }) {
         </div>
         <StackGrid
           className='m-b:1'
-          columnWidth={isSm ? '100%' : '25%'}
+          columnWidth={isSm ? '100%' : '33.33%'}
           monitorImagesLoaded={true}
           gridRef={grid => setStackGrid(grid)}
           duration={180}

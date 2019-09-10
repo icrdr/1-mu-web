@@ -1,11 +1,10 @@
 import React, { useState } from 'react'
 import { withRouter } from 'react-router-dom'
-import { Card, Typography, Button, Row, Col, Upload, Icon, Alert, message, Modal } from 'antd';
+import { Card, Button, Row, Col, Upload, Icon, Alert, message, Modal } from 'antd';
 import useForm from '../../hooks/useForm'
 import ImgCard from '../ImgCard'
 import { updateData } from '../../utility'
 import BraftEditor from 'braft-editor'
-const { Paragraph } = Typography;
 const { confirm } = Modal;
 const { Dragger } = Upload;
 const API_URL = window.API_URL
@@ -105,7 +104,6 @@ function ProjectUpload({ history, match, upload, file, onSuccess }) {
     <Row type="flex" justify="space-around" align="middle" style={{ height: 'auto' }}>
       <Col xs={24} md={20} lg={16}>
         <div className='m-b:2'>
-          <Paragraph>*文件</Paragraph>
           <Dragger className='m-b:1' {...uploadArgs}>
             <Icon type="inbox" />
             添加文件
@@ -114,7 +112,6 @@ function ProjectUpload({ history, match, upload, file, onSuccess }) {
         <Row gutter={12} className='m-b:2' style={{ height: '200px', overflowY: 'scroll' }}>
           {imgRender}
         </Row>
-        <Paragraph>*说明</Paragraph>
         <Card className='m-b:2' size='small'
           cover={
             <BraftEditor contentStyle={{ height: '100px' }}
