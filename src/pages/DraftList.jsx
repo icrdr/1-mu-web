@@ -27,6 +27,7 @@ export default function DoneList({ location, history }) {
       creator_id: 1,
       progress: 2,
       status: 'progress, pause',
+      tags: '腾讯医典词条',
     }
 
     const values = queryString.parse(location.search)
