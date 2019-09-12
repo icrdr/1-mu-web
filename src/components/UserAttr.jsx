@@ -5,7 +5,7 @@ import { Chart, Geom, Axis, Tooltip, Coord } from 'bizcharts';
 
 export default function UserAttr({ userID, ...rest }) {
   const [attr, setAttr] = useState();
-  const [dateRangeFilter, setDateRangeFilter] = useState(getMonthRange(new Date()).join(','));
+  const [dateRangeFilter, setDateRangeFilter] = useState(getQuarterRange(new Date()).join(','));
   const [dateFilter, setDatefilter] = useState('quarter');
 
   useEffect(() => {

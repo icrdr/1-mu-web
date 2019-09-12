@@ -129,7 +129,7 @@ export default function UserList({ location, history }) {
     },
     {
       key: 'overtime_sum',
-      title: '累计提交超时',
+      title: '累计提交超时（小时）',
     },
   ]
   const columns = [
