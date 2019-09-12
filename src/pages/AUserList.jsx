@@ -25,7 +25,7 @@ export default function UserList({ location, history }) {
       width: isSm ? 80: 120,
       fixed: 'left',
       render: (name, user) => {
-        return <Link to={"/users/" + user.id}>{name}</Link>
+        return <Link to={"/admin/users/" + user.id}>{name}</Link>
       }
     },
     {

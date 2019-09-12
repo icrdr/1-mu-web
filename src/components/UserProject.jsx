@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useContext } from 'react'
 import moment from 'moment';
 import { Link, withRouter } from 'react-router-dom'
-import { Table, Tag, Button, Input, Icon, DatePicker, Divider } from 'antd'
+import { Table, Tag, Button, Input, Icon, DatePicker, Divider, Card } from 'antd'
 import { fetchData, parseDate } from '../utility'
-import StatusTag from '../components/projectPage/StatusTag'
+import StatusTag from './projectPage/StatusTag'
 import queryString from 'query-string'
 import { globalContext } from '../App';
-import StageShow from '../components/projectPage/StageShow'
+import StageShow from './projectPage/StageShow'
 const { RangePicker } = DatePicker;
 
-function Main({ location, history }) {
+function UserProject({ location, history, userID, staticContext, ...rest }) {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 10 });
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
@@ -21,7 +21,7 @@ function Main({ location, history }) {
   const [projectList, setProjectList] = useState([]);
   const [isloading, setLoading] = useState(false);
 
-  const { isSm, meData } = useContext(globalContext);
+  const {isSm} = useContext(globalContext);
 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: () => (
@@ -98,7 +98,7 @@ function Main({ location, history }) {
     {
       title: '企划名',
       dataIndex: 'title',
-      width: isSm ? 150 : 200,
+      width: 150,
       sorter: true,
       sortOrder: tableSorter['title'],
       sortDirections: ['descend', 'ascend'],
@@ -229,7 +229,7 @@ function Main({ location, history }) {
     const path = '/projects'
     const params = {
       pre_page: pagination.pageSize,
-      participant_id: meData.id
+      participant_id: userID
     }
 
     const values = queryString.parse(location.search)
@@ -352,6 +352,7 @@ function Main({ location, history }) {
   }
 
   return (
+    <Card {...rest} bodyStyle={{ padding: isSm ? '24px 8px' : '' }}>
     <Table
       columns={columns}
       rowKey={project => project.id}
@@ -359,9 +360,10 @@ function Main({ location, history }) {
       loading={isloading}
       pagination={pagination}
       onChange={handleTableChange}
-      scroll={{ x: 1400 }}
+      scroll={{ x: 1300 }}
     />
+    </Card>
   )
 }
 
-export default withRouter(Main)
+export default withRouter(UserProject)

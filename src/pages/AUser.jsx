@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Card, Row, Col, Descriptions, Statistic} from 'antd'
+import { Card, Row, Col } from 'antd'
 import Loading from '../components/Loading'
-import {fetchData} from '../utility'
+import { fetchData } from '../utility'
 import Avatarx from '../components/Avatarx'
+import UserData from '../components/UserData'
+import UserAttr from '../components/UserAttr'
+import UserProject from '../components/UserProject'
 
 export default function User({ match }) {
   const [userData, setUserData] = useState();
@@ -22,25 +25,21 @@ export default function User({ match }) {
   }
 
   return (
-    <Card className='p:2' title={'用户：' + userData.name}>
-      <div className='t-a:c'><Avatarx size={128}  url={userData.avatar_url} name={userData.name}/></div>
-      <div className='m-t:4 t-a:c' style={{ fontSize: '25px' }}>{userData.name}</div>
-      <div className='m-t:.8 t-a:c'>{userData.title}</div>
-      <Row className='m-t:4 t-a:c' gutter={16}>
-        <Col span={12} >
-          <Statistic title="粉丝" value={userData.followed_count} />
+    <>
+      <Row gutter={16}>
+        <Col xs={24} lg={16}>
+          <UserData className='m-b:1' title="数据" bordered={false} userID={userData.id} />
+          <UserProject className='m-b:1' title="参与的企划" bordered={false} userID={userData.id} />
         </Col>
-        <Col span={12} >
-          <Statistic title="追随者" value={userData.follower_count}/>
+        <Col xs={24} lg={8}>
+          <Card className='m-b:1' bordered={false} title='基本信息'>
+            <div className='t-a:c'><Avatarx size={128} url={userData.avatar_url} name={userData.name} /></div>
+            <div className='m-t:4 t-a:c' style={{ fontSize: '25px' }}>{userData.name}</div>
+            <div className='m-t:.8 t-a:c'>{userData.title}</div>
+          </Card>
+          <UserAttr title="指数" bordered={false} userID={userData.id} />
         </Col>
       </Row>
-      <Descriptions className="m-t:5" layout="vertical" bordered>
-        <Descriptions.Item label="ID">{userData.id}</Descriptions.Item>
-        <Descriptions.Item label="邮箱">{userData.email}</Descriptions.Item>
-        <Descriptions.Item label="手机">{userData.phone}</Descriptions.Item>
-        <Descriptions.Item label="性别">{userData.sex}</Descriptions.Item>
-        <Descriptions.Item label="微信昵称">{userData.wx_user.nickname}</Descriptions.Item>
-      </Descriptions>
-    </Card>
+    </>
   )
 }

@@ -79,6 +79,12 @@ export function getWeekRange(current) {
   const endDate = moment(endDateStr).utc().format('YYYY-MM-DD HH:mm:ss')
   return [startDate, endDate]
 }
+export function getYearRange(current) {
+  const year = current.getFullYear()
+  const startDate = moment(new Date(year, 0, 1)).utc().format('YYYY-MM-DD HH:mm:ss')
+  const endDate = moment(new Date(year, 11, 31)).utc().format('YYYY-MM-DD HH:mm:ss')
+  return [startDate, endDate]
+}
 
 export function parseTimeLeft(timeleft) {
   const x_days = Math.floor(timeleft)

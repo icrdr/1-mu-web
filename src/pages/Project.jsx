@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { Link } from 'react-router-dom'
-import { Card, Steps, Button, Icon, PageHeader, Divider, Affix, Popconfirm, Drawer } from 'antd'
+import { Card, Steps, Button, Icon, PageHeader, Divider, Affix, Popconfirm, Drawer, List } from 'antd'
 import ProjectUpload from '../components/projectPage/ProjectUpload'
 import ProjectFeedback from '../components/projectPage/ProjectFeedback'
 import Loading from '../components/Loading'
 import ImgCard from '../components/ImgCard'
 import Stage from '../components/projectPage/Stage'
 import Design from '../components/projectPage/Design'
-import { parseStatus, getPhase, getStage, timeLeft, parseTimeLeft, fetchData, updateData } from '../utility'
+import { parseStatus, getPhase, getStage, timeLeft, parseTimeLeft, fetchData, updateData, toLocalDate } from '../utility'
 import { globalContext } from '../App';
 import StatusTag from '../components/projectPage/StatusTag'
 import StageShow from '../components/projectPage/StageShow'
 import queryString from 'query-string'
+import Avatarx from '../components/Avatarx'
+import moment from 'moment';
 
 const { Step } = Steps;
 
@@ -133,7 +135,7 @@ export default function Project({ match, isAdmin, location }) {
       case 'progress':
       case 'modify':
         return projectData.creator.id === meData.id || isAdmin ? <>
-          <Button className={isAffixed ? 'shadow' : ''} size='large' type="primary" disabled={showUploadPlane} onClick={() => setUploadPlane(true)} block>阶段成品提交</Button>
+          <Button className={isAffixed ? 'shadow' : ''} size='large' type="primary" disabled={showUploadPlane || projectData.pause} onClick={() => setUploadPlane(true)} block>阶段成品提交</Button>
           <Drawer
             title="阶段成品提交"
             placement='bottom'
@@ -154,7 +156,7 @@ export default function Project({ match, isAdmin, location }) {
         </> : null
       case 'pending':
         return projectData.client.id === meData.id || isAdmin ? <>
-          <Button className={isAffixed ? 'shadow' : ''} size='large' type="primary" disabled={showFeedbackPlane} onClick={() => setFeedbackPlane(true)} block>反馈建议</Button>
+          <Button className={isAffixed ? 'shadow' : ''} size='large' type="primary" disabled={showFeedbackPlane || projectData.pause} onClick={() => setFeedbackPlane(true)} block>反馈建议</Button>
           <Drawer
             title="反馈建议"
             placement='bottom'
@@ -240,6 +242,63 @@ export default function Project({ match, isAdmin, location }) {
       </Card>
       <Card className='m-b:2'>
         {stageRender()}
+      </Card>
+      <Card title={'操作记录'} className='m-b:2' bodyStyle={{ padding: '0px' }}>
+        <List
+          itemLayout="horizontal"
+          dataSource={projectData.logs}
+          renderItem={log => {
+            let title
+            switch (log.log_type) {
+              case 'upload':
+                title = `${log.operator.name} 提交了阶段内容`
+                break
+              case 'modify':
+                title = `${log.operator.name} 提出了修改建议`
+                break
+              case 'pass':
+                title = `${log.operator.name} 审核通过了阶段`
+                break
+              case 'create':
+                title = `${log.operator.name} 创建了该企划`
+                break
+              case 'start':
+                title = `${log.operator.name} 开启了该企划`
+                break
+              case 'discard':
+                title = `${log.operator.name} 删除了该企划`
+                break
+              case 'recover':
+                title = `${log.operator.name} 撤销删除了该企划`
+                break
+              case 'pause':
+                title = `${log.operator.name} 暂停了该企划`
+                break
+              case 'resume':
+                title = `${log.operator.name} 取消暂停了该企划`
+                break
+              case 'stage':
+                title = `${log.operator.name} 修改了阶段`
+                break
+              case 'design':
+                title = `${log.operator.name} 编辑了初始设计思路`
+                break
+              case 'deadline':
+                title = `${log.operator.name} 修改了死线日期`
+                break
+              default:
+                break
+            }
+            return (
+              <List.Item key={log.id} style={{ padding: '12px 24px'}}>
+                <List.Item.Meta
+                  avatar={<Avatarx url={log.operator.avatar_url} name={log.operator.name} />}
+                  title={title}
+                  description={moment(toLocalDate(log.log_date)).fromNow()}
+                />
+              </List.Item>
+            )
+          }} />
       </Card>
       <Affix offsetBottom={0} onChange={affixed => setAffixed(affixed)}>
         {operation()}

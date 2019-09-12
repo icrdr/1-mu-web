@@ -226,7 +226,7 @@ export default function ProjectList({ location, history }) {
         >
           <Button type="link" size='small'>回溯</Button>
         </Popconfirm>
-        return <><StageShow project={project} />{progress!==0 && goBack}</>
+        return <><StageShow project={project} />{progress!==0 && !project.pause && goBack}</>
       }
     },
     {
