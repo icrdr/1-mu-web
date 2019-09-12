@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Card, Row, Col, Radio, Statistic, DatePicker } from 'antd'
 import moment from 'moment';
-import { fetchData, getMonthRange, getWeekRange, getYearRange } from '../utility'
+import { fetchData, getMonthRange, getWeekRange, getYearRange, getQuarterRange } from '../utility'
 const { RangePicker } = DatePicker;
 
 export default function UserData({ userID, ...rest }) {
@@ -42,6 +42,9 @@ export default function UserData({ userID, ...rest }) {
           case 'year':
             setDateRangeFilter(getYearRange(new Date()).join(','))
             break;
+          case 'quarter':
+            setDateRangeFilter(getQuarterRange(new Date()).join(','))
+            break;
           case 'month':
             setDateRangeFilter(getMonthRange(new Date()).join(','))
             break;
@@ -54,6 +57,7 @@ export default function UserData({ userID, ...rest }) {
       }}>
         <Radio value="all">累计</Radio>
         <Radio value="year">本年</Radio>
+        <Radio value="quarter">本季</Radio>
         <Radio value="month">本月</Radio>
         <Radio value="week">本周</Radio>
       </Radio.Group>
@@ -67,9 +71,9 @@ export default function UserData({ userID, ...rest }) {
     <Card {...rest} extra={extra}>{data &&
       <Row gutter={16}>
         <Col xs={12} md={6} className='m-b:1'><Statistic title="所有参与的阶段数" value={data.stages_all} /></Col>
-        <Col xs={12} md={6} className='m-b:1'><Statistic title="一次通过的阶段数" value={data.stages_one_pass + data.stages_one_pass_d} /></Col>
-        <Col xs={12} md={6} className='m-b:1'><Statistic title="修改通过的阶段数" value={data.stages_mod_pass + data.stages_mod_pass_d} /></Col>
-        <Col xs={12} md={6} className='m-b:1'><Statistic title="尚未通过的阶段数" value={data.stages_no_pass + data.stages_no_pass_d} /></Col>
+        <Col xs={12} md={6} className='m-b:1'><Statistic title="一次通过的阶段数" value={data.stages_one_pass_c + data.stages_one_pass_d} /></Col>
+        <Col xs={12} md={6} className='m-b:1'><Statistic title="修改通过的阶段数" value={data.stages_mod_pass_c + data.stages_mod_pass_d} /></Col>
+        <Col xs={12} md={6} className='m-b:1'><Statistic title="尚未通过的阶段数" value={data.stages_no_pass_c + data.stages_no_pass_d} /></Col>
         <Col xs={12} md={6} className='m-b:1'><Statistic title="所有发起的提交数" value={data.phases_all} /></Col>
         <Col xs={12} md={6} className='m-b:1'><Statistic title="审核通过的提交数" value={data.phases_pass} /></Col>
         <Col xs={12} md={6} className='m-b:1'><Statistic title="审核不通过的提交数" value={data.phases_modify} /></Col>
