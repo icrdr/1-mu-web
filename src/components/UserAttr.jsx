@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { Card, Row, Col, Statistic } from 'antd'
-import { fetchData } from '../utility'
+import { fetchData, getMonthRange } from '../utility'
 import { Chart, Geom, Axis, Tooltip, Coord } from 'bizcharts';
 
 export default function UserAttr({ userID, ...rest }) {
   const [attr, setAttr] = useState();
   useEffect(() => {
     const path = `/dashboard/attr/${userID}`
-    fetchData(path).then(res => {
+    const params = {
+      date_range: getMonthRange(new Date()).join(','),
+    }
+    fetchData(path, params).then(res => {
       setAttr(res.data)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
