@@ -1,20 +1,27 @@
 import React, { useEffect, useState } from 'react'
-import { Card, Row, Col, Statistic } from 'antd'
-import { fetchData, getMonthRange } from '../utility'
+import { Card, Row, Col, Radio, Statistic } from 'antd'
+import { fetchData, getMonthRange, getYearRange, getQuarterRange} from '../utility'
 import { Chart, Geom, Axis, Tooltip, Coord } from 'bizcharts';
 
 export default function UserAttr({ userID, ...rest }) {
   const [attr, setAttr] = useState();
+  const [dateRangeFilter, setDateRangeFilter] = useState(getMonthRange(new Date()).join(','));
+  const [dateFilter, setDatefilter] = useState('quarter');
+
   useEffect(() => {
     const path = `/dashboard/attr/${userID}`
-    const params = {
-      date_range: getMonthRange(new Date()).join(','),
+    let params = {}
+    if (dateRangeFilter) {
+      params = {
+        date_range: dateRangeFilter,
+      }
     }
     fetchData(path, params).then(res => {
       setAttr(res.data)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dateRangeFilter]);
+  
   const attrData = [
     {
       item: '手速',
@@ -38,8 +45,33 @@ export default function UserAttr({ userID, ...rest }) {
     }
   ]
 
+  const extra = (
+    <>
+      <Radio.Group value={dateFilter} onChange={e => {
+        setDatefilter(e.target.value)
+        switch (e.target.value) {
+          case 'year':
+            setDateRangeFilter(getYearRange(new Date()).join(','))
+            break;
+          case 'quarter':
+            setDateRangeFilter(getQuarterRange(new Date()).join(','))
+            break;
+          case 'month':
+            setDateRangeFilter(getMonthRange(new Date()).join(','))
+            break;
+          default:
+            break;
+        }
+      }}>
+        <Radio value="year">本年</Radio>
+        <Radio value="quarter">本季</Radio>
+        <Radio value="month">本月</Radio>
+      </Radio.Group>
+    </>
+  )
+
   return (
-    <Card {...rest} >
+    <Card {...rest} extra={extra}>
       {attr && <>
         <Chart className='m-b:1' height={300} data={attrData} padding={[30, 'auto', 'auto', 'auto']} scale={{ score: { min: 0, max: 5 } }} forceFit>
           <Coord type="polar" radius={1} />

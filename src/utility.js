@@ -61,6 +61,26 @@ export function timeLeft(stage) {
   return difference / (1000 * 60 * 60 * 24)
 }
 
+export function getQuarterRange(current) {
+  const month = current.getMonth()
+  const year = current.getFullYear()
+  let startDate,endDate
+  if (month<3){
+    startDate = moment(new Date(year, 0, 1)).utc().format('YYYY-MM-DD HH:mm:ss')
+    endDate = moment(new Date(year, 2, 31)).utc().format('YYYY-MM-DD HH:mm:ss')
+  }else if (month<6){
+    startDate = moment(new Date(year, 3, 1)).utc().format('YYYY-MM-DD HH:mm:ss')
+    endDate = moment(new Date(year, 5, 30)).utc().format('YYYY-MM-DD HH:mm:ss')
+  }else if (month<9){
+    startDate = moment(new Date(year, 6, 1)).utc().format('YYYY-MM-DD HH:mm:ss')
+    endDate = moment(new Date(year, 8, 30)).utc().format('YYYY-MM-DD HH:mm:ss')
+  }else{
+    startDate = moment(new Date(year, 9, 1)).utc().format('YYYY-MM-DD HH:mm:ss')
+    endDate = moment(new Date(year, 11, 31)).utc().format('YYYY-MM-DD HH:mm:ss')
+  }
+  return [startDate, endDate]
+}
+
 export function getMonthRange(current) {
   const month = current.getMonth()
   const year = current.getFullYear()
