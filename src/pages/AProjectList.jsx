@@ -792,8 +792,8 @@ export default function ProjectList({ location, history }) {
       </Modal>
       <Card bodyStyle={{ padding: isSm ? '24px 8px' : '' }}>
         <div className='m-b:1'>
-          <Button className='m-r:.5' type={isBatch ? "" : 'link'} onClick={() => setBatch(!isBatch)}>批量操作</Button>
-          <Button className='m-r:.5' type='primary'><Link to='/admin/projects/post'>添加企划</Link></Button>
+          <Button className='m-r:.5' type={isBatch ? "" : 'link'} onClick={() => setBatch(!isBatch)}><Icon type="profile" />批量操作</Button>
+          <Link to='/admin/projects/post'><Button className='m-r:.5' type='primary'><Icon type="plus"/>添加企划</Button></Link>
           <ProjectPostByCsv onSucceed={() => setUpdate(!update)} />
         </div>
         {isBatch &&

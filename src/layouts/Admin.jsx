@@ -16,7 +16,8 @@ function Admin({ location, history, props, component: Component, ...rest }) {
       <Basic menutheme='dark' menuItems={[
         <Menu.Item key="/admin/projects"><Icon type="unordered-list" />企划列表</Menu.Item>,
         <Menu.Item key="/admin/users"><Icon type="user" />用户列表</Menu.Item>,
-        <Menu.Item key="/admin/groups"><Icon type="usergroup-add" />小组列表</Menu.Item>
+        <Menu.Item key="/admin/groups"><Icon type="usergroup-add" />小组列表</Menu.Item>,
+        <Menu.Item key="/admin/option"><Icon type="setting" />设置</Menu.Item>
       ]}><Component {...matchProps} {...props} /></Basic>
     )} />
   )

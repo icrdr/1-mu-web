@@ -34,6 +34,7 @@ import Maintenance from './components/Maintenance'
 import { useMediaQuery } from 'react-responsive'
 //css
 import './App.css';
+import Aoption from './pages/Aoption';
 export const globalContext = React.createContext();
 function App({ location }) {
   
@@ -79,6 +80,7 @@ function App({ location }) {
       <Admin path="/admin/projects/:project_id(\d+)" component={Project} props={{isAdmin:true}}/>
       <Admin path="/admin/projects/post" component={AProjectPost} />
       <Admin exact path="/admin/users" component={AUserList} />
+      <Admin path="/admin/option" component={Aoption} />
       <Admin path="/admin/users/:user_id(\d+)" component={AUser} />
       <Admin exact path="/admin/groups" component={AGroupList} />
       <Admin path="/admin/groups/:group_id(\d+)" component={AGroup} />
