@@ -207,7 +207,7 @@ export default function ProjectPost({ history }) {
     <Card className='p:2'>
       <Row type="flex" justify="space-around" align="middle">
         <Col xs={24} md={20} lg={16}>
-          <Title>企划编辑</Title>
+          <Title>添加企划</Title>
           <PostProjectForm history={history} />
         </Col>
       </Row>
