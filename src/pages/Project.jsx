@@ -246,7 +246,7 @@ export default function Project({ match, isAdmin, location }) {
       <Card title={'操作记录'} className='m-b:2' bodyStyle={{ padding: '0px' }}>
         <List
           itemLayout="horizontal"
-          dataSource={projectData.logs}
+          dataSource={[...projectData.logs].reverse()}
           renderItem={log => {
             let title
             switch (log.log_type) {
