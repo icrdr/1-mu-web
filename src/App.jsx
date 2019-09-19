@@ -22,6 +22,7 @@ import AGroupAdd from './pages/AGroupAdd'
 import DoneList from './pages/DoneList'
 import Dashboard from './pages/Dashboard'
 import DraftList from './pages/DraftList'
+import AProjectRecycle from './pages/AProjectRecycle'
 // layouts
 import Web from './layouts/Web'
 import Admin from './layouts/Admin'
@@ -77,6 +78,7 @@ function App({ location }) {
       <Web exact path="/groups" component={GroupList} />
       <Web path="/groups/:group_id(\d+)" component={Group} />
       <Admin exact path="/admin/projects" component={AProjectList} />
+      <Admin exact path="/admin/recycle" component={AProjectRecycle} />
       <Admin path="/admin/projects/:project_id(\d+)" component={Project} props={{isAdmin:true}}/>
       <Admin path="/admin/projects/post" component={AProjectPost} />
       <Admin exact path="/admin/users" component={AUserList} />
