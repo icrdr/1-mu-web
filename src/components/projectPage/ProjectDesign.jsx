@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useState} from 'react'
 import { Card, Typography, Button, Icon, Alert, Upload } from 'antd';
 import useForm from '../../hooks/useForm'
 import BraftEditor from 'braft-editor'
@@ -7,17 +7,7 @@ import { uploadData, updateData } from '../../utility'
 const { Paragraph } = Typography;
 
 export default function ProjectDesign({ history, match, design, onSuccess }) {
-  const validation = {
-    'design': [
-      {
-        error: '必须填写说明',
-        validate: v => !v.isEmpty()
-      }
-    ],
-  }
-
-  const { setValues, errors, field, handleSubmit } = useForm(onSubmit, undefined, validation)
-
+  const [content, setContent] = useState(BraftEditor.createEditorState(design))
   function onSubmit(v) {
     const path = `/projects/${match.params.project_id}`
     const data = {
@@ -44,13 +34,7 @@ export default function ProjectDesign({ history, match, design, onSuccess }) {
       url = res.data.previews[0].url
     })
 
-    setValues(preState=> {return {
-      ...preState,
-      'design':ContentUtils.insertMedias(preState['design'], [{
-        type: 'IMAGE',
-        url: url
-      }])
-    }})
+    setContent(ContentUtils.insertMedias(preState['design'], [{type: 'IMAGE', url: url}]))
   }
   
   const extendControls = [
@@ -73,19 +57,17 @@ export default function ProjectDesign({ history, match, design, onSuccess }) {
   ]
   return (<>
     <h1>初始设计稿</h1>
-    <form onSubmit={handleSubmit}>
       <Paragraph>*修改</Paragraph>
-      <Card size='small'
-        cover={
+      <Card size='small' cover={
           <BraftEditor contentStyle={{ height: '600px' }}
-            {...field('design', BraftEditor.createEditorState(design))}
+            value={content}
+            onChange={v=>setContent(v)}
             controls={['bold', 'headings', 'separator', 'link', 'separator']}
             extendControls={extendControls}
           />}
       >
-        {errors['design'] && <Alert message={errors['design']} type="error" />}
       </Card>
-      <Button size='large' block type="primary" htmlType="submit">保存</Button>
-    </form ></>
+      <Button size='large' block type="primary" onClick={onSubmit}>保存</Button>
+    </>
   )
 }
