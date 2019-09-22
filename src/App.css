@@ -55,3 +55,6 @@
 .disable {
   filter: opacity(0.5);
 }
+img{
+  width: 100%;
+}
