@@ -1,6 +1,5 @@
 import React,{useState} from 'react'
-import { Card, Typography, Button, Icon, Alert, Upload } from 'antd';
-import useForm from '../../hooks/useForm'
+import { Card, Typography, Button, Icon, Message, Upload } from 'antd';
 import BraftEditor from 'braft-editor'
 import { ContentUtils } from 'braft-utils'
 import { uploadData, updateData } from '../../utility'
@@ -8,11 +7,10 @@ const { Paragraph } = Typography;
 
 export default function ProjectDesign({ history, match, design, onSuccess }) {
   const [content, setContent] = useState(BraftEditor.createEditorState(design))
-  function onSubmit(v) {
+  function onSubmit() {
     const path = `/projects/${match.params.project_id}`
     const data = {
-      ...v,
-      design: v.design.toHTML(),
+      design: content,
     }
 
     updateData(path, data).then(res => {
@@ -34,7 +32,7 @@ export default function ProjectDesign({ history, match, design, onSuccess }) {
       url = res.data.previews[0].url
     })
 
-    setContent(ContentUtils.insertMedias(preState['design'], [{type: 'IMAGE', url: url}]))
+    setContent(prevState=>ContentUtils.insertMedias(prevState, [{type: 'IMAGE', url: url}]))
   }
   
   const extendControls = [

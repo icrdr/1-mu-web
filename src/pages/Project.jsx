@@ -122,7 +122,7 @@ export default function Project({ match, isAdmin, location }) {
   const operation = () => {
     switch (projectData.status) {
       case 'await':
-        return projectData.client.id === meData.id || meData.role=='Admin' ?
+        return projectData.client.id === meData.id || meData.role==='Admin' ?
           <Popconfirm
             title="确定如此操作么？"
             onConfirm={onStart}
@@ -134,7 +134,7 @@ export default function Project({ match, isAdmin, location }) {
       case 'delay':
       case 'progress':
       case 'modify':
-        return projectData.creator.id === meData.id || meData.role=='Admin' ? <>
+        return projectData.creator.id === meData.id || meData.role==='Admin' ? <>
           <Button className={isAffixed ? 'shadow' : ''} size='large' type="primary" disabled={showUploadPlane || projectData.pause} onClick={() => setUploadPlane(true)} block>阶段成品提交</Button>
           <Drawer
             title="阶段成品提交"
@@ -155,7 +155,7 @@ export default function Project({ match, isAdmin, location }) {
           </Drawer>
         </> : null
       case 'pending':
-        return projectData.client.id === meData.id || meData.role=='Admin' ? <>
+        return projectData.client.id === meData.id || meData.role==='Admin' ? <>
           <Button className={isAffixed ? 'shadow' : ''} size='large' type="primary" disabled={showFeedbackPlane || projectData.pause} onClick={() => setFeedbackPlane(true)} block>反馈建议</Button>
           <Drawer
             title="反馈建议"
