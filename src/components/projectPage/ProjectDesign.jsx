@@ -14,7 +14,7 @@ export default function ProjectDesign({ history, match, design, onSuccess }) {
     }
     const path = `/projects/${match.params.project_id}`
     const data = {
-      design: content,
+      design: content.toHTML(),
     }
 
     updateData(path, data).then(res => {
