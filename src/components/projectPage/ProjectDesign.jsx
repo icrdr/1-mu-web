@@ -1,5 +1,5 @@
 import React,{useState} from 'react'
-import { Card, Typography, Button, Icon, Message, Upload } from 'antd';
+import { Card, Typography, Button, Icon, Upload, message } from 'antd';
 import BraftEditor from 'braft-editor'
 import { ContentUtils } from 'braft-utils'
 import { uploadData, updateData } from '../../utility'
@@ -8,6 +8,10 @@ const { Paragraph } = Typography;
 export default function ProjectDesign({ history, match, design, onSuccess }) {
   const [content, setContent] = useState(BraftEditor.createEditorState(design))
   function onSubmit() {
+    if (content.isEmpty()){
+      message.warn('没有填写任何内容')
+      return false
+    }
     const path = `/projects/${match.params.project_id}`
     const data = {
       design: content,
