@@ -149,8 +149,7 @@ export default function Project({ match, isAdmin, location }) {
                 setUploadPlane(false)
                 setUpdate(!update)
               }}
-              file={getPhase(getStage(projectData)).upload_files}
-              upload={getPhase(getStage(projectData)).creator_upload}
+              phase={getPhase(getStage(projectData))}
             />
           </Drawer>
         </> : null
