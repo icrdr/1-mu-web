@@ -8,7 +8,7 @@ const { SubMenu } = Menu
 function Admin({ location, history, props, component: Component, ...rest }) {
   const { meData } = useContext(globalContext);
 
-  if (meData.role !== 'Admin') {
+  if (meData.role !== 'Admin' && meData.role !== "Editor") {
     return <h1>你没有admin权限</h1>
   }
 

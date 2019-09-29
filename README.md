@@ -6,7 +6,6 @@ yarn add antd
 yarn add query-string 
 yarn add react-cookie
 yarn add axios
-yarn add react-final-form final-form
 ```
 # TO DO
 - [ ] 甘特图
