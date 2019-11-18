@@ -18,7 +18,8 @@ import {
   DatePicker,
   Divider,
   Menu,
-  Dropdown
+  Dropdown,
+  notification
 } from "antd";
 import { fetchData, updateData, parseDate } from "../utility";
 import ProjectPostByCsv from "../components/ProjectPostByCsv";
@@ -400,7 +401,7 @@ export default function ProjectList({ location, history }) {
       }
     }
   ];
-  
+
   const menu = project => (
     <Menu>
       {project.pause ? (
@@ -852,6 +853,48 @@ export default function ProjectList({ location, history }) {
       title: "制作者"
     }
   ];
+
+  const openNotification = ({ creates, updates, errors }) => {
+    const title = `完成上传`;
+    const description = (
+      <div>
+        <div>创建词条{creates.length}个</div>
+        <div>更新词条{updates.length}个</div>
+      </div>
+    );
+    const rows = errors.map((e, i) => [e.title]);
+    let csvContent = rows.map(e => e.join(",")).join("\n");
+
+    notification.open({
+      message: title,
+      description: (
+        <>
+          {description}
+          {rows.length > 0 && (
+            <>
+              <div>发生错误{rows.length}个</div>
+              <div>
+                <Button
+                  href={
+                    "data:attachment/csv;charset=utf-8," +
+                    "\uFEFF" +
+                    encodeURIComponent(csvContent)
+                  }
+                  target="_blank"
+                  download="出现错误的词条.csv"
+                >
+                  下载错误表格
+                </Button>
+              </div>
+            </>
+          )}
+        </>
+      ),
+      icon: <Icon type="smile" style={{ color: "#108ee9" }} />,
+      duration: 0
+    });
+  };
+
   return (
     <>
       <Modal
@@ -917,7 +960,12 @@ export default function ProjectList({ location, history }) {
               添加企划
             </Button>
           </Link>
-          <ProjectPostByCsv onSucceed={() => setUpdate(!update)} />
+          <ProjectPostByCsv
+            onSucceed={msg => {
+              openNotification(msg);
+              setUpdate(!update);
+            }}
+          />
         </div>
         {isBatch && (
           <div className="m-b:1">
