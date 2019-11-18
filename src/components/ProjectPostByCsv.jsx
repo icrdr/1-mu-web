@@ -43,8 +43,7 @@ export default function ProjectPostByCsv({ onSucceed }) {
             const data = {
               title: row[0],
               design: `<p>${row[0]}</p>`,
-              tags: tags,
-              client_id: 100,
+              tags: tags
             };
             return updateData(path, data);
           } else {
@@ -52,7 +51,7 @@ export default function ProjectPostByCsv({ onSucceed }) {
             const data = {
               title: row[0],
               design: `<p>${row[0]}</p>`,
-              client_id: 100,
+              client_id: client_id,
               creator_id: creator_id,
               stages: [
                 {
