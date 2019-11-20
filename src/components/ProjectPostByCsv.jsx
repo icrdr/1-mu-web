@@ -35,16 +35,16 @@ export default function ProjectPostByCsv({ onSucceed }) {
       const tags = row[1].split(";");
       
       let isUpdate = false
-      await fetchData(path, { title: row[0] }, false)
+      await fetchData(path, { title: row[0], tags: "腾讯医典词条"}, false)
         .then(res => {
           if (res.data.projects.length > 0) {
             isUpdate = true
             const path = "/projects/" + res.data.projects[0].id;
             const data = {
               title: row[0],
-              design: `<p>${row[0]}</p>`,
-              tags: tags
+              design: `<p>${row[0]}</p>`
             };
+            console.log(row[0])
             return updateData(path, data);
           } else {
             const path = "/projects";
@@ -78,7 +78,7 @@ export default function ProjectPostByCsv({ onSucceed }) {
         .catch(err => {
           errors.push({title:row[0],err})
         });
-      console.log(i);
+      console.debug(i);
     }
     onSucceed({creates, updates, errors});
   }
