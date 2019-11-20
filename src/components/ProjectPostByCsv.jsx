@@ -29,7 +29,18 @@ export default function ProjectPostByCsv({ onSucceed }) {
         .slice(0, 5);
       if (!row[0]) continue;
       const path = "/projects";
-      await postData(path, { title: row[0], tags: row[1].split(";") })
+      const data = {
+        title: row[0],
+        design: `<p>${row[0]}</p>`,
+        creator_id: 1,
+        client_id: 1,
+        stages: [
+          { stage_name: "草图", days_planned: 7 },
+          { stage_name: "成图", days_planned: 7 }
+        ],
+        tags: row[1].split(";")
+      };
+      await postData(path, data)
         .then(res => {
           creates.push({ title: row[0], res });
         })
