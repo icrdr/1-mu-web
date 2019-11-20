@@ -30,52 +30,13 @@ export default function ProjectPostByCsv({ onSucceed }) {
         .slice(0, 5);
       if (!row[0]) continue;
       const path = "/projects";
-      const client_id = row[2] ? row[2] : 1;
-      const creator_id = row[3] ? row[3] : 1;
-      const tags = row[1].split(";");
-      
-      let isUpdate = false
       await fetchData(path, { title: row[0], tags: "腾讯医典词条"}, false)
         .then(res => {
           if (res.data.projects.length > 0) {
-            isUpdate = true
-            const path = "/projects/" + res.data.projects[0].id;
-            const data = {
-              title: row[0],
-              design: `<p>${row[0]}</p>`
-            };
             console.log(row[0])
-            return updateData(path, data);
-          } else {
-            const path = "/projects";
-            const data = {
-              title: row[0],
-              design: `<p>${row[0]}</p>`,
-              client_id: client_id,
-              creator_id: creator_id,
-              stages: [
-                {
-                  stage_name: "草图",
-                  days_planned: 7
-                },
-                {
-                  stage_name: "成图",
-                  days_planned: 7
-                }
-              ],
-              tags: tags,
-              confirm: 1
-            };
-            return postData(path, data);
+            errors.push({title:row[0]})
           }
-        }).then(res => {
-          if(isUpdate){
-            updates.push({title:row[0],res})
-          }else{
-            creates.push({title:row[0],res})
-          }
-        })
-        .catch(err => {
+        }).catch(err => {
           errors.push({title:row[0],err})
         });
       console.debug(i);
