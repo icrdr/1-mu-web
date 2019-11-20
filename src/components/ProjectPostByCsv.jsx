@@ -20,7 +20,6 @@ export default function ProjectPostByCsv({ onSucceed }) {
     let newLinebrk = data.split("\n");
     console.log(newLinebrk.length);
     const errors = [];
-    const updates = [];
     const creates = [];
 
     for (let i = 0; i < newLinebrk.length; i++) {
@@ -30,18 +29,16 @@ export default function ProjectPostByCsv({ onSucceed }) {
         .slice(0, 5);
       if (!row[0]) continue;
       const path = "/projects";
-      await fetchData(path, { title: row[0], tags: "腾讯医典词条"}, false)
+      await postData(path, { title: row[0], tags: row[1].split(";") })
         .then(res => {
-          if (res.data.projects.length > 0) {
-            console.log(row[0])
-            errors.push({title:row[0]})
-          }
-        }).catch(err => {
-          errors.push({title:row[0],err})
+          creates.push({ title: row[0], res });
+        })
+        .catch(err => {
+          errors.push({ title: row[0], err });
         });
       console.debug(i);
     }
-    onSucceed({creates, updates, errors});
+    onSucceed({ creates, errors });
   }
   return (
     <Upload

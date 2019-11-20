@@ -854,12 +854,11 @@ export default function ProjectList({ location, history }) {
     }
   ];
 
-  const openNotification = ({ creates, updates, errors }) => {
+  const openNotification = ({ creates, errors }) => {
     const title = `完成上传`;
     const description = (
       <div>
         <div>创建词条{creates.length}个</div>
-        <div>更新词条{updates.length}个</div>
       </div>
     );
     const rows = errors.map((e, i) => [e.title]);
