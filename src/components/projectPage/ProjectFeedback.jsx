@@ -1,16 +1,7 @@
 import React, { useState } from "react";
 import { withRouter } from "react-router-dom";
-import {
-  Card,
-  Button,
-  Row,
-  Col,
-  message,
-  Icon,
-  Upload,
-  Modal,
-  Switch
-} from "antd";
+import { PictureFilled } from "@ant-design/icons";
+import { Card, Button, Row, Col, message, Upload, Modal, Switch } from "antd";
 import { ContentUtils } from "braft-utils";
 import BraftEditor from "braft-editor";
 import { updateData, uploadData } from "../../utility";
@@ -90,7 +81,7 @@ function ProjectFeedback({ match, phase, onSuccess }) {
             className="control-item button upload-button"
             data-title="插入图片"
           >
-            <Icon type="picture" theme="filled" />
+            <PictureFilled />
           </button>
         </Upload>
       )

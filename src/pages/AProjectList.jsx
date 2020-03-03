@@ -2,6 +2,14 @@ import React, { useEffect, useState, useContext } from "react";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import {
+  EditFilled,
+  CalendarFilled,
+  DownOutlined,
+  SmileOutlined,
+  PlusOutlined,
+  ProfileOutlined
+} from "@ant-design/icons";
+import {
   Transfer,
   Table,
   Card,
@@ -12,7 +20,6 @@ import {
   Select,
   Modal,
   TimePicker,
-  Icon,
   Progress,
   message,
   DatePicker,
@@ -111,9 +118,7 @@ export default function ProjectList({ location, history }) {
       </div>
     ),
     filterIcon: () => (
-      <Icon
-        type="edit"
-        theme="filled"
+      <EditFilled
         style={{ color: tableSearch[dataIndex] ? "#1890ff" : undefined }}
       />
     )
@@ -155,9 +160,7 @@ export default function ProjectList({ location, history }) {
       </div>
     ),
     filterIcon: () => (
-      <Icon
-        type="calendar"
-        theme="filled"
+      <CalendarFilled
         style={{ color: tableDate[dataIndex] ? "#1890ff" : undefined }}
       />
     )
@@ -374,7 +377,7 @@ export default function ProjectList({ location, history }) {
       render: (key, project) => (
         <Dropdown overlay={menu(project)}>
           <Button>
-            操作 <Icon type="down" />
+            操作 <DownOutlined />
           </Button>
         </Dropdown>
       )
@@ -889,7 +892,7 @@ export default function ProjectList({ location, history }) {
           )}
         </>
       ),
-      icon: <Icon type="smile" style={{ color: "#108ee9" }} />,
+      icon: <SmileOutlined style={{ color: "#108ee9" }} />,
       duration: 0
     });
   };
@@ -950,12 +953,12 @@ export default function ProjectList({ location, history }) {
             type={isBatch ? "" : "link"}
             onClick={() => setBatch(!isBatch)}
           >
-            <Icon type="profile" />
+            <ProfileOutlined />
             批量操作
           </Button>
           <Link to="/admin/projects/post">
             <Button className="m-r:.5" type="primary">
-              <Icon type="plus" />
+              <PlusOutlined />
               添加企划
             </Button>
           </Link>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { withRouter } from 'react-router-dom'
-import { Card, Row, Col, Descriptions, Button, Tabs, message, Icon } from 'antd'
+import { Card, Row, Col, Descriptions, Button, Tabs, message } from 'antd';
 import ImgCard from '../ImgCard'
 import { getPhase, parseDate, fetchData } from '../../utility'
 

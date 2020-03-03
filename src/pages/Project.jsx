@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
+import { DownloadOutlined, MoreOutlined } from "@ant-design/icons";
 import {
   Card,
   Steps,
   Button,
-  Icon,
   PageHeader,
   Divider,
   Affix,
@@ -247,7 +247,7 @@ export default function Project({ match, location }) {
           {phase.upload_files.map((item, j) => (
             <Card key={j} className="m-t:2" cover={<ImgCard file={item} />}>
               <a href={item.url}>
-                <Icon type="download" />
+                <DownloadOutlined />
                 <div className="fl:r">
                   {item.name}.{item.format}
                 </div>
@@ -298,10 +298,7 @@ export default function Project({ match, location }) {
               </>
             )}
             <div className="d:i" style={{ lineHeight: "25px" }}>
-              <Icon
-                type="more"
-                style={{ fontSize: "16px", color: "#1890ff" }}
-              />
+              <MoreOutlined style={{ fontSize: "16px", color: "#1890ff" }} />
             </div>
           </>
         }
