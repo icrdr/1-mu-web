@@ -102,7 +102,7 @@ export default function Main({ location, history }) {
         { text: "逾期（状态）", value: "delay" },
         { text: "暂停（状态）", value: "pause" }
       ],
-      filteredValue: tableFilter["status"] || [],
+      filteredValue: tableFilter["status"] || null,
       width: 200,
       render: (status, project) => <StatusTag project={project} />
     },
@@ -215,7 +215,9 @@ export default function Main({ location, history }) {
     }
 
     for (const filter in filters) {
-      if (filters[filter].length !== 0) {
+      console.log(filter);
+      console.log(filters);
+      if (filters[filter] != null) {
         paramsObject[filter] = filters[filter].join(",");
       } else {
         delete paramsObject[filter];

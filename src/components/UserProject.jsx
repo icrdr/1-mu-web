@@ -205,7 +205,7 @@ function UserProject({ location, history, userID, staticContext, ...rest }) {
         { text: "成图", value: 2 },
         { text: "已完成", value: -1 }
       ],
-      filteredValue: tableFilter["progress"] || [],
+      filteredValue: tableFilter["progress"] || null,
       width: 150,
       render: (progress, project) => {
         return <StageShow project={project} />;
@@ -226,7 +226,7 @@ function UserProject({ location, history, userID, staticContext, ...rest }) {
         { text: "逾期（状态）", value: "delay" },
         { text: "暂停（状态）", value: "pause" }
       ],
-      filteredValue: tableFilter["status"] || [],
+      filteredValue: tableFilter["status"] || null,
       width: 150,
       render: (status, project) => <StatusTag project={project} />
     },
@@ -351,7 +351,7 @@ function UserProject({ location, history, userID, staticContext, ...rest }) {
     }
 
     for (const filter in filters) {
-      if (filters[filter].length !== 0) {
+      if (filters[filter] !== null) {
         paramsObject[filter] = filters[filter].join(",");
       } else {
         delete paramsObject[filter];
