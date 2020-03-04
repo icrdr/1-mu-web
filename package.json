@@ -28,7 +28,7 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "react-app-rewired start",
-    "build": "react-app-rewired build -max_old_space_size=4096",
+    "build": "react-app-rewired build --max_old_space_size=4096",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
