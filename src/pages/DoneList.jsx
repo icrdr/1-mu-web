@@ -1,79 +1,92 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Card, Input, Modal, Tag, Button, BackTop, Statistic } from "antd";
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  Input,
+  Modal,
+  Tag,
+  Pagination,
+  Row,
+  Col,
+  BackTop,
+  Statistic
+} from "antd";
 import { fetchData, getPhase } from "../utility";
 import ImgCard from "../components/ImgCard";
 import queryString from "query-string";
 import { useMediaQuery } from "react-responsive";
-import StackGrid from "react-stack-grid";
-import useEvent from "../hooks/useEvent";
+const { CheckableTag } = Tag;
 const { Search } = Input;
 export default function DoneList({ location, history }) {
   const isSm = useMediaQuery({ query: "(max-width: 768px)" });
-  const [stackGrid, setStackGrid] = useState();
   const [update, setUpdate] = useState(false);
-  const [page, setPage] = useState(1);
   const [projectList, setProjectList] = useState([]);
+  const [page, setPage] = useState(1);
   const [isLoading, setLoading] = useState(false);
-  const [isEnd, setEnd] = useState(false);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [lightBox, setLightBox] = useState();
-  const [total, seTtotal] = useState(0);
+  const [total, setTotal] = useState(0);
+  const pageSize = 12;
+
+  const tagsFromServer = [
+    "腾讯医典词条",
+    "腾讯军医词条",
+    "腾讯综述",
+    "腾讯手术",
+    "百度词条"
+  ];
 
   useEffect(() => {
     setLoading(true);
     const path = "/projects";
-    const params = {
+    let params = {
       order: "desc",
       order_by: "finish_date",
-      pre_page: 12,
-      page: page,
+      pre_page: pageSize,
+      page: 1,
       status: "finish",
-      tags: "腾讯医典词条,腾讯军医词条"
+      tags: "腾讯医典词条,腾讯军医词条,腾讯综述,腾讯手术,百度词条"
     };
 
     const values = queryString.parse(location.search);
-
-    if (values.search) {
-      params.search = values.search;
-    }
+    params = { ...params, ...values };
 
     fetchData(path, params).then(res => {
-      setProjectList(prevState => {
-        return prevState.concat(res.data.projects);
-      });
-      seTtotal(res.data.total);
-      if (res.data.projects.length > 0) {
-        setPage(prevState => {
-          return prevState + 1;
-        });
-      } else {
-        setEnd(true);
-      }
-      setTimeout(() => {
-        if (stackGrid) stackGrid.updateLayout();
-        setLoading(false);
-      }, 200);
+      setProjectList(res.data.projects);
+      setTotal(res.data.total);
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update, location]);
 
-  const handleScroll = useCallback(() => {
-    if (
-      document.documentElement.offsetHeight +
-        document.documentElement.scrollTop <
-      document.documentElement.scrollHeight - 100
-    )
-      return;
-    if (!isLoading && !isEnd) {
-      setUpdate(!update);
+  const handlePageChange = (page, pageSize) => {
+    const values = queryString.parse(location.search);
+    const params = queryString.stringify({ ...values, page: page });
+    history.push(`${location.pathname}?${params}`);
+    setPage(page);
+  };
+
+  const handleChange = (tag, checked) => {
+    const newSelectedTags = checked
+      ? [...selectedTags, tag]
+      : selectedTags.filter(t => t !== tag);
+    const values = queryString.parse(location.search);
+
+    const paramsObject = {
+      ...values,
+      page: 1
+    };
+
+    if (newSelectedTags.length !== 0) {
+      paramsObject["tags"] = newSelectedTags.join(",");
+    } else {
+      delete paramsObject["tags"];
     }
-    // eslint-disable-next-line
-  }, [isLoading]);
-
-  useEvent("scroll", handleScroll);
-
+    const params = queryString.stringify(paramsObject);
+    history.push(`${location.pathname}?${params}`);
+    setSelectedTags(newSelectedTags);
+    setPage(1);
+  };
   const onSearch = v => {
-    setProjectList([]);
     setPage(1);
     const values = queryString.parse(location.search);
     const params = queryString.stringify({ ...values, search: v, page: 1 });
@@ -109,7 +122,17 @@ export default function DoneList({ location, history }) {
       )}
       <BackTop />
       <Card>
-        <Statistic className="m-b:1" title="已完成总数" value={total} />
+        <div className="m-b:1">
+          {tagsFromServer.map(tag => (
+            <CheckableTag
+              key={tag}
+              checked={selectedTags.indexOf(tag) > -1}
+              onChange={checked => handleChange(tag, checked)}
+            >
+              {tag}
+            </CheckableTag>
+          ))}
+        </div>
         <div className="m-b:1">
           <Search
             placeholder="输入企划标题关键词"
@@ -118,42 +141,31 @@ export default function DoneList({ location, history }) {
             enterButton
           />
         </div>
-        <StackGrid
-          className="m-b:1"
-          columnWidth={isSm ? "100%" : "33.33%"}
-          monitorImagesLoaded={true}
-          gridRef={grid => setStackGrid(grid)}
-          duration={180}
-          gutterWidth={12}
-          gutterHeight={12}
-        >
+        <Statistic className="m-b:1" title="已完成总数" value={total} />
+        <Row gutter={16}>
           {projectList.map((project, index) => {
             const item = getPhase(project.stages[project.stages.length - 1])
               .upload_files[0];
             return (
-              <Card
-                key={index}
-                onClick={() => setLightBox(project)}
-                cover={<ImgCard file={item} />}
-              >
-                {project.title}
-              </Card>
+              <Col key={index} span={isSm ? 24 : 8} className="m-b:2">
+                <Card
+                  onClick={() => setLightBox(project)}
+                  cover={<ImgCard file={item} />}
+                >
+                  <div className="fl:l">{project.title}</div>
+                  <div className="fl:r">{project.creator.name}</div>
+                </Card>
+              </Col>
             );
           })}
-        </StackGrid>
-        {!isEnd ? (
-          <Button
-            type="primary"
-            loading={isLoading}
-            disabled={isEnd}
-            onClick={() => setUpdate(!update)}
-            block
-          >
-            {isLoading ? "加载中" : "点击加载"}
-          </Button>
-        ) : (
-          <div className="t-a:c">没有更多内容啦...</div>
-        )}
+        </Row>
+        <Pagination
+          className="m-t:1 fl:r"
+          page={page}
+          pageSize={pageSize}
+          total={total}
+          onChange={handlePageChange}
+        />
       </Card>
     </>
   );

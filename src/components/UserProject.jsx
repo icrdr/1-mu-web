@@ -66,6 +66,7 @@ function UserProject({ location, history, userID, staticContext, ...rest }) {
         </div>
       </div>
     ),
+    filteredValue: tableSearch[dataIndex] || null,
     filterIcon: () => (
       <EditFilled
         style={{ color: tableSearch[dataIndex] ? "#1890ff" : undefined }}
@@ -342,7 +343,7 @@ function UserProject({ location, history, userID, staticContext, ...rest }) {
       page: pagination.current
     };
 
-    if (Object.keys(sorter).length !== 0) {
+    if (sorter.order !== undefined) {
       paramsObject.order = sorter.order === "descend" ? "desc" : "asc";
       paramsObject.order_by = sorter.field;
     } else {
@@ -352,13 +353,16 @@ function UserProject({ location, history, userID, staticContext, ...rest }) {
 
     for (const filter in filters) {
       if (filters[filter] !== null) {
-        paramsObject[filter] = filters[filter].join(",");
+        if (Array.isArray(filters[filter])) {
+          paramsObject[filter] = filters[filter].join(",");
+        } else {
+          paramsObject[filter] = filters[filter];
+        }
       } else {
         delete paramsObject[filter];
       }
     }
 
-    // console.log(paramsObject)
     const params = queryString.stringify(paramsObject);
     history.push(`${location.pathname}?${params}`);
   };
@@ -369,7 +373,7 @@ function UserProject({ location, history, userID, staticContext, ...rest }) {
       ...values,
       page: 1
     };
-    if (dates.length === 2) {
+    if (dates && dates.length === 2) {
       const dates_str = dates
         .map(date => {
           return moment(date.format("YYYY-MM-DD"))

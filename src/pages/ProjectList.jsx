@@ -61,6 +61,7 @@ export default function Main({ location, history }) {
         </div>
       </div>
     ),
+    filteredValue: tableSearch[dataIndex] || null,
     filterIcon: () => (
       <EditFilled
         style={{ color: tableSearch[dataIndex] ? "#1890ff" : undefined }}
@@ -206,7 +207,7 @@ export default function Main({ location, history }) {
       page: pagination.current
     };
 
-    if (Object.keys(sorter).length !== 0) {
+    if (sorter.order !== undefined) {
       paramsObject.order = sorter.order === "descend" ? "desc" : "asc";
       paramsObject.order_by = sorter.field;
     } else {
@@ -215,10 +216,12 @@ export default function Main({ location, history }) {
     }
 
     for (const filter in filters) {
-      console.log(filter);
-      console.log(filters);
-      if (filters[filter] != null) {
-        paramsObject[filter] = filters[filter].join(",");
+      if (filters[filter] !== null) {
+        if (Array.isArray(filters[filter])) {
+          paramsObject[filter] = filters[filter].join(",");
+        } else {
+          paramsObject[filter] = filters[filter];
+        }
       } else {
         delete paramsObject[filter];
       }

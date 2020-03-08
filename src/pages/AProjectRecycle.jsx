@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import moment from "moment";
 import { Link } from "react-router-dom";
-import { EditFilled, CalendarFilled } from "@ant-design/icons";
+import { EditFilled, CalendarFilled, ProfileOutlined } from "@ant-design/icons";
 import {
   Table,
   Card,
@@ -38,8 +38,8 @@ export default function ProjectList({ location, history }) {
   const [isloading, setLoading] = useState(false);
 
   const [update, setUpdate] = useState(false);
+  const [isBatch, setBatch] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [isBatch] = useState(false);
 
   const allTableFilter = { status: [], client_id: [], progress: [] };
   const allTableSearch = { title: "", tags: "" };
@@ -83,6 +83,7 @@ export default function ProjectList({ location, history }) {
         </div>
       </div>
     ),
+    filteredValue: tableSearch[dataIndex] || null,
     filterIcon: () => (
       <EditFilled
         style={{ color: tableSearch[dataIndex] ? "#1890ff" : undefined }}
@@ -353,7 +354,28 @@ export default function ProjectList({ location, history }) {
   const onSelectChange = selectedRowKeys => {
     setSelectedRowKeys(selectedRowKeys);
   };
+  function selectRecoverConfirm() {
+    confirm({
+      title: "确认",
+      content: "您确定恢复这些企划？",
+      okText: "确认",
+      cancelText: "取消",
+      onOk() {
+        handleSelectedProjectAction("recover");
+      },
+      onCancel() {}
+    });
+  }
+  const handleSelectedProjectAction = action => {
+    const path = `/projects/${action}`;
+    const params = {
+      project_id: selectedRowKeys.join(",")
+    };
 
+    updateData(path, params).then(res => {
+      setUpdate(!update);
+    });
+  };
   const handleTableChange = (pagination, filters, sorter) => {
     const values = queryString.parse(location.search);
 
@@ -362,7 +384,7 @@ export default function ProjectList({ location, history }) {
       page: pagination.current
     };
 
-    if (Object.keys(sorter).length !== 0) {
+    if (sorter.order !== undefined) {
       const order = sorter.order === "descend" ? "desc" : "asc";
       if (paramsObject.order !== order) {
         setSelectedRowKeys([]);
@@ -379,9 +401,11 @@ export default function ProjectList({ location, history }) {
 
     for (const filter in filters) {
       if (filters[filter] !== null) {
-        if (paramsObject[filter] !== filters[filter].join(",")) {
-          setSelectedRowKeys([]);
+        setSelectedRowKeys([]);
+        if (Array.isArray(filters[filter])) {
           paramsObject[filter] = filters[filter].join(",");
+        } else {
+          paramsObject[filter] = filters[filter];
         }
       } else {
         delete paramsObject[filter];
@@ -415,7 +439,7 @@ export default function ProjectList({ location, history }) {
       ...values,
       page: 1
     };
-    if (dates.length === 2) {
+    if (dates && dates.length === 2) {
       const dates_str = dates
         .map(date => {
           return moment(date.format("YYYY-MM-DD"))
@@ -433,6 +457,37 @@ export default function ProjectList({ location, history }) {
 
   return (
     <Card bodyStyle={{ padding: isSm ? "24px 8px" : "" }}>
+      <div className="m-b:1">
+        <Button
+          className="m-r:.5"
+          type={isBatch ? "" : "link"}
+          onClick={() => setBatch(!isBatch)}
+        >
+          <ProfileOutlined />
+          批量操作
+        </Button>
+      </div>
+      {isBatch && (
+        <div className="m-b:1">
+          <span className="m-r:.5">已选择{selectedRowKeys.length}个项目</span>
+          <Button
+            className="m-r:.5"
+            onClick={() => setSelectedRowKeys([])}
+            disabled={selectedRowKeys.length === 0}
+          >
+            取消所有
+          </Button>
+          <Button
+            className="m-r:.5"
+            type="primary"
+            onClick={() => selectRecoverConfirm()}
+            loading={false}
+            disabled={selectedRowKeys.length === 0}
+          >
+            恢复
+          </Button>
+        </div>
+      )}
       <Table
         rowSelection={
           isBatch
