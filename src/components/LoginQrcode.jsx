@@ -81,7 +81,7 @@ function LoginQrcode({ location, history }) {
   };
   let loginRender;
 
-  if (!isWx()) {
+  if (isWx()) {
     loginRender = (
       <Button type="primary" href={wx_qrcode_url} block>
         微信登陆
