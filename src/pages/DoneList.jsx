@@ -16,7 +16,7 @@ export default function DoneList({ location, history }) {
   const [selectedTags, setSelectedTags] = useState([]);
   const [lightBox, setLightBox] = useState();
   const [total, setTotal] = useState(0);
-  const pageSize = 12;
+  const pageSize = 1;
 
   const tagsFromServer = ["腾讯综述", "腾讯标签页", "腾讯手术", "百度综述"];
 
@@ -35,6 +35,7 @@ export default function DoneList({ location, history }) {
     const values = queryString.parse(location.search);
     params = { ...params, ...values };
 
+    setPage(parseInt(params['page']));
     fetchData(path, params)
       .then(res => {
         setProjectList(res.data.projects);
@@ -48,10 +49,10 @@ export default function DoneList({ location, history }) {
   }, [update, location]);
 
   const handlePageChange = (page, pageSize) => {
+    // console.log(page)
     const values = queryString.parse(location.search);
     const params = queryString.stringify({ ...values, page: page });
     history.push(`${location.pathname}?${params}`);
-    setPage(page);
   };
 
   const handleChange = (tag, checked) => {
@@ -73,10 +74,8 @@ export default function DoneList({ location, history }) {
     const params = queryString.stringify(paramsObject);
     history.push(`${location.pathname}?${params}`);
     setSelectedTags(newSelectedTags);
-    setPage(1);
   };
   const onSearch = v => {
-    setPage(1);
     const values = queryString.parse(location.search);
     const params = queryString.stringify({ ...values, search: v, page: 1 });
     history.push(`${location.pathname}?${params}`);
@@ -153,7 +152,7 @@ export default function DoneList({ location, history }) {
         )}
         <Pagination
           className="m-t:1 fl:r"
-          page={page}
+          current={page}
           pageSize={pageSize}
           total={total}
           onChange={handlePageChange}

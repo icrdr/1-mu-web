@@ -29,6 +29,7 @@ export default function DoneList({ location, history }) {
 
     const values = queryString.parse(location.search);
     params = { ...params, ...values };
+    setPage(parseInt(params['page']));
 
     fetchData(path, params)
       .then(res => {
@@ -46,11 +47,9 @@ export default function DoneList({ location, history }) {
     const values = queryString.parse(location.search);
     const params = queryString.stringify({ ...values, page: page });
     history.push(`${location.pathname}?${params}`);
-    setPage(page);
   };
 
   const onSearch = v => {
-    setPage(1);
     const values = queryString.parse(location.search);
     const params = queryString.stringify({ ...values, search: v, page: 1 });
     history.push(`${location.pathname}?${params}`);
@@ -119,7 +118,7 @@ export default function DoneList({ location, history }) {
         )}
         <Pagination
           className="m-t:1 fl:r"
-          page={page}
+          current={page}
           pageSize={pageSize}
           total={total}
           onChange={handlePageChange}
