@@ -159,9 +159,6 @@ export default function Main({ location, history }) {
         values.order === "desc" ? "descend" : "ascend";
       params.order = values.order;
       params.order_by = values.order_by;
-    } else {
-      params.order = "desc";
-      params.order_by = "status";
     }
     setTableSorter(new_tableSorter);
 

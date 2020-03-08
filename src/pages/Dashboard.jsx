@@ -49,12 +49,6 @@ export default function Main() {
     <>
       <Row gutter={16}>
         <Col xs={24} lg={16}>
-          <UserData
-            className="m-b:1"
-            title="数据"
-            bordered={false}
-            userID={meData.id}
-          />
           <Card
             title="进行中"
             extra={
@@ -80,7 +74,21 @@ export default function Main() {
           />
         </Col>
         <Col xs={24} lg={8}>
-          <UserAttr title="指数" bordered={false} userID={meData.id} />
+          <Card title="公告" className="m-b:1">
+            施工中...
+          </Card>
+          <UserAttr
+            title="指数"
+            className="m-b:1"
+            bordered={false}
+            userID={meData.id}
+          />
+          <UserData
+            className="m-b:1"
+            title="数据"
+            bordered={false}
+            userID={meData.id}
+          />
         </Col>
       </Row>
     </>
