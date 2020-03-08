@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  Input,
-  Modal,
-  Tag,
-  Pagination,
-  Row,
-  Col,
-  BackTop,
-  Statistic
-} from "antd";
+import { Card, Input, Modal, Tag, Pagination, Row, Col, Statistic } from "antd";
 import { fetchData, getPhase } from "../utility";
 import ImgCard from "../components/ImgCard";
+import Loading from "../components/Loading";
 import queryString from "query-string";
 import { useMediaQuery } from "react-responsive";
 const { CheckableTag } = Tag;
@@ -27,13 +18,7 @@ export default function DoneList({ location, history }) {
   const [total, setTotal] = useState(0);
   const pageSize = 12;
 
-  const tagsFromServer = [
-    "腾讯医典词条",
-    "腾讯军医词条",
-    "腾讯综述",
-    "腾讯手术",
-    "百度词条"
-  ];
+  const tagsFromServer = ["腾讯综述", "腾讯标签页", "腾讯手术", "百度综述"];
 
   useEffect(() => {
     setLoading(true);
@@ -44,16 +29,20 @@ export default function DoneList({ location, history }) {
       pre_page: pageSize,
       page: 1,
       status: "finish",
-      tags: "腾讯医典词条,腾讯军医词条,腾讯综述,腾讯手术,百度词条"
+      tags: "腾讯综述,腾讯标签页,腾讯手术,百度综述"
     };
 
     const values = queryString.parse(location.search);
     params = { ...params, ...values };
 
-    fetchData(path, params).then(res => {
-      setProjectList(res.data.projects);
-      setTotal(res.data.total);
-    });
+    fetchData(path, params)
+      .then(res => {
+        setProjectList(res.data.projects);
+        setTotal(res.data.total);
+      })
+      .finally(res => {
+        setLoading(false);
+      });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update, location]);
@@ -120,7 +109,6 @@ export default function DoneList({ location, history }) {
           </div>
         </Modal>
       )}
-      <BackTop />
       <Card>
         <div className="m-b:1">
           {tagsFromServer.map(tag => (
@@ -142,23 +130,27 @@ export default function DoneList({ location, history }) {
           />
         </div>
         <Statistic className="m-b:1" title="已完成总数" value={total} />
-        <Row gutter={16}>
-          {projectList.map((project, index) => {
-            const item = getPhase(project.stages[project.stages.length - 1])
-              .upload_files[0];
-            return (
-              <Col key={index} span={isSm ? 24 : 8} className="m-b:2">
-                <Card
-                  onClick={() => setLightBox(project)}
-                  cover={<ImgCard file={item} />}
-                >
-                  <div className="fl:l">{project.title}</div>
-                  <div className="fl:r">{project.creator.name}</div>
-                </Card>
-              </Col>
-            );
-          })}
-        </Row>
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <Row gutter={16}>
+            {projectList.map((project, index) => {
+              const item = getPhase(project.stages[project.stages.length - 1])
+                .upload_files[0];
+              return (
+                <Col key={index} span={isSm ? 24 : 8} className="m-b:2">
+                  <Card
+                    onClick={() => setLightBox(project)}
+                    cover={<ImgCard file={item} />}
+                  >
+                    <div className="fl:l">{project.title}</div>
+                    <div className="fl:r">{project.creator.name}</div>
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
+        )}
         <Pagination
           className="m-t:1 fl:r"
           page={page}

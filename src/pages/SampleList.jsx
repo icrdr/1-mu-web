@@ -9,11 +9,11 @@ import {
   Row,
   Col,
   Button,
-  message,
-  BackTop
+  message
 } from "antd";
 import { fetchData, getPhase } from "../utility";
 import ImgCard from "../components/ImgCard";
+import Loading from "../components/Loading";
 import queryString from "query-string";
 import { useMediaQuery } from "react-responsive";
 
@@ -42,10 +42,14 @@ export default function SampleList({ location, history }) {
     const values = queryString.parse(location.search);
     params = { ...params, ...values };
 
-    fetchData(path, params).then(res => {
-      setProjectList(res.data.projects);
-      setTotal(res.data.total);
-    });
+    fetchData(path, params)
+      .then(res => {
+        setProjectList(res.data.projects);
+        setTotal(res.data.total);
+      })
+      .finally(res => {
+        setLoading(false);
+      });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [update, location]);
@@ -112,7 +116,6 @@ export default function SampleList({ location, history }) {
           </div>
         </Modal>
       )}
-      <BackTop />
       <Card>
         <div className="m-b:1">
           <Search
@@ -122,38 +125,42 @@ export default function SampleList({ location, history }) {
             enterButton
           />
         </div>
-        <Row gutter={16}>
-          {projectList.map((project, index) => {
-            const item = getPhase(project.stages[project.stages.length - 1])
-              .upload_files[0];
-            return (
-              <Col key={index} span={isSm ? 24 : 8} className="m-b:2">
-                <Card
-                  cover={
-                    <div onClick={() => setLightBox(project)}>
-                      <ImgCard file={item} />
-                    </div>
-                  }
-                >
-                  <Button
-                    type="link"
-                    size="small"
-                    disabled={isZipping}
-                    onClick={() =>
-                      handleDownload(
-                        getPhase(project.stages[project.stages.length - 1])
-                          .upload_files
-                      )
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <Row gutter={16}>
+            {projectList.map((project, index) => {
+              const item = getPhase(project.stages[project.stages.length - 1])
+                .upload_files[0];
+              return (
+                <Col key={index} span={isSm ? 24 : 8} className="m-b:2">
+                  <Card
+                    cover={
+                      <div onClick={() => setLightBox(project)}>
+                        <ImgCard file={item} />
+                      </div>
                     }
                   >
-                    <DownloadOutlined />
-                    {project.title}
-                  </Button>
-                </Card>
-              </Col>
-            );
-          })}
-        </Row>
+                    <Button
+                      type="link"
+                      size="small"
+                      disabled={isZipping}
+                      onClick={() =>
+                        handleDownload(
+                          getPhase(project.stages[project.stages.length - 1])
+                            .upload_files
+                        )
+                      }
+                    >
+                      <DownloadOutlined />
+                      {project.title}
+                    </Button>
+                  </Card>
+                </Col>
+              );
+            })}
+          </Row>
+        )}
         <Pagination
           className="m-t:1 fl:r"
           page={page}

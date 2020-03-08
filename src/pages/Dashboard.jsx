@@ -35,7 +35,6 @@ export default function Main() {
     fetchData(path, params)
       .then(res => {
         setProjectList(res.data.projects);
-        console.log(res.data.projects)
       })
       .catch(() => {
         setProjectList([]);
