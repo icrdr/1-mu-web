@@ -16,7 +16,7 @@ export default function DoneList({ location, history }) {
   const [selectedTags, setSelectedTags] = useState([]);
   const [lightBox, setLightBox] = useState();
   const [total, setTotal] = useState(0);
-  const pageSize = 1;
+  const pageSize = 12;
 
   const tagsFromServer = ["腾讯综述", "腾讯标签页", "腾讯手术", "百度综述"];
 
