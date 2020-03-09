@@ -48,7 +48,7 @@ export function parseDate(date_str) {
   return date.toLocaleString();
 }
 export function toLocalDate(date_str) {
-  if (typeof date_str === String) {
+  if (typeof date_str === 'string') {
     date_str = date_str.replace(/-/g, "/");
   }
   const offset = new Date().getTimezoneOffset();
