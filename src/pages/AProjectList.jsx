@@ -463,7 +463,7 @@ export default function ProjectList({ location, history }) {
       okText: "确认",
       cancelText: "取消",
       onOk() {
-        handleSelectedProjectAction("discard")
+        handleSelectedProjectAction("discard");
       },
       onCancel() {}
     });
@@ -476,7 +476,7 @@ export default function ProjectList({ location, history }) {
       okText: "确认",
       cancelText: "取消",
       onOk() {
-        handleSelectedProjectAction("pause")
+        handleSelectedProjectAction("pause");
       },
       onCancel() {}
     });
@@ -489,7 +489,7 @@ export default function ProjectList({ location, history }) {
       okText: "确认",
       cancelText: "取消",
       onOk() {
-        handleSelectedProjectAction("resume")
+        handleSelectedProjectAction("resume");
       },
       onCancel() {}
     });
@@ -648,10 +648,15 @@ export default function ProjectList({ location, history }) {
 
     for (const filter in filters) {
       if (filters[filter] !== null) {
-        setSelectedRowKeys([]);
         if (Array.isArray(filters[filter])) {
+          if (paramsObject[filter] !== filters[filter].join(",")) {
+            setSelectedRowKeys([]);
+          }
           paramsObject[filter] = filters[filter].join(",");
         } else {
+          if (paramsObject[filter] !== filters[filter]) {
+            setSelectedRowKeys([]);
+          }
           paramsObject[filter] = filters[filter];
         }
       } else {
@@ -796,10 +801,10 @@ export default function ProjectList({ location, history }) {
     });
   };
 
-  const handleSelectedProjectAction = (action) => {
+  const handleSelectedProjectAction = action => {
     const path = `/projects/${action}`;
     const params = {
-      project_id: selectedRowKeys.join(","),
+      project_id: selectedRowKeys.join(",")
     };
 
     updateData(path, params).then(res => {
@@ -1066,27 +1071,27 @@ export default function ProjectList({ location, history }) {
             <Button
               className="m-r:.5"
               type="primary"
-              onClick={()=>selectDiscardConfirm()}
+              onClick={() => selectDiscardConfirm()}
               loading={false}
-              disabled={selectedRowKeys.length === 0 }
+              disabled={selectedRowKeys.length === 0}
             >
               删除
             </Button>
             <Button
               className="m-r:.5"
               type="primary"
-              onClick={()=>selectPauseConfirm()}
+              onClick={() => selectPauseConfirm()}
               loading={false}
-              disabled={selectedRowKeys.length === 0 }
+              disabled={selectedRowKeys.length === 0}
             >
               暂停
             </Button>
             <Button
               className="m-r:.5"
               type="primary"
-              onClick={()=>selectResumeConfirm()}
+              onClick={() => selectResumeConfirm()}
               loading={false}
-              disabled={selectedRowKeys.length === 0 }
+              disabled={selectedRowKeys.length === 0}
             >
               继续
             </Button>
