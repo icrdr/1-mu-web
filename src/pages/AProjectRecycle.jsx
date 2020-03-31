@@ -398,10 +398,15 @@ export default function ProjectList({ location, history }) {
 
     for (const filter in filters) {
       if (filters[filter] !== null) {
-        setSelectedRowKeys([]);
         if (Array.isArray(filters[filter])) {
+          if (paramsObject[filter] !== filters[filter].join(",")) {
+            setSelectedRowKeys([]);
+          }
           paramsObject[filter] = filters[filter].join(",");
         } else {
+          if (paramsObject[filter] !== filters[filter]) {
+            setSelectedRowKeys([]);
+          }
           paramsObject[filter] = filters[filter];
         }
       } else {
