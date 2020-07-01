@@ -21,7 +21,7 @@ export function html2excerpt(str) {
 }
 
 export function parseTag(tag) {
-  let color = "black";
+  let color = "";
   switch (tag.name) {
     case "腾讯综述":
       color = "magenta";
