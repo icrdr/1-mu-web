@@ -30,7 +30,7 @@ export function parseTag(tag) {
       color = "green";
       break;
     case "腾讯手术":
-      color = "cyan";
+      color = "orange";
       break;
     case "百度综述":
       color = "blue";
