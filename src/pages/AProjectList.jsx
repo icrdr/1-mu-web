@@ -7,7 +7,7 @@ import {
   DownOutlined,
   SmileOutlined,
   PlusOutlined,
-  ProfileOutlined
+  ProfileOutlined,
 } from "@ant-design/icons";
 import {
   Transfer,
@@ -26,9 +26,15 @@ import {
   Divider,
   Menu,
   Dropdown,
-  notification
+  notification,
 } from "antd";
-import { fetchData, updateData, parseDate } from "../utility";
+import {
+  fetchData,
+  updateData,
+  parseDate,
+  parseTag,
+  parseTags,
+} from "../utility";
 import ProjectPostByCsv from "../components/ProjectPostByCsv";
 import StatusTag from "../components/projectPage/StatusTag";
 import queryString from "query-string";
@@ -47,7 +53,7 @@ export default function ProjectList({ location, history }) {
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
-    total: 10
+    total: 10,
   });
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
@@ -79,16 +85,16 @@ export default function ProjectList({ location, history }) {
   const allTableSearch = { title: "", tags: "" };
   const allTableDate = { start_date: [], finish_date: [], deadline_date: [] };
 
-  const getColumnSearchProps = dataIndex => ({
+  const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: () => (
       <div>
         <div className="p:.8">
           <Input
             placeholder="输入关键词"
             value={tableSearch[dataIndex]}
-            onChange={e => {
+            onChange={(e) => {
               e.persist();
-              setTableSearch(prevState => {
+              setTableSearch((prevState) => {
                 prevState[dataIndex] = e.target.value ? e.target.value : "";
                 return { ...prevState };
               });
@@ -122,16 +128,16 @@ export default function ProjectList({ location, history }) {
       <EditFilled
         style={{ color: tableSearch[dataIndex] ? "#1890ff" : undefined }}
       />
-    )
+    ),
   });
 
-  const getColumnDateProps = dataIndex => ({
+  const getColumnDateProps = (dataIndex) => ({
     filterDropdown: () => (
       <div>
         <div className="p:.8">
           <RangePicker
-            onChange={dates => {
-              setTableDate(prevState => {
+            onChange={(dates) => {
+              setTableDate((prevState) => {
                 prevState[dataIndex] = dates;
                 return { ...prevState };
               });
@@ -164,7 +170,7 @@ export default function ProjectList({ location, history }) {
       <CalendarFilled
         style={{ color: tableDate[dataIndex] ? "#1890ff" : undefined }}
       />
-    )
+    ),
   });
 
   const columns = [
@@ -175,7 +181,7 @@ export default function ProjectList({ location, history }) {
       sorter: true,
       sortOrder: tableSorter["id"],
       sortDirections: ["descend", "ascend"],
-      fixed: "left"
+      fixed: "left",
     },
     {
       title: "企划名",
@@ -187,21 +193,33 @@ export default function ProjectList({ location, history }) {
       ...getColumnSearchProps("title"),
       fixed: "left",
       render: (name, project) => {
+        const color = parseTags(project.tags);
         return (
-          <Link to={`/admin/projects/${project.id}`} className="dont-break-out">
+          <Link
+            to={`/admin/projects/${project.id}`}
+            className="dont-break-out"
+            style={{ color: color }}
+          >
             {name}
           </Link>
         );
-      }
+      },
     },
     {
       title: "标签",
       dataIndex: "tags",
       ...getColumnSearchProps("tags"),
       width: 120,
-      render: tags => {
-        return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>);
-      }
+      render: (tags) => {
+        return tags.map((tag, index) => {
+          const color = parseTag(tag);
+          return (
+            <Tag key={index} color={color}>
+              {tag.name}
+            </Tag>
+          );
+        });
+      },
     },
     {
       title: "开始时间",
@@ -211,13 +229,13 @@ export default function ProjectList({ location, history }) {
       sortDirections: ["descend", "ascend"],
       ...getColumnDateProps("start_date"),
       width: 150,
-      render: start_date => {
+      render: (start_date) => {
         if (start_date) {
           return parseDate(start_date);
         } else {
           return "未开始";
         }
-      }
+      },
     },
     {
       title: "结束时间",
@@ -227,13 +245,13 @@ export default function ProjectList({ location, history }) {
       sortDirections: ["descend", "ascend"],
       ...getColumnDateProps("finish_date"),
       width: 150,
-      render: finish_date => {
+      render: (finish_date) => {
         if (finish_date) {
           return parseDate(finish_date);
         } else {
           return "未结束";
         }
-      }
+      },
     },
     {
       title: "死线日期",
@@ -262,7 +280,7 @@ export default function ProjectList({ location, history }) {
         } else {
           return "未进行";
         }
-      }
+      },
     },
     {
       title: "企划进度",
@@ -274,7 +292,7 @@ export default function ProjectList({ location, history }) {
         { text: "未开始", value: 0 },
         { text: "草图", value: 1 },
         { text: "成图", value: 2 },
-        { text: "已完成", value: -1 }
+        { text: "已完成", value: -1 },
       ],
       filteredValue: tableFilter["progress"] || null,
       width: 150,
@@ -297,7 +315,7 @@ export default function ProjectList({ location, history }) {
             {progress !== 0 && !project.pause && goBack}
           </>
         );
-      }
+      },
     },
     {
       title: "阶段状态",
@@ -312,13 +330,13 @@ export default function ProjectList({ location, history }) {
         { text: "待确认", value: "pending" },
         { text: "已完成", value: "finish" },
         { text: "逾期（状态）", value: "delay" },
-        { text: "暂停（状态）", value: "pause" }
+        { text: "暂停（状态）", value: "pause" },
       ],
       filteredValue: tableFilter["status"] || null,
       width: 100,
       render: (status, project) => {
         return <StatusTag project={project}></StatusTag>;
-      }
+      },
     },
     {
       title: "审核者",
@@ -335,14 +353,14 @@ export default function ProjectList({ location, history }) {
         <Select
           style={{ width: "100%", maxWidth: "120px" }}
           placeholder="选择小组"
-          onChange={v => handleChangeGroup(v, project)}
+          onChange={(v) => handleChangeGroup(v, project)}
           value={project.client.name}
         >
-          {groupList.map(item => (
+          {groupList.map((item) => (
             <Option key={item.id}>{item.name}</Option>
           ))}
         </Select>
-      )
+      ),
     },
     {
       title: "制作者",
@@ -353,23 +371,23 @@ export default function ProjectList({ location, history }) {
       width: 160,
       render: (creator_id, project) => {
         const creator = project.creator;
-        const the_group = groupList.filter(group => {
+        const the_group = groupList.filter((group) => {
           return group.admins[0].id === project.client.id;
         })[0];
         return (
           <Select
             style={{ width: "100%", maxWidth: "120px" }}
             placeholder="选择制作"
-            onChange={v => handleChangeCreator(v, project)}
+            onChange={(v) => handleChangeCreator(v, project)}
             value={creator.name}
           >
             {the_group &&
-              the_group.users.map(item => (
+              the_group.users.map((item) => (
                 <Option key={item.id}>{item.name}</Option>
               ))}
           </Select>
         );
-      }
+      },
     },
     {
       title: "操作",
@@ -381,7 +399,7 @@ export default function ProjectList({ location, history }) {
             操作 <DownOutlined />
           </Button>
         </Dropdown>
-      )
+      ),
     },
     {
       title: "备注",
@@ -402,11 +420,11 @@ export default function ProjectList({ location, history }) {
             </Button>
           </div>
         );
-      }
-    }
+      },
+    },
   ];
 
-  const menu = project => (
+  const menu = (project) => (
     <Menu>
       {project.pause ? (
         <Menu.Item onClick={() => resumeConfirm(project.id)}>继续</Menu.Item>
@@ -426,7 +444,7 @@ export default function ProjectList({ location, history }) {
       onOk() {
         handleProjectAction(id, "pause");
       },
-      onCancel() {}
+      onCancel() {},
     });
   }
 
@@ -439,7 +457,7 @@ export default function ProjectList({ location, history }) {
       onOk() {
         handleProjectAction(id, "resume");
       },
-      onCancel() {}
+      onCancel() {},
     });
   }
 
@@ -452,7 +470,7 @@ export default function ProjectList({ location, history }) {
       onOk() {
         handleProjectAction(id, "discard");
       },
-      onCancel() {}
+      onCancel() {},
     });
   }
 
@@ -465,7 +483,7 @@ export default function ProjectList({ location, history }) {
       onOk() {
         handleSelectedProjectAction("discard");
       },
-      onCancel() {}
+      onCancel() {},
     });
   }
 
@@ -478,7 +496,7 @@ export default function ProjectList({ location, history }) {
       onOk() {
         handleSelectedProjectAction("pause");
       },
-      onCancel() {}
+      onCancel() {},
     });
   }
 
@@ -491,18 +509,18 @@ export default function ProjectList({ location, history }) {
       onOk() {
         handleSelectedProjectAction("resume");
       },
-      onCancel() {}
+      onCancel() {},
     });
   }
 
   const handleChangeGroup = (v, project) => {
-    const the_group = groupList.filter(group => group.id === parseInt(v))[0];
+    const the_group = groupList.filter((group) => group.id === parseInt(v))[0];
     if (project.client.id === the_group.admins[0].id) return false;
 
     const path = `/projects/${project.id}`;
     const data = {
       client_id: the_group.admins[0].id,
-      creator_id: the_group.admins[0].id
+      creator_id: the_group.admins[0].id,
     };
 
     updateData(path, data).then(() => {
@@ -514,7 +532,7 @@ export default function ProjectList({ location, history }) {
     if (project.creator.id === parseInt(v)) return false;
     const path = `/projects/${project.id}`;
     const data = {
-      creator_id: v
+      creator_id: v,
     };
     updateData(path, data).then(() => {
       setUpdate(!update);
@@ -531,7 +549,7 @@ export default function ProjectList({ location, history }) {
     setLoading(true);
     const path = "/groups";
 
-    fetchData(path).then(res => {
+    fetchData(path).then((res) => {
       setGroupList(res.data.groups);
       setUpdate(!update);
     });
@@ -543,12 +561,12 @@ export default function ProjectList({ location, history }) {
       setLoading(true);
       const path = "/projects";
       const params = {
-        pre_page: pagination.pageSize
+        pre_page: pagination.pageSize,
       };
 
       const values = queryString.parse(location.search);
       if (values.page) {
-        setPagination(prevState => {
+        setPagination((prevState) => {
           return { ...prevState, current: parseInt(values.page) };
         });
         params.page = values.page;
@@ -586,7 +604,7 @@ export default function ProjectList({ location, history }) {
       const new_tableDate = {};
       for (const filter in allTableDate) {
         if (filter in values) {
-          new_tableDate[filter] = values[filter].split(",").map(date_str => {
+          new_tableDate[filter] = values[filter].split(",").map((date_str) => {
             return moment.utc(date_str, "YYYY-MM-DD HH:mm:ss").local();
           });
           params[filter] = values[filter];
@@ -608,9 +626,9 @@ export default function ProjectList({ location, history }) {
       }
 
       fetchData(path, params)
-        .then(res => {
+        .then((res) => {
           setProjectList(res.data.projects);
-          setPagination(prevState => {
+          setPagination((prevState) => {
             return { ...prevState, total: res.data.total };
           });
         })
@@ -628,7 +646,7 @@ export default function ProjectList({ location, history }) {
     const values = queryString.parse(location.search);
     const paramsObject = {
       ...values,
-      page: pagination.current
+      page: pagination.current,
     };
 
     if (sorter.order !== undefined) {
@@ -673,7 +691,7 @@ export default function ProjectList({ location, history }) {
     const values = queryString.parse(location.search);
     const paramsObject = {
       ...values,
-      page: 1
+      page: 1,
     };
     if (keyWord) {
       paramsObject[dataIndex] = keyWord;
@@ -689,12 +707,12 @@ export default function ProjectList({ location, history }) {
     const values = queryString.parse(location.search);
     const paramsObject = {
       ...values,
-      page: 1
+      page: 1,
     };
 
     if (dates && dates.length === 2) {
       const dates_str = dates
-        .map(date => {
+        .map((date) => {
           return moment(date.format("YYYY-MM-DD"))
             .utc()
             .format("YYYY-MM-DD HH:mm:ss");
@@ -716,13 +734,10 @@ export default function ProjectList({ location, history }) {
       return false;
     }
     const ddl = ddlTime.clone();
-    ddl
-      .year(ddlDay.year())
-      .month(ddlDay.month())
-      .date(ddlDay.date());
+    ddl.year(ddlDay.year()).month(ddlDay.month()).date(ddlDay.date());
 
     const data = {
-      ddl: ddl.utc().format("YYYY-MM-DD HH:mm:ss")
+      ddl: ddl.utc().format("YYYY-MM-DD HH:mm:ss"),
     };
 
     updateData(path, data)
@@ -738,7 +753,7 @@ export default function ProjectList({ location, history }) {
     console.log(remark);
     const path = `/projects/${showRemarkModel.id}`;
     const data = {
-      remark: remark
+      remark: remark,
     };
     updateData(path, data).then(() => {
       setUpdate(!update);
@@ -746,7 +761,7 @@ export default function ProjectList({ location, history }) {
     });
   };
 
-  const onSelectChange = selectedRowKeys => {
+  const onSelectChange = (selectedRowKeys) => {
     setSelectedRowKeys(selectedRowKeys);
   };
 
@@ -755,9 +770,9 @@ export default function ProjectList({ location, history }) {
     const path = "/download/projects";
     const params = {
       project_id: selectedRowKeys.join(","),
-      mode: "source"
+      mode: "source",
     };
-    fetchData(path, params).then(res => {
+    fetchData(path, params).then((res) => {
       setTaskId(res.data.task_id);
       checkTask(res.data.task_id);
     });
@@ -768,10 +783,10 @@ export default function ProjectList({ location, history }) {
     const path = "/download/projects";
     const params = {
       project_id: selectedRowKeys.join(","),
-      mode: "compress"
+      mode: "compress",
     };
 
-    fetchData(path, params).then(res => {
+    fetchData(path, params).then((res) => {
       setTaskId(res.data.task_id);
       checkTask(res.data.task_id);
     });
@@ -783,7 +798,7 @@ export default function ProjectList({ location, history }) {
     const path = "/download/projects/csv";
     const params = {
       project_id: selectedRowKeys.join(","),
-      keys: transferTargetKeys.join(",")
+      keys: transferTargetKeys.join(","),
     };
 
     const values = queryString.parse(location.search);
@@ -795,26 +810,26 @@ export default function ProjectList({ location, history }) {
       params.order_by = "status";
     }
 
-    fetchData(path, params).then(res => {
+    fetchData(path, params).then((res) => {
       setTaskId(res.data.task_id);
       checkTask(res.data.task_id);
     });
   };
 
-  const handleSelectedProjectAction = action => {
+  const handleSelectedProjectAction = (action) => {
     const path = `/projects/${action}`;
     const params = {
-      project_id: selectedRowKeys.join(",")
+      project_id: selectedRowKeys.join(","),
     };
 
-    updateData(path, params).then(res => {
+    updateData(path, params).then((res) => {
       setUpdate(!update);
     });
   };
 
-  const checkTask = id => {
+  const checkTask = (id) => {
     const path = "/tasks/" + id;
-    fetchData(path).then(res => {
+    fetchData(path).then((res) => {
       setTaskData(res.data);
       switch (res.data.state) {
         case "SUCCESS":
@@ -841,7 +856,7 @@ export default function ProjectList({ location, history }) {
     taskId ? 1000 : null
   );
 
-  const progressRender = task => {
+  const progressRender = (task) => {
     switch (task.state) {
       case "PENDING":
         return <Progress percent={0} format={() => "等待中"} />;
@@ -861,7 +876,7 @@ export default function ProjectList({ location, history }) {
   };
   const handleTransferChange = (nextTargetKeys, direction, moveKeys) => {
     if (direction === "right") {
-      setTransferTargetKeys(prevState => prevState.concat(moveKeys));
+      setTransferTargetKeys((prevState) => prevState.concat(moveKeys));
     } else {
       setTransferTargetKeys(nextTargetKeys);
     }
@@ -869,48 +884,48 @@ export default function ProjectList({ location, history }) {
   const headerData = [
     {
       key: "id",
-      title: "ID"
+      title: "ID",
     },
     {
       key: "title",
-      title: "企划名"
+      title: "企划名",
     },
     {
       key: "tags",
-      title: "标签"
+      title: "标签",
     },
     {
       key: "start_date",
-      title: "开始时间"
+      title: "开始时间",
     },
     {
       key: "finish_date",
-      title: "结束时间"
+      title: "结束时间",
     },
     {
       key: "deadline_date",
-      title: "死线日期"
+      title: "死线日期",
     },
     {
       key: "progress",
-      title: "企划进度"
+      title: "企划进度",
     },
     {
       key: "status",
-      title: "阶段状态"
+      title: "阶段状态",
     },
     {
       key: "finish",
-      title: "企划状态"
+      title: "企划状态",
     },
     {
       key: "client",
-      title: "审核者"
+      title: "审核者",
     },
     {
       key: "creator",
-      title: "制作者"
-    }
+      title: "制作者",
+    },
   ];
 
   const openNotification = ({ creates, errors }) => {
@@ -921,7 +936,7 @@ export default function ProjectList({ location, history }) {
       </div>
     );
     const rows = errors.map((e, i) => [e.title]);
-    let csvContent = rows.map(e => e.join(",")).join("\n");
+    let csvContent = rows.map((e) => e.join(",")).join("\n");
 
     notification.open({
       message: title,
@@ -949,7 +964,7 @@ export default function ProjectList({ location, history }) {
         </>
       ),
       icon: <SmileOutlined style={{ color: "#108ee9" }} />,
-      duration: 0
+      duration: 0,
     });
   };
 
@@ -966,7 +981,7 @@ export default function ProjectList({ location, history }) {
           titles={["可选数据", "目标数据"]}
           targetKeys={transferTargetKeys}
           onChange={handleTransferChange}
-          render={item => item.title}
+          render={(item) => item.title}
           locale={{ itemUnit: "项", itemsUnit: "项" }}
         />
       </Modal>
@@ -981,7 +996,7 @@ export default function ProjectList({ location, history }) {
           placeholder="备注说明"
           autosize={{ minRows: 2, maxRows: 6 }}
           value={remark}
-          onChange={e => {
+          onChange={(e) => {
             e.persist();
             setRemark(e.target.value);
           }}
@@ -997,10 +1012,10 @@ export default function ProjectList({ location, history }) {
         <DatePicker
           className="m-r:.5"
           value={ddlDay}
-          onChange={v => setDdlDay(v)}
+          onChange={(v) => setDdlDay(v)}
           style={{ width: "128px" }}
         />
-        <TimePicker value={ddlTime} onChange={v => setDdlTime(v)} />
+        <TimePicker value={ddlTime} onChange={(v) => setDdlTime(v)} />
       </Modal>
       <Card bodyStyle={{ padding: isSm ? "24px 8px" : "" }}>
         <div className="m-b:1">
@@ -1019,7 +1034,7 @@ export default function ProjectList({ location, history }) {
             </Button>
           </Link>
           <ProjectPostByCsv
-            onSucceed={msg => {
+            onSucceed={(msg) => {
               openNotification(msg);
               setUpdate(!update);
             }}
@@ -1108,12 +1123,12 @@ export default function ProjectList({ location, history }) {
               ? {
                   columnWidth: isSm ? 48 : 60,
                   selectedRowKeys,
-                  onChange: onSelectChange
+                  onChange: onSelectChange,
                 }
               : undefined
           }
           columns={columns}
-          rowKey={project => project.id}
+          rowKey={(project) => project.id}
           dataSource={projectList}
           loading={isloading}
           pagination={pagination}

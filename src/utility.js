@@ -19,6 +19,36 @@ export function html2excerpt(str) {
   }
   return string;
 }
+
+export function parseTag(tag) {
+  let color = "";
+  switch (tag.name) {
+    case "腾讯综述":
+      color = "magenta";
+      break;
+    case "腾讯标签页":
+      color = "green";
+      break;
+    case "腾讯手术":
+      color = "cyan";
+      break;
+    case "百度综述":
+      color = "blue";
+      break;
+    default:
+      break;
+  }
+  return color;
+}
+
+export function parseTags(tags) {
+  let color = "";
+  for (const tag of tags) {
+    color = parseTag(tag);
+  }
+  return color;
+}
+
 export function parseStatus(status) {
   switch (status) {
     case "await":
@@ -48,7 +78,7 @@ export function parseDate(date_str) {
   return date.toLocaleString();
 }
 export function toLocalDate(date_str) {
-  if (typeof date_str === 'string') {
+  if (typeof date_str === "string") {
     date_str = date_str.replace(/-/g, "/");
   }
   const offset = new Date().getTimezoneOffset();
@@ -73,23 +103,17 @@ export function getQuarterRange(current) {
     startDate = moment(new Date(year, 0, 1))
       .utc()
       .format("YYYY-MM-DD HH:mm:ss");
-    endDate = moment(new Date(year, 2, 31))
-      .utc()
-      .format("YYYY-MM-DD HH:mm:ss");
+    endDate = moment(new Date(year, 2, 31)).utc().format("YYYY-MM-DD HH:mm:ss");
   } else if (month < 6) {
     startDate = moment(new Date(year, 3, 1))
       .utc()
       .format("YYYY-MM-DD HH:mm:ss");
-    endDate = moment(new Date(year, 5, 30))
-      .utc()
-      .format("YYYY-MM-DD HH:mm:ss");
+    endDate = moment(new Date(year, 5, 30)).utc().format("YYYY-MM-DD HH:mm:ss");
   } else if (month < 9) {
     startDate = moment(new Date(year, 6, 1))
       .utc()
       .format("YYYY-MM-DD HH:mm:ss");
-    endDate = moment(new Date(year, 8, 30))
-      .utc()
-      .format("YYYY-MM-DD HH:mm:ss");
+    endDate = moment(new Date(year, 8, 30)).utc().format("YYYY-MM-DD HH:mm:ss");
   } else {
     startDate = moment(new Date(year, 9, 1))
       .utc()
@@ -123,12 +147,8 @@ export function getWeekRange(current) {
     "YYYY-MM-DD"
   );
 
-  const startDate = moment(startDateStr)
-    .utc()
-    .format("YYYY-MM-DD HH:mm:ss");
-  const endDate = moment(endDateStr)
-    .utc()
-    .format("YYYY-MM-DD HH:mm:ss");
+  const startDate = moment(startDateStr).utc().format("YYYY-MM-DD HH:mm:ss");
+  const endDate = moment(endDateStr).utc().format("YYYY-MM-DD HH:mm:ss");
   return [startDate, endDate];
 }
 export function getYearRange(current) {
@@ -181,16 +201,16 @@ export function fetchData(path, params, showMsg = true) {
     axios
       .get(path, {
         params: params,
-        withCredentials: true
+        withCredentials: true,
       })
-      .then(res => {
+      .then((res) => {
         if (res.data) {
           console.debug("RESPOND:");
           console.debug(res.data);
         }
         resolve(res);
       })
-      .catch(err => {
+      .catch((err) => {
         handleError(err, showMsg);
         reject(err);
       });
@@ -207,16 +227,16 @@ export function deleteData(path, params, showMsg = true) {
     axios
       .delete(path, {
         params: params,
-        withCredentials: true
+        withCredentials: true,
       })
-      .then(res => {
+      .then((res) => {
         if (res.data) {
           console.debug("RESPOND:");
           console.debug(res.data);
         }
         resolve(res);
       })
-      .catch(err => {
+      .catch((err) => {
         handleError(err, showMsg);
         reject(err);
       });
@@ -233,16 +253,16 @@ export function updateData(path, data, showMsg = true) {
         path,
         { ...data },
         {
-          withCredentials: true
+          withCredentials: true,
         }
       )
-      .then(res => {
+      .then((res) => {
         console.debug("RESPOND:");
         console.debug(res.data);
         if (showMsg) message.success("更新成功");
         resolve(res);
       })
-      .catch(err => {
+      .catch((err) => {
         handleError(err, showMsg);
         reject(err);
       });
@@ -259,16 +279,16 @@ export function postData(path, data, showMsg = true) {
         path,
         { ...data },
         {
-          withCredentials: true
+          withCredentials: true,
         }
       )
-      .then(res => {
+      .then((res) => {
         console.debug("RESPOND:");
         console.debug(res.data);
         if (showMsg) message.success("提交成功");
         resolve(res);
       })
-      .catch(err => {
+      .catch((err) => {
         handleError(err, showMsg);
         reject(err);
       });
@@ -281,17 +301,17 @@ export function uploadData(path, formData, showMsg = true) {
     axios
       .post(path, formData, {
         headers: {
-          "Content-Type": "multipart/form-data"
+          "Content-Type": "multipart/form-data",
         },
-        withCredentials: true
+        withCredentials: true,
       })
-      .then(res => {
+      .then((res) => {
         console.debug("RESPOND:");
         console.debug(res.data);
         if (showMsg) message.success("提交成功");
         resolve(res);
       })
-      .catch(err => {
+      .catch((err) => {
         handleError(err, showMsg);
         reject(err);
       });
@@ -299,13 +319,13 @@ export function uploadData(path, formData, showMsg = true) {
 }
 
 export function isUserExist(v) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const path = "/users/" + v;
     fetchData(path, null, false)
-      .then(res => {
+      .then((res) => {
         resolve(true);
       })
-      .catch(err => {
+      .catch((err) => {
         resolve(false);
       });
   });

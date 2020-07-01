@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { EditFilled } from "@ant-design/icons";
 import { Table, Card, Tag, Input, Button, Divider } from "antd";
-import { fetchData } from "../utility";
+import { fetchData, parseTag, parseTags } from "../utility";
 import { globalContext } from "../App";
 import queryString from "query-string";
 import StatusTag from "../components/projectPage/StatusTag";
@@ -11,7 +11,7 @@ export default function Main({ location, history }) {
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
-    total: 10
+    total: 10,
   });
   const [tableSorter, setTableSorter] = useState({});
   const [tableFilter, setTableFilter] = useState({});
@@ -23,16 +23,16 @@ export default function Main({ location, history }) {
 
   const { isSm } = useContext(globalContext);
 
-  const getColumnSearchProps = dataIndex => ({
+  const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: () => (
       <div>
         <div className="p:.8">
           <Input
             placeholder="输入关键词"
             value={tableSearch[dataIndex]}
-            onChange={e => {
+            onChange={(e) => {
               e.persist();
-              setTableSearch(prevState => {
+              setTableSearch((prevState) => {
                 prevState[dataIndex] = e.target.value ? e.target.value : "";
                 return { ...prevState };
               });
@@ -66,7 +66,7 @@ export default function Main({ location, history }) {
       <EditFilled
         style={{ color: tableSearch[dataIndex] ? "#1890ff" : undefined }}
       />
-    )
+    ),
   });
 
   const columns = [
@@ -78,15 +78,26 @@ export default function Main({ location, history }) {
       sortOrder: tableSorter["title"],
       sortDirections: ["descend", "ascend"],
       ...getColumnSearchProps("title"),
-      fixed: "left"
+      fixed: "left",
+      render: (name, project) => {
+        const color = parseTags(project.tags);
+        return <div style={{ color: color }}>{name}</div>;
+      },
     },
     {
       title: "标签",
       dataIndex: "tags",
       ...getColumnSearchProps("tags"),
-      render: tags => {
-        return tags.map((tag, index) => <Tag key={index}>{tag.name}</Tag>);
-      }
+      render: (tags) => {
+        return tags.map((tag, index) => {
+          const color = parseTag(tag);
+          return (
+            <Tag key={index} color={color}>
+              {tag.name}
+            </Tag>
+          );
+        });
+      },
     },
     {
       title: "阶段状态",
@@ -101,11 +112,11 @@ export default function Main({ location, history }) {
         { text: "待确认", value: "pending" },
         { text: "已完成", value: "finish" },
         { text: "逾期（状态）", value: "delay" },
-        { text: "暂停（状态）", value: "pause" }
+        { text: "暂停（状态）", value: "pause" },
       ],
       filteredValue: tableFilter["status"] || null,
       width: 200,
-      render: (status, project) => <StatusTag project={project} />
+      render: (status, project) => <StatusTag project={project} />,
     },
     {
       title: "审核者",
@@ -118,7 +129,7 @@ export default function Main({ location, history }) {
         return (
           <Link to={"/users/" + project.client.id}>{project.client.name}</Link>
         );
-      }
+      },
     },
     {
       title: "制作者",
@@ -133,19 +144,19 @@ export default function Main({ location, history }) {
             {project.creator.name}
           </Link>
         );
-      }
-    }
+      },
+    },
   ];
   useEffect(() => {
     setLoading(true);
     const path = "/projects";
     const params = {
-      pre_page: pagination.pageSize
+      pre_page: pagination.pageSize,
     };
 
     const values = queryString.parse(location.search);
     if (values.page) {
-      setPagination(prevState => {
+      setPagination((prevState) => {
         return { ...prevState, current: parseInt(values.page) };
       });
       params.page = values.page;
@@ -181,9 +192,9 @@ export default function Main({ location, history }) {
     setTableSearch(new_tableSearch);
 
     fetchData(path, params)
-      .then(res => {
+      .then((res) => {
         setProjectList(res.data.projects);
-        setPagination(prevState => {
+        setPagination((prevState) => {
           return { ...prevState, total: res.data.total };
         });
       })
@@ -201,7 +212,7 @@ export default function Main({ location, history }) {
 
     const paramsObject = {
       ...values,
-      page: pagination.current
+      page: pagination.current,
     };
 
     if (sorter.order !== undefined) {
@@ -233,7 +244,7 @@ export default function Main({ location, history }) {
     const values = queryString.parse(location.search);
     const paramsObject = {
       ...values,
-      page: 1
+      page: 1,
     };
     if (keyWord) {
       paramsObject[dataIndex] = keyWord;
@@ -248,7 +259,7 @@ export default function Main({ location, history }) {
     <Card bodyStyle={{ padding: isSm ? "24px 8px" : "" }}>
       <Table
         columns={columns}
-        rowKey={project => project.id}
+        rowKey={(project) => project.id}
         dataSource={projectList}
         loading={isloading}
         pagination={pagination}
