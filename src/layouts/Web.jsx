@@ -8,7 +8,7 @@ import {
   FileImageOutlined,
   EditOutlined,
   InboxOutlined,
-  FundOutlined
+  FundOutlined,
 } from "@ant-design/icons";
 import { Menu } from "antd";
 import Basic from "./Basic";
@@ -19,7 +19,7 @@ function Web({ location, history, props, component: Component, ...rest }) {
   return (
     <Route
       {...rest}
-      render={matchProps => (
+      render={(matchProps) => (
         <Basic
           menutheme="light"
           menuItems={[
@@ -52,11 +52,15 @@ function Web({ location, history, props, component: Component, ...rest }) {
                 <InboxOutlined />
                 样图图库
               </Menu.Item>
+              <Menu.Item key="/samples2">
+                <InboxOutlined />
+                百度样图图库
+              </Menu.Item>
               <Menu.Item key="/dones">
                 <FundOutlined />
                 成品图库
               </Menu.Item>
-            </SubMenu>
+            </SubMenu>,
           ]}
         >
           <Component {...matchProps} {...props} />
