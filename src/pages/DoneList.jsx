@@ -18,7 +18,7 @@ export default function DoneList({ location, history }) {
   const [total, setTotal] = useState(0);
   const pageSize = 12;
 
-  const tagsFromServer = ["腾讯综述", "腾讯标签页", "腾讯手术", "百度综述"];
+  const tagsFromServer = ["腾讯综述", "腾讯标签页", "腾讯手术", "腾讯检验检查", "百度综述"];
 
   useEffect(() => {
     setLoading(true);
@@ -29,7 +29,7 @@ export default function DoneList({ location, history }) {
       pre_page: pageSize,
       page: 1,
       status: "finish",
-      tags: "腾讯综述,腾讯标签页,腾讯手术,百度综述"
+      tags: "腾讯综述,腾讯标签页,腾讯手术, 腾讯检验检查, 百度综述"
     };
 
     const values = queryString.parse(location.search);
