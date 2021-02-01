@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { Card, Input, Modal, Tag, Pagination, Row, Col, Statistic } from "antd";
-import { fetchData, getPhase } from "../utility";
-import ImgCard from "../components/ImgCard";
-import Loading from "../components/Loading";
-import queryString from "query-string";
-import { useMediaQuery } from "react-responsive";
+import React, { useEffect, useState } from 'react';
+import { Card, Input, Modal, Tag, Pagination, Row, Col, Statistic } from 'antd';
+import { fetchData, getPhase } from '../utility';
+import ImgCard from '../components/ImgCard';
+import Loading from '../components/Loading';
+import queryString from 'query-string';
+import { useMediaQuery } from 'react-responsive';
 const { CheckableTag } = Tag;
 const { Search } = Input;
 export default function DoneList({ location, history }) {
-  const isSm = useMediaQuery({ query: "(max-width: 768px)" });
+  const isSm = useMediaQuery({ query: '(max-width: 768px)' });
   const [update, setUpdate] = useState(false);
   const [projectList, setProjectList] = useState([]);
   const [page, setPage] = useState(1);
@@ -18,18 +18,25 @@ export default function DoneList({ location, history }) {
   const [total, setTotal] = useState(0);
   const pageSize = 12;
 
-  const tagsFromServer = ["腾讯综述", "腾讯标签页", "腾讯手术", "腾讯检验检查", "百度综述"];
+  const tagsFromServer = [
+    '腾讯综述',
+    '腾讯手术概述',
+    '腾讯标签页',
+    '腾讯手术',
+    '腾讯检验检查',
+    '百度综述',
+  ];
 
   useEffect(() => {
     setLoading(true);
-    const path = "/projects";
+    const path = '/projects';
     let params = {
-      order: "desc",
-      order_by: "finish_date",
+      order: 'desc',
+      order_by: 'finish_date',
       pre_page: pageSize,
       page: 1,
-      status: "finish",
-      tags: "腾讯综述,腾讯标签页,腾讯手术, 腾讯检验检查, 百度综述"
+      status: 'finish',
+      tags: '腾讯综述,腾讯手术概述,腾讯标签页,腾讯手术, 腾讯检验检查, 百度综述',
     };
 
     const values = queryString.parse(location.search);
@@ -37,11 +44,11 @@ export default function DoneList({ location, history }) {
 
     setPage(parseInt(params['page']));
     fetchData(path, params)
-      .then(res => {
+      .then((res) => {
         setProjectList(res.data.projects);
         setTotal(res.data.total);
       })
-      .finally(res => {
+      .finally((res) => {
         setLoading(false);
       });
 
@@ -58,24 +65,24 @@ export default function DoneList({ location, history }) {
   const handleChange = (tag, checked) => {
     const newSelectedTags = checked
       ? [...selectedTags, tag]
-      : selectedTags.filter(t => t !== tag);
+      : selectedTags.filter((t) => t !== tag);
     const values = queryString.parse(location.search);
 
     const paramsObject = {
       ...values,
-      page: 1
+      page: 1,
     };
 
     if (newSelectedTags.length !== 0) {
-      paramsObject["tags"] = newSelectedTags.join(",");
+      paramsObject['tags'] = newSelectedTags.join(',');
     } else {
-      delete paramsObject["tags"];
+      delete paramsObject['tags'];
     }
     const params = queryString.stringify(paramsObject);
     history.push(`${location.pathname}?${params}`);
     setSelectedTags(newSelectedTags);
   };
-  const onSearch = v => {
+  const onSearch = (v) => {
     const values = queryString.parse(location.search);
     const params = queryString.stringify({ ...values, search: v, page: 1 });
     history.push(`${location.pathname}?${params}`);
@@ -89,16 +96,14 @@ export default function DoneList({ location, history }) {
           centered
           visible={lightBox != null}
           onCancel={() => setLightBox()}
-          okButtonProps={{ className: "d:n" }}
-          cancelButtonProps={{ className: "d:n" }}
-          width={isSm ? "100%" : "60%"}
+          okButtonProps={{ className: 'd:n' }}
+          cancelButtonProps={{ className: 'd:n' }}
+          width={isSm ? '100%' : '60%'}
           bodyStyle={{
-            padding: 0
+            padding: 0,
           }}
         >
-          {getPhase(
-            lightBox.stages[lightBox.stages.length - 1]
-          ).upload_files.map((file, index) => {
+          {getPhase(lightBox.stages[lightBox.stages.length - 1]).upload_files.map((file, index) => {
             return <ImgCard key={index} file={file} />;
           })}
           <div className="p:2">
@@ -110,23 +115,18 @@ export default function DoneList({ location, history }) {
       )}
       <Card>
         <div className="m-b:1">
-          {tagsFromServer.map(tag => (
+          {tagsFromServer.map((tag) => (
             <CheckableTag
               key={tag}
               checked={selectedTags.indexOf(tag) > -1}
-              onChange={checked => handleChange(tag, checked)}
+              onChange={(checked) => handleChange(tag, checked)}
             >
               {tag}
             </CheckableTag>
           ))}
         </div>
         <div className="m-b:1">
-          <Search
-            placeholder="输入企划标题关键词"
-            onSearch={onSearch}
-            allowClear
-            enterButton
-          />
+          <Search placeholder="输入企划标题关键词" onSearch={onSearch} allowClear enterButton />
         </div>
         <Statistic className="m-b:1" title="已完成总数" value={total} />
         {isLoading ? (
@@ -134,14 +134,10 @@ export default function DoneList({ location, history }) {
         ) : (
           <Row gutter={16}>
             {projectList.map((project, index) => {
-              const item = getPhase(project.stages[project.stages.length - 1])
-                .upload_files[0];
+              const item = getPhase(project.stages[project.stages.length - 1]).upload_files[0];
               return (
                 <Col key={index} span={isSm ? 24 : 8} className="m-b:2">
-                  <Card
-                    onClick={() => setLightBox(project)}
-                    cover={<ImgCard file={item} />}
-                  >
+                  <Card onClick={() => setLightBox(project)} cover={<ImgCard file={item} />}>
                     <div className="fl:l">{project.title}</div>
                     <div className="fl:r">{project.creator.name}</div>
                   </Card>
