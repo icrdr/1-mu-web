@@ -1,7 +1,7 @@
-import React from "react";
-import { Route, withRouter } from "react-router-dom";
-import moment from "moment";
-import "moment/locale/zh-cn";
+import React from 'react';
+import { Route, withRouter } from 'react-router-dom';
+import moment from 'moment';
+import 'moment/locale/zh-cn';
 import {
   DashboardOutlined,
   UnorderedListOutlined,
@@ -9,11 +9,11 @@ import {
   EditOutlined,
   InboxOutlined,
   FundOutlined,
-} from "@ant-design/icons";
-import { Menu } from "antd";
-import Basic from "./Basic";
+} from '@ant-design/icons';
+import { Menu } from 'antd';
+import Basic from './Basic';
 const { SubMenu } = Menu;
-moment.locale("zh-cn");
+moment.locale('zh-cn');
 
 function Web({ location, history, props, component: Component, ...rest }) {
   return (
@@ -55,6 +55,10 @@ function Web({ location, history, props, component: Component, ...rest }) {
               <Menu.Item key="/samples2">
                 <InboxOutlined />
                 百度样图图库
+              </Menu.Item>
+              <Menu.Item key="/samples3">
+                <InboxOutlined />
+                腾讯标签页样图库
               </Menu.Item>
               <Menu.Item key="/dones">
                 <FundOutlined />

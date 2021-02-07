@@ -19,6 +19,7 @@ import FileList from "./pages/FileList";
 import NotFound from "./pages/NotFound";
 import SampleList from "./pages/SampleList";
 import SampleList2 from "./pages/SampleList2";
+import SampleList3 from "./pages/SampleList3";
 import AGroupAdd from "./pages/AGroupAdd";
 import DoneList from "./pages/DoneList";
 import Dashboard from "./pages/Dashboard";
@@ -69,6 +70,7 @@ function App({ location }) {
         <Web path="/me" component={Me} />
         <Web exact path="/samples" component={SampleList} />
         <Web exact path="/samples2" component={SampleList2} />
+        <Web exact path="/samples3" component={SampleList3} />
         <Web exact path="/dones" component={DoneList} />
         <Web exact path="/projects" component={ProjectList} />
         <Web exact path="/resources" component={FileList} />
